@@ -36,7 +36,7 @@ export default function Header({ open }: { open: boolean }) {
           </Link>
           <nav className="nav" aria-label="Main">
             {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} aria-current={active === id}>{t}</a>)}
-            <Link className="btn btn-amber" href="/apply">{open ? 'APPLY' : 'STATUS'}</Link>
+            <Link className="btn btn-amber" href="/apply">{open ? 'APPLY' : 'DASHBOARD'}</Link>
           </nav>
           <button className="burger" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} aria-controls="drawer" onClick={() => setMenu((m) => !m)}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
@@ -47,7 +47,7 @@ export default function Header({ open }: { open: boolean }) {
       </header>
       <div id="drawer" className={'drawer' + (menu ? ' open' : '')} aria-hidden={!menu} inert={!menu}>
         {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} onClick={() => setMenu(false)}>{t}</a>)}
-        <Link className="btn btn-amber" href="/apply" onClick={() => setMenu(false)}>{open ? 'APPLY FOR FORGE30' : 'CHECK MY STATUS'}</Link>
+        <Link className="btn btn-amber" href="/apply" onClick={() => setMenu(false)}>{open ? 'APPLY FOR FORGE30' : 'STUDENT DASHBOARD'}</Link>
       </div>
     </>
   );

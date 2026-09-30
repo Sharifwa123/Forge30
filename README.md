@@ -5,6 +5,12 @@
 **Stack:** Next.js 15 (App Router) · TypeScript · Postgres (`pg`) · Zod. Plain CSS, no animation/UI libraries.
 The logo is the official SharifTech mark in `public/brand/` (used unmodified; `src/app/icon.png` / `apple-icon.png` are resized copies).
 
+## Student dashboard & card
+- After applying, a student signs in once at `/status` with their **reference code + email**; the device is then remembered for 30 days and `/dashboard` shows their status, announcements, cohort info, group / class time / seat, contact-details form and organizer contact.
+- When an admin sets an applicant to **Confirmed**, a student ID (`F30-YY-NNNN`) and a non-guessable serial are issued automatically. The student then uploads a passport photo (re-encoded server-side, EXIF stripped) and can download a print-size (CR80 @300 dpi) front and back card PNG. A QR code opens `/verify/<serial>`, which shows only name, ID and active/inactive.
+- Setting the status away from Confirmed stops the card rendering and marks it inactive on the verify page. Seat / group / class time are set per applicant in admin and appear on the card only when filled in.
+- Organizer bio and contact details are edited in **Admin → Cohort & settings** (prefilled only from the public GitHub profile; phone, WhatsApp and email stay empty until you add them).
+
 ## Run locally
 ```bash
 npm install
@@ -20,6 +26,7 @@ npm run build && APPLY_RATE_LIMIT=1000 npm start   # in one terminal (raise limi
 BASE=http://localhost:3000 ADMIN_PASSWORD=... npm run test:e2e       # API, security and admin tests
 npm run test:browser                               # 6 viewports, every interactive component (needs Chromium)
 ADMIN_PASSWORD=... npm run test:journey            # full applicant + admin journey on a phone viewport
+node tests/card.mjs                                 # student card, photo, dashboard, verification lifecycle
 ```
 
 ## Deploy (Vercel + custom subdomain)

@@ -5,13 +5,14 @@ import Enhance from '@/components/Enhance';
 import Footer from '@/components/Footer';
 import { CommitCounter, Day30, DayTracker, DeliverySelector, DeviceSelector, Faq, Journey, ProjectBuilder } from '@/components/Interactive';
 import { getSettings, DEFAULTS } from '@/lib/settings';
+import { OrganizerCard } from '@/components/Dashboard';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const s = await getSettings().catch(() => DEFAULTS);
   const open = s.applicationsOpen;
-  const CTA = open ? 'APPLY FOR THE COHORT' : 'CHECK MY APPLICATION STATUS';
+  const CTA = open ? 'APPLY FOR THE COHORT' : 'STUDENT DASHBOARD';
 
   return (
     <>
@@ -191,6 +192,13 @@ export default async function Home() {
           </div>
         </section>
 
+        <section id="organizer" className="darker">
+          <div className="wrap grid g2" style={{ gap: 40, alignItems: 'center' }}>
+            <div className="rv"><div className="eyebrow">Who runs FORGE30</div><h2>Built by the people behind SHARIF TECHNOLOGIES.</h2><p className="lead">Questions before you apply? Reach out using the details here.</p></div>
+            <div className="rv"><OrganizerCard o={s.organizer} dark /></div>
+          </div>
+        </section>
+
         <section id="faq" className="tint">
           <div className="wrap"><div className="hdgs rv"><div className="eyebrow">Questions</div><h2>Straight answers.</h2></div><div className="rv"><Faq /></div></div>
         </section>
@@ -200,7 +208,7 @@ export default async function Home() {
             <div className="eyebrow" style={{ color: 'var(--amber)' }}>The next step</div>
             <h2 style={{ fontSize: 'clamp(2.2rem,7vw,4.4rem)' }}>Ready to build for real?</h2>
             <p className="tag">30 days. 60 hours. One serious commitment.</p>
-            <div className="cta-row"><Link href={open ? '/apply' : '/status'} className="btn btn-amber">{open ? 'APPLY FOR FORGE30' : 'CHECK MY APPLICATION STATUS'} <span className="arrow">→</span></Link></div>
+            <div className="cta-row"><Link href={open ? '/apply' : '/status'} className="btn btn-amber">{open ? 'APPLY FOR FORGE30' : 'STUDENT DASHBOARD'} <span className="arrow">→</span></Link></div>
             <p className="note" style={{ marginTop: 16 }}>Applications are reviewed before the cohort is formed. Submission does not guarantee selection.</p>
           </div>
         </section>

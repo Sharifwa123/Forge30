@@ -110,8 +110,12 @@ await page.goto(BASE + '/apply', { waitUntil: 'networkidle' });
 ok(await page.getByText('Read this before applying').count() === 1, 'fresh visit starts at the gate again');
 
 // status page
-await page.goto(BASE + '/status'); await page.fill('#ref', ref); await page.fill('#em', `kwame${id}@example.com`); await page.getByRole('button', { name: 'CHECK STATUS' }).tap();
-await page.getByText('Status: Submitted').waitFor(); ok(true, 'status page: applicant sees "Submitted"');
+await page.goto(BASE + '/status'); await page.fill('#ref', ref); await page.fill('#em', `kwame${id}@example.com`); await page.getByRole('button', { name: 'OPEN MY DASHBOARD' }).tap();
+await page.waitForURL('**/dashboard'); await page.getByRole('heading', { name: /Welcome, Kwame/ }).waitFor(); ok(true, 'dashboard: student signed in and sees welcome');
+ok(await page.getByText('Submitted', { exact: true }).count() >= 1 && await page.getByText('unlocks here once your place is').count() === 1, 'dashboard: status shown, card locked until confirmed');
+await page.fill('#c-whatsapp', '0551234567'); await page.locator('fieldset[data-field="c-method"] label.opt', { hasText: 'WhatsApp' }).tap(); await page.locator('fieldset[data-field="c-time"] label.opt', { hasText: 'Evening' }).tap(); await page.getByRole('button', { name: 'SAVE CONTACT DETAILS' }).tap(); await page.getByText('Saved. SHARIF TECHNOLOGIES').waitFor(); ok(true, 'dashboard: contact details saved');
+await page.screenshot({ path: `${OUT}/dashboard-mobile.png`, fullPage: true });
+await page.reload(); ok(await page.getByRole('heading', { name: /Welcome, Kwame/ }).count() === 1, 'dashboard: still signed in after reload (remembered)');
 
 // admin journey
 if (PW) {

@@ -8,7 +8,9 @@ export type Settings = {
   deliveryArrangement: string;
   classArrangement: string;
   announcements: { id: string; text: string; at: string }[];
+  organizer: Organizer;
 };
+export type Organizer = { name: string; title: string; bio: string; website: string; location: string; email: string; phone: string; whatsapp: string };
 
 export const DEFAULTS: Settings = {
   applicationsOpen: true,
@@ -18,6 +20,15 @@ export const DEFAULTS: Settings = {
   deliveryArrangement: 'To be determined by SHARIF TECHNOLOGIES',
   classArrangement: 'To be determined by SHARIF TECHNOLOGIES',
   announcements: [],
+  // Prefilled only from the public SHARIF TECHNOLOGIES GitHub profile. Edit in Admin → Cohort & settings.
+  organizer: {
+    name: 'SHARIF TECHNOLOGIES',
+    title: 'Founder',
+    bio: 'Founder of SHARIF TECHNOLOGIES, working across software, AI and cybersecurity, and focused on building practical technology. FORGE30 is the program built to turn committed beginners into people who can build real software.',
+    website: 'https://www.shariftechnologies.online',
+    location: 'Wenchi, Bono Region, Ghana',
+    email: '', phone: '', whatsapp: '',
+  },
 };
 
 export async function getSettings(): Promise<Settings> {

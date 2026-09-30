@@ -161,9 +161,10 @@ export default function ApplyFlow({ open, notice }: { open: boolean; notice: str
           <li>Applications remain open until SHARIF TECHNOLOGIES determines that sufficient applications have been received for the selection process.</li>
           <li>The organizer reviews applications and determines the cohort and the delivery arrangement.</li>
           <li>Your class time is assigned by SHARIF TECHNOLOGIES after the application period closes.</li>
+          <li>Visit your <b>student dashboard</b> any time for updates. If you are confirmed, your downloadable student card appears there.</li>
         </ol>
         <div className="info amber" style={{ marginTop: 24 }}><b>Submission does not guarantee selection.</b><p style={{ margin: 0 }}>You are not enrolled yet. You will be contacted on the phone number or email you provided.</p></div>
-        <div className="actions"><Link className="btn btn-line" href="/">Back to FORGE30</Link><Link className="btn btn-primary" href="/status">CHECK MY STATUS</Link></div>
+        <div className="actions"><Link className="btn btn-line" href="/">Back to FORGE30</Link><Link className="btn btn-primary" href="/status">STUDENT DASHBOARD</Link></div>
       </div>
     </div></div>
   );

@@ -24,7 +24,7 @@ export default function Enhance({ open }: { open: boolean }) {
   }, []);
   return (
     <div className={'sticky' + (show ? ' show' : '')} aria-hidden={!show}>
-      <Link className="btn btn-amber" href="/apply" tabIndex={show ? 0 : -1}>{open ? 'APPLY FOR FORGE30' : 'CHECK MY STATUS'} <span className="arrow">→</span></Link>
+      <Link className="btn btn-amber" href="/apply" tabIndex={show ? 0 : -1}>{open ? 'APPLY FOR FORGE30' : 'STUDENT DASHBOARD'} <span className="arrow">→</span></Link>
     </div>
   );
 }

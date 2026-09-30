@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       await q(`INSERT INTO applications(ref,email,phone,name,location,data) VALUES ($1,$2,$3,$4,$5,$6::jsonb)`,
         [ref, a.about.email, phone, a.about.fullName, a.about.location, JSON.stringify(a)]);
     } catch (e: any) {
-      if (e?.code === '23505') return NextResponse.json({ error: 'An application with this email address or phone number already exists. Use “Check my status” with your reference code instead.', duplicate: true }, { status: 409 });
+      if (e?.code === '23505') return NextResponse.json({ error: 'An application with this email address or phone number already exists. Sign in to your student dashboard with your reference code instead.', duplicate: true }, { status: 409 });
       throw e;
     }
     return NextResponse.json({ ok: true, ref });

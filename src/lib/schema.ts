@@ -137,3 +137,15 @@ export const STEP_SCHEMAS = { about: aboutSchema, commitment: commitmentSchema, 
 export type StepKey = keyof typeof STEP_SCHEMAS;
 
 export const label = (k: keyof typeof OPTIONS, v?: string) => OPTIONS[k].find((o) => o[0] === v)?.[1] ?? v ?? '';
+
+export const contactSchema = z.object({
+  whatsapp: optText(20).pipe(z.string().refine((v) => v === '' || phoneOk(v), 'Enter a valid WhatsApp number')),
+  altPhone: optText(20).pipe(z.string().refine((v) => v === '' || phoneOk(v), 'Enter a valid phone number')),
+  preferredMethod: z.enum(['whatsapp', 'call', 'sms', 'email'], { message: 'Please choose an option' }),
+  bestTime: z.enum(['morning', 'afternoon', 'evening', 'anytime'], { message: 'Please choose an option' }),
+  emergencyName: optText(100),
+  emergencyPhone: optText(20).pipe(z.string().refine((v) => v === '' || phoneOk(v), 'Enter a valid phone number')),
+}).refine((v) => !v.emergencyName === !v.emergencyPhone, { path: ['emergencyPhone'], message: 'Give both the emergency contact’s name and number, or leave both empty', when: (p) => typeof p.value === 'object' && p.value !== null });
+export type Contact = z.output<typeof contactSchema>;
+export const CONTACT_METHODS = [['whatsapp', 'WhatsApp message'], ['call', 'Phone call'], ['sms', 'SMS'], ['email', 'Email']] as const;
+export const CONTACT_TIMES = [['morning', 'Morning'], ['afternoon', 'Afternoon'], ['evening', 'Evening'], ['anytime', 'Any time']] as const;

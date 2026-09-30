@@ -5,7 +5,7 @@ import type { Settings } from '@/lib/settings';
 
 export default function SettingsForm({ s }: { s: Settings }) {
   const [v, setV] = useState({ notice: s.notice, cohortName: s.cohortName, cohortDates: s.cohortDates, deliveryArrangement: s.deliveryArrangement, classArrangement: s.classArrangement });
-  const [ann, setAnn] = useState(''); const [msg, setMsg] = useState(''); const r = useRouter();
+  const [o, setO] = useState(s.organizer); const [ann, setAnn] = useState(''); const [msg, setMsg] = useState(''); const r = useRouter();
   async function post(body: object, ok = 'Saved') {
     const res = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     setMsg(res.ok ? ok : 'Failed'); if (res.ok) r.refresh();
@@ -23,6 +23,13 @@ export default function SettingsForm({ s }: { s: Settings }) {
         <h3>Cohort information</h3>
         <F k="cohortName" l="Cohort name" /><F k="cohortDates" l="Program dates" /><F k="deliveryArrangement" l="Delivery arrangement" /><F k="classArrangement" l="Class arrangement" />
         <button className="btn btn-primary sm" onClick={() => post(v)}>Save settings</button> <span role="status" style={{ marginLeft: 10, fontWeight: 700 }}>{msg}</span>
+      </div>
+      <div className="panel">
+        <h3>Organizer profile &amp; contact</h3>
+        <p className="note">Shown on the public site, in students’ dashboards and on the student card back. Leave phone, WhatsApp and email empty to keep them private.</p>
+        {([['name', 'Name'], ['title', 'Title'], ['location', 'Location'], ['website', 'Website (https://…)'], ['email', 'Email'], ['phone', 'Phone'], ['whatsapp', 'WhatsApp']] as const).map(([k, l]) => <div className="field" key={k}><label htmlFor={'o-' + k}>{l}</label><input id={'o-' + k} type="text" value={o[k]} onChange={(e) => setO({ ...o, [k]: e.target.value })} /></div>)}
+        <div className="field"><label htmlFor="o-bio">Short bio</label><textarea id="o-bio" maxLength={800} value={o.bio} onChange={(e) => setO({ ...o, bio: e.target.value })} /></div>
+        <button className="btn btn-primary sm" onClick={() => post({ organizer: o })}>Save organizer profile</button>
       </div>
       <div className="panel">
         <h3>Announcements</h3>

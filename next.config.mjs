@@ -8,6 +8,7 @@ const securityHeaders = [
 ];
 export default {
   poweredByHeader: false,
+  outputFileTracingIncludes: { '/api/card/image': ['./src/assets/fonts/**', './public/brand/**'], '/opengraph-image': ['./public/brand/**'] },
   webpack(config) { config.resolve.alias['@'] = path.join(process.cwd(), 'src'); return config; },
   serverExternalPackages: ['pg'],
   async headers() {

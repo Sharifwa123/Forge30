@@ -29,10 +29,11 @@ export default async function Applicant({ params }: { params: Promise<{ id: stri
             <KV k="Phone device" v={label('phone', d.device.phone)} /><KV k="Computer" v={label('computer', d.device.computer)} /><KV k="Shared computer" v={label('sharedComputer', d.device.sharedComputer)} /><KV k="Device note" v={d.device.deviceNote} />
             <KV k="Internet" v={label('internet', d.device.internet)} /><KV k="Electricity" v={label('electricity', d.device.electricity)} /><KV k="Workspace" v={label('workspace', d.device.workspace)} />
             <KV k="Certificate" v={label('certificate', d.finish.certificate)} />
+            <KV k="WhatsApp" v={r.contact?.whatsapp} /><KV k="Alt phone" v={r.contact?.altPhone} /><KV k="Preferred contact" v={r.contact?.preferredMethod} /><KV k="Best time to reach" v={r.contact?.bestTime} /><KV k="Emergency contact" v={r.contact?.emergencyName ? `${r.contact.emergencyName} · ${r.contact.emergencyPhone}` : undefined} />
           </dl>
         </div>
         <div className="grid">
-          <ApplicantActions id={Number(r.id)} status={r.status} notes={r.admin_notes} cohortNote={r.cohort_note} />
+          <ApplicantActions id={Number(r.id)} status={r.status} notes={r.admin_notes} cohortNote={r.cohort_note} seat={r.seat} group={r.group_label} session={r.session_time} studentId={r.student_id} serial={r.serial} hasPhoto={!!r.photo_at} />
           <div className="panel"><h3>Project</h3><dl>
             <KV k="Working name" v={d.project.title} /><KV k="Idea" v={d.project.idea} /><KV k="Problem" v={d.project.problem} /><KV k="Users" v={d.project.users} />
             <KV k="Benefits" v={d.project.benefits} /><KV k="Growth" v={d.project.growth} /><KV k="Personal benefit" v={d.project.personalBenefit} /><KV k="Vision" v={d.project.vision} /><KV k="GH₵500 budget" v={label('budget', d.project.budget)} />

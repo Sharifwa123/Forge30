@@ -11,6 +11,7 @@ const Body = z.object({
   cohortDates: z.string().max(200).optional(),
   deliveryArrangement: z.string().max(300).optional(),
   classArrangement: z.string().max(300).optional(),
+  organizer: z.object({ name: z.string().max(100), title: z.string().max(100), bio: z.string().max(800), website: z.string().max(200).refine((v) => v === '' || /^https?:\/\//.test(v), 'Must start with http(s)://'), location: z.string().max(120), email: z.string().max(200).refine((v) => v === '' || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), 'Invalid email'), phone: z.string().max(40), whatsapp: z.string().max(40) }).optional(),
   addAnnouncement: z.string().max(500).optional(),
   removeAnnouncement: z.string().max(60).optional(),
 });

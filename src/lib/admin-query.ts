@@ -20,5 +20,5 @@ export function buildWhere(f: Filters) {
 
 export async function listApplications(f: Filters, limit = 500) {
   const { where, params, order } = buildWhere(f);
-  return q<any>(`SELECT id, ref, email, phone, name, location, status, data, admin_notes, created_at FROM applications ${where} ORDER BY ${order} LIMIT ${Math.min(limit, 5000)}`, params);
+  return q<any>(`SELECT id, ref, email, phone, name, location, status, data, admin_notes, student_id, serial, seat, group_label, session_time, contact, created_at FROM applications ${where} ORDER BY ${order} LIMIT ${Math.min(limit, 5000)}`, params);
 }
