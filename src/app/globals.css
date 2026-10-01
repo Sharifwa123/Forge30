@@ -341,3 +341,5 @@ main, section { overflow-x: clip; }
 .prep-lab { display: block; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .prep-tips { font-size: .85rem; color: var(--muted); margin: 12px 0 0; }
 .prep .range { height: 36px; } .prep .range::-webkit-slider-runnable-track { background: var(--tint-2); } .prep .range::-moz-range-track { background: var(--tint-2); }
+
+.banner p { margin: 0 0 6px; } .banner p:last-child { margin-bottom: 0; }

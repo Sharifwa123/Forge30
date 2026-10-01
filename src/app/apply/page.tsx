@@ -6,5 +6,5 @@ export const dynamic = 'force-dynamic';
 
 export default async function Apply() {
   const s = await getSettings().catch(() => DEFAULTS);
-  return <ApplyFlow open={s.applicationsOpen} notice={s.notice} />;
+  return <ApplyFlow open={s.applicationsOpen} notice={s.notice} announcements={s.announcements.slice(0, 3).map((a) => a.text)} />;
 }

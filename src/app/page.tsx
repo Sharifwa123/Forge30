@@ -19,7 +19,10 @@ export default async function Home() {
       <Header open={open} />
       <main id="main">
         {(s.notice || s.announcements.length > 0) && (
-          <div className="banner"><div className="wrap"><b>Notice: </b>{s.notice || s.announcements[0].text}</div></div>
+          <div className="banner" role="region" aria-label="Notices"><div className="wrap">
+            {s.notice && <p><b>Notice: </b>{s.notice}</p>}
+            {s.announcements.slice(0, 3).map((a) => <p key={a.id}><b>{new Date(a.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: </b>{a.text}</p>)}
+          </div></div>
         )}
 
         <section id="hero" className="hero">
