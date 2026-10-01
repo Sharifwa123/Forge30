@@ -81,7 +81,7 @@ r = await fetch(`${BASE}/api/card/image?t=${T}&side=front&dl=1`); ok((r.headers.
 ok((await fetch(`${BASE}/api/card/image?t=tampered&side=front`)).status === 401, 'card image with bad token -> 401');
 ok((await fetch(`${BASE}/api/admin/photo/${id}`)).status === 401, 'admin photo route requires admin');
 r = await fetch(`${BASE}/api/admin/photo/${id}`, { headers: A }); const stored = Buffer.from(await r.arrayBuffer()); const sm = await sharp(stored).metadata();
-ok(r.status === 200 && sm.width === 480 && sm.height === 600 && !sm.exif, 'stored photo normalised to 480×600 with EXIF stripped');
+ok(r.status === 200 && sm.width === 413 && sm.height === 531 && !sm.exif, 'stored photo is passport size 413×531 (35×45 mm @300dpi) with EXIF stripped');
 
 // photo policy: first upload free, ONE change, then locked until an admin verifies ID
 r = await photoTest(jpeg); ok(r.status === 200 && (await r.json()).changesLeft === 0, 'photo: the one allowed change succeeds (0 left)');

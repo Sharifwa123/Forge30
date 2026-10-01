@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { DialogProvider } from '@/components/Dialog';
 import { SITE } from '@/lib/content';
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#071230' };
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'EducationalOrganization', name: 'SHARIF TECHNOLOGIES', slogan: 'Knowledge Is Power', url: SITE.url, logo: `${SITE.url}/brand/sharif-logo.png` }) }} />
-        {children}
+        <DialogProvider>{children}</DialogProvider>
       </body>
     </html>
   );

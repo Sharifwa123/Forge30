@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib/schema';
 import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
+import PhotoPrep from './PhotoPrep';
 
 type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; notice: string; announcements: { id: string; text: string; at: string }[]; organizer: Organizer };
@@ -99,16 +100,6 @@ export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; set
 const Fact = ({ k, v, dim }: { k: string; v: string; dim?: boolean }) => <div><div style={{ fontSize: '.75rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>{k}</div><div style={{ fontWeight: 600, color: dim || tbd(v) ? 'var(--muted)' : 'var(--ink)' }}>{v}</div></div>;
 
 /* ---------- Student card: passport photo upload, preview, download ---------- */
-async function shrink(file: File): Promise<Blob> {
-  // Downscale on the phone first so uploads are small on mobile data; the server re-encodes again.
-  const bmp = await createImageBitmap(file).catch(() => null);
-  if (!bmp) return file;
-  const k = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
-  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-  c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
-  return await new Promise<Blob>((res) => c.toBlob((b) => res(b || file), 'image/jpeg', 0.9));
-}
-
 function Flip3D({ front, back, alt }: { front: string; back: string; alt: string }) {
   const [flipped, setFlipped] = useState(false); const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const move = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -135,18 +126,20 @@ function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { t
   const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now()); const [left, setLeft] = useState(initialLeft);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   const input = useRef<HTMLInputElement>(null); const camera = useRef<HTMLInputElement>(null);
+  const [prep, setPrep] = useState<{ file: File; from: React.RefObject<HTMLInputElement | null> } | null>(null);
   const locked = photo && left <= 0;
-  async function upload(f: File | undefined, from: React.RefObject<HTMLInputElement | null>) {
-    const reset = () => { if (from.current) from.current.value = ''; };
-    if (!f) return;
-    if (photo && !confirm(`You can change your photo only ${left === 1 ? 'once' : left + ' more times'}. After that it is locked, and any further change needs a legal document or card with your photo verified by SHARIF TECHNOLOGIES.\n\nChange it now?`)) { reset(); return; }
+  const pick = (f: File | undefined, from: React.RefObject<HTMLInputElement | null>) => { if (f) setPrep({ file: f, from }); };
+  // The student first prepares the photo (auto-centred passport crop); only then is it uploaded.
+  async function upload(blob: Blob | null) {
+    const from = prep?.from; setPrep(null); if (from?.current) from.current.value = '';
+    if (!blob) return;
     setBusy(true); setErr('');
     try {
-      const fd = new FormData(); fd.append('token', token); fd.append('photo', await shrink(f), 'photo.jpg');
+      const fd = new FormData(); fd.append('token', token); fd.append('photo', blob, 'photo.jpg');
       const r = await fetch('/api/card/photo', { method: 'POST', body: fd }); const j = await r.json().catch(() => ({}));
       if (r.ok) { if (photo) setLeft(j.changesLeft ?? left - 1); setPhoto(true); setV(Date.now()); } else { setErr(j.error || 'Upload failed. Try again.'); if (j.locked) setLeft(0); }
     } catch { setErr('Network problem. Check your connection and try again.'); }
-    setBusy(false); reset();
+    setBusy(false);
   }
   const url = (sd: string, dl = false) => `/api/card/image?t=${encodeURIComponent(token)}&side=${sd}${dl ? '&dl=1' : ''}&v=${v}`;
   return (
@@ -155,8 +148,8 @@ function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { t
       <h2 style={{ fontSize: '1.5rem' }}>{photo ? 'Your FORGE30 student card' : 'Add your passport photo to create your card'}</h2>
       {!photo && <p style={{ color: 'var(--muted)' }}>Use a clear, front-facing passport-style photo: plain background, face fully visible, no sunglasses or hat. <b>Choose carefully: you can change it only once afterwards.</b> Your photo appears on your card, and is shown to anyone who scans your card’s QR code so they can match it to you.</p>}
       {/* Two inputs: one opens the camera, the other opens the gallery / file picker (no `capture`). */}
-      <input ref={camera} type="file" accept="image/*" capture="user" hidden onChange={(e) => upload(e.target.files?.[0], camera)} id="photo-camera" />
-      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/*" hidden onChange={(e) => upload(e.target.files?.[0], input)} id="photo-file" />
+      <input ref={camera} type="file" accept="image/*" capture="user" hidden onChange={(e) => pick(e.target.files?.[0], camera)} id="photo-camera" />
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/*" hidden onChange={(e) => pick(e.target.files?.[0], input)} id="photo-file" />
       {photo && (<>
         <Flip3D front={url('front')} back={url('back')} alt="Student card" />
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
@@ -168,6 +161,7 @@ function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { t
       </>)}
       {locked && <div className="info amber" style={{ marginTop: 14 }}><b>Your photo is locked</b><p style={{ margin: 0 }}>You have used your photo change. To change it again, present a legal document or card showing your photo (for example a Ghana Card, passport or driver’s licence) to SHARIF TECHNOLOGIES. An administrator will verify you and unlock one more change.</p></div>}
       {err && <div className="error" role="alert" style={{ marginTop: 10 }}>⚠ {err}</div>}
+      {prep && <PhotoPrep file={prep.file} onDone={upload} warn={photo ? <><b>You can change your photo only {left === 1 ? 'once' : `${left} more times`}.</b> After that it is locked, and any further change needs a legal document or card showing your photo, verified by SHARIF TECHNOLOGIES.</> : undefined} />}
       {!locked && (
         <div style={{ marginTop: 14 }}>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
