@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { aboutSchema, availabilitySchema, deviceSchema, commitmentSchema, phoneOk } from '../src/lib/schema';
+import { aboutSchema, availabilitySchema, deviceSchema, commitmentSchema, phoneOk, STEP_SCHEMAS } from '../src/lib/schema';
 
 const paths = (r: any) => (r.success ? [] : r.error.issues.map((i: any) => i.path.join('.')));
 
@@ -33,4 +33,12 @@ test('device: shared computer asked only when no computer; all errors at once', 
 test('text is sanitised', () => {
   const r = aboutSchema.parse({ fullName: ' <b>Ama</b>\u0000 ', phone: '0241234567', email: 'A@B.CO', location: 'Accra', ageBracket: '18-24', experience: 'none' });
   assert.equal(r.fullName, 'bAma/b'); assert.equal(r.email, 'a@b.co');
+});
+
+test('empty steps give human messages, never raw validator text (every step)', () => {
+  for (const [step, schema] of Object.entries(STEP_SCHEMAS)) {
+    const r = schema.safeParse({});
+    assert.ok(!r.success, step);
+    for (const i of r.error.issues) assert.ok(!/expected|received|Invalid input|undefined/i.test(i.message), `${step}.${i.path.join('.')}: ${i.message}`);
+  }
 });

@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib/schema';
 import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
+import { useDialog } from './Dialog';
 
 type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; notice: string; announcements: { id: string; text: string; at: string }[]; organizer: Organizer };
@@ -134,12 +135,22 @@ function Flip3D({ front, back, alt }: { front: string; back: string; alt: string
 function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { token: string; hasPhoto: boolean; studentId: string; changesLeft: number }) {
   const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now()); const [left, setLeft] = useState(initialLeft);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  const { confirm } = useDialog();
   const input = useRef<HTMLInputElement>(null); const camera = useRef<HTMLInputElement>(null);
   const locked = photo && left <= 0;
   async function upload(f: File | undefined, from: React.RefObject<HTMLInputElement | null>) {
     const reset = () => { if (from.current) from.current.value = ''; };
     if (!f) return;
-    if (photo && !confirm(`You can change your photo only ${left === 1 ? 'once' : left + ' more times'}. After that it is locked, and any further change needs a legal document or card with your photo verified by SHARIF TECHNOLOGIES.\n\nChange it now?`)) { reset(); return; }
+    if (photo) {
+      const preview = URL.createObjectURL(f);
+      const ok = await confirm({
+        title: 'Use this photo?',
+        body: (<><p>This will replace the photo on your card.</p><img src={preview} alt="The photo you chose" /><p><b>You can change your photo only {left === 1 ? 'once' : `${left} more times`}.</b> After that it is locked, and any further change needs a legal document or card showing your photo, verified by SHARIF TECHNOLOGIES.</p></>),
+        confirmLabel: 'Use this photo', cancelLabel: 'Choose another',
+      });
+      URL.revokeObjectURL(preview);
+      if (!ok) { reset(); return; }
+    }
     setBusy(true); setErr('');
     try {
       const fd = new FormData(); fd.append('token', token); fd.append('photo', await shrink(f), 'photo.jpg');

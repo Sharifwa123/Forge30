@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { SECTIONS, STAGES, summarize, type Project } from '@/lib/project';
+import { useDialog } from './Dialog';
 
 type Save = 'idle' | 'saving' | 'saved' | 'error';
 const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -127,9 +128,10 @@ function SectionCard({ s, p, setP, isOpen, toggle }: { s: (typeof SECTIONS)[numb
 }
 
 function Journal({ p, setP }: { p: Project; setP: (f: (x: Project) => Project) => void }) {
+  const { confirm } = useDialog();
   const [t, setT] = useState(''); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   async function add() { setBusy(true); setErr(''); try { const j = await post({ kind: 'log.add', text: t }); setP((x) => ({ ...x, log: j.log })); setT(''); } catch (e: any) { setErr(e.message); } setBusy(false); }
-  async function remove(id: string) { if (!confirm('Delete this journal entry?')) return; try { const j = await post({ kind: 'log.remove', id }); setP((x) => ({ ...x, log: j.log })); } catch (e: any) { setErr(e.message); } }
+  async function remove(id: string) { if (!(await confirm({ title: 'Delete this journal entry?', body: <p>This cannot be undone.</p>, confirmLabel: 'Delete entry', tone: 'danger' }))) return; try { const j = await post({ kind: 'log.remove', id }); setP((x) => ({ ...x, log: j.log })); } catch (e: any) { setErr(e.message); } }
   return (
     <div className="no-print" style={{ display: 'grid', gap: 16 }}>
       <div className="panel">
