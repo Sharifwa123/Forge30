@@ -9,8 +9,7 @@ const app = { about: { fullName: 'Akosua Boateng-Owusu', preferredName: 'Akosua'
   commitment: { why: 'I want to learn to build software that helps people in my town.', hopeToBuild: 'A booking app for local clinics and salons.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'in_person', contribPref: 'flexible', contribRange: '50-100' },
   device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' },
-  project: { title: 'ClinicBook', idea: 'An app to book clinic appointments without queueing.', problem: 'People wait hours in queues at clinics.', users: 'Patients and clinic staff', benefits: 'Saves time', growth: 'Add reminders', personalBenefit: 'Subscription from clinics', vision: 'Used by clinics across Bono', budget: 'yes' },
-  finish: { certificate: 'yes', privacy: true } };
+  finish: { certificate: 'yes', budget: 'yes', privacy: true } };
 const strip = (h) => h.replace(/<!--.*?-->/g, '');
 const cookieOf = (r) => (r.headers.getSetCookie?.() || []).map((c) => c.split(';')[0]).join('; ');
 

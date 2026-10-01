@@ -284,3 +284,14 @@ tr:hover td { background: #fafcff; }
 .btn.sm { min-height: 40px; padding: 0 16px; font-size: .9rem; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--navy-900); color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; font-weight: 600; }
 .prose h2 { font-size: 1.6rem; margin-top: 1.6em; } .prose h1 { font-size: clamp(2rem, 6vw, 3rem); }
+
+/* Project workspace + print */
+.sr-only { position: absolute; left: -9999px; }
+@media print {
+  .hdr, .ftr, .sticky, .drawer, .no-print, .skip { display: none !important; }
+  body { background: #fff !important; font-size: 12pt; }
+  main, .tint { background: #fff !important; padding: 0 !important; }
+  .panel, .proposal { border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+  .proposal section { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
