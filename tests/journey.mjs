@@ -7,6 +7,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
 const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 const page = await ctx.newPage(); const errs = []; page.on('pageerror', (e) => errs.push(e.message));
+let nativeDialogs = 0; const noNative = (pg) => pg.on('dialog', (d) => { nativeDialogs++; d.dismiss(); }); noNative(page);
 const id = Date.now().toString().slice(-7);
 const cont = () => page.getByRole('button', { name: /CONTINUE|REVIEW MY APPLICATION/ }).tap();
 const opt = (t) => page.locator('label.opt', { hasText: t }).first().tap();
@@ -124,6 +125,10 @@ await page.getByRole('button', { name: /The problem/ }).tap(); ok((await page.lo
 ok(await page.getByText('1 of 10 sections ready').count() === 1, 'project: ready progress counts');
 await page.screenshot({ path: `${OUT}/project-mobile.png`, fullPage: true });
 await page.getByRole('tab', { name: /Progress journal/ }).tap(); await page.fill('#jt', 'Today I wrote the problem statement.'); await page.getByRole('button', { name: 'ADD ENTRY' }).tap(); await page.getByText('Today I wrote the problem statement.').waitFor(); ok(true, 'project: journal entry added');
+const dlg = page.getByRole('dialog');
+await page.getByRole('button', { name: /Delete entry from/ }).tap(); await dlg.getByRole('heading', { name: 'Delete this journal entry?' }).waitFor();
+await dlg.getByRole('button', { name: 'Cancel' }).tap(); await dlg.waitFor({ state: 'detached' }); ok(await page.getByText('Today I wrote the problem statement.').count() === 1, 'dialog: Cancel keeps the journal entry');
+await page.getByRole('button', { name: /Delete entry from/ }).tap(); await dlg.getByRole('button', { name: 'Delete entry' }).tap(); await page.getByText('Today I wrote the problem statement.').waitFor({ state: 'detached' }); ok(true, 'dialog: branded confirm deletes the journal entry');
 await page.getByRole('tab', { name: 'Proposal' }).tap(); ok((await page.locator('.proposal').innerText()).includes('FarmLink') && (await page.locator('.proposal').innerText()).includes('middlemen'), 'project: proposal compiled from sections');
 await page.screenshot({ path: `${OUT}/project-proposal.png`, fullPage: true });
 
@@ -141,12 +146,18 @@ if (PW) {
   ok(await p.getByText('Farmers in the north lose money').count() >= 1, 'admin: sees the student’s project workspace');
   await p.selectOption('#st', 'selected'); await p.fill('#nt', 'Great project idea'); await p.getByRole('button', { name: 'Save' }).click(); await p.getByText('Saved').waitFor(); ok(true, 'admin: status + note saved');
   await p.screenshot({ path: `${OUT}/admin-detail.png`, fullPage: true });
-  await p.goto(BASE + '/admin/settings'); await p.fill('#notice', 'Applications close soon'); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();
+  await p.goto(BASE + '/admin/settings'); noNative(p);
+  await p.getByRole('button', { name: 'Close applications' }).click(); const ad = p.getByRole('dialog'); await ad.getByRole('heading', { name: 'Close applications?' }).waitFor();
+  await ad.getByRole('button', { name: 'Cancel' }).click(); await ad.waitFor({ state: 'detached' }); ok(await p.getByText('OPEN', { exact: true }).count() >= 1, 'dialog: Cancel leaves applications open');
+  await p.getByRole('button', { name: 'Close applications' }).click(); await ad.getByRole('button', { name: 'Close applications' }).click(); await p.getByText('CLOSED', { exact: true }).waitFor({ timeout: 8000 }); ok(true, 'dialog: branded confirm closes applications');
+  await p.getByRole('button', { name: 'Re-open applications' }).click(); await p.getByText('OPEN', { exact: true }).waitFor({ timeout: 8000 }); ok(true, 'applications re-opened');
+  await p.fill('#notice', 'Applications close soon'); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();
   ok((await (await fetch(BASE + '/')).text()).includes('Applications close soon'), 'admin: public notice appears on landing page');
   await p.fill('#notice', ''); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();
   await p.screenshot({ path: `${OUT}/admin-settings.png`, fullPage: true });
   const [dl] = await Promise.all([p.waitForEvent('download'), (async () => { await p.goto(BASE + '/admin'); await p.getByRole('link', { name: /Export CSV/ }).click(); })()]);
   ok(/forge30-applicants-.*\.csv/.test(dl.suggestedFilename()), 'admin: CSV export downloads');
 }
+ok(nativeDialogs === 0, `no native browser dialogs were shown (${nativeDialogs})`);
 ok(errs.length === 0, 'no page errors ' + errs.join('|'));
 await browser.close(); console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);
