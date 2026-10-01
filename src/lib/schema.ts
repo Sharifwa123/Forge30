@@ -56,7 +56,7 @@ const vals = <K extends keyof typeof OPTIONS>(k: K) => OPTIONS[k].map((o) => o[0
 const en = <K extends keyof typeof OPTIONS>(k: K) => z.enum(vals(k), { message: 'Please choose an option' });
 
 // strip control chars + angle brackets (output is also escaped by React; this is defence in depth)
-const clean = (s: string) => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/[<>]/g, '').trim();
+export const clean = (s: string) => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/[<>]/g, '').trim();
 const text = (min: number, max: number, label: string) =>
   z.string({ message: `${label} is required` }).transform(clean)
     .pipe(z.string().min(min, min <= 1 ? `${label} is required` : `${label}: please write at least ${min} characters`).max(max, `${label} is too long (max ${max})`));
@@ -109,31 +109,20 @@ export const deviceSchema = z.object({
   workspace: en('workspace'),
 }).refine(...rule<any>((v) => v.computer !== 'none' || !!v.sharedComputer, 'sharedComputer', 'Please choose an option'));
 
-export const projectSchema = z.object({
-  title: text(2, 120, 'Working name'),
-  idea: text(30, 2000, 'This answer'),
-  problem: text(20, 2000, 'This answer'),
-  users: text(10, 1500, 'This answer'),
-  benefits: text(10, 1500, 'This answer'),
-  growth: text(10, 1500, 'This answer'),
-  personalBenefit: text(10, 1500, 'This answer'),
-  vision: text(10, 1500, 'This answer'),
-  budget: en('budget'),
-});
-
 export const finishSchema = z.object({
   certificate: en('certificate'),
+  budget: en('budget'),
   privacy: z.literal(true, { message: 'You must agree to the privacy notice to apply' }),
 });
 
 export const applicationSchema = z.object({
   about: aboutSchema, commitment: commitmentSchema, availability: availabilitySchema,
-  device: deviceSchema, project: projectSchema, finish: finishSchema,
+  device: deviceSchema, finish: finishSchema,
 });
 export type ApplicationInput = z.input<typeof applicationSchema>;
 export type Application = z.output<typeof applicationSchema>;
 
-export const STEP_SCHEMAS = { about: aboutSchema, commitment: commitmentSchema, availability: availabilitySchema, device: deviceSchema, project: projectSchema, finish: finishSchema } as const;
+export const STEP_SCHEMAS = { about: aboutSchema, commitment: commitmentSchema, availability: availabilitySchema, device: deviceSchema, finish: finishSchema } as const;
 export type StepKey = keyof typeof STEP_SCHEMAS;
 
 export const label = (k: keyof typeof OPTIONS, v?: string) => OPTIONS[k].find((o) => o[0] === v)?.[1] ?? v ?? '';

@@ -20,7 +20,9 @@ const MSG: Record<Status, string> = {
 };
 const tbd = (v: string) => !v || /^to be determined/i.test(v);
 
-export function Dashboard({ me, settings: s, cardToken }: { me: Me; settings: S; cardToken: string | null }) {
+type ProjectSummary = { ready: number; started: number; total: number; nextTitle: string | null; title: string; feedback: number; journal: number };
+
+export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null }) {
   const router = useRouter();
   const idx = STAGES.indexOf(me.status);
   const first = me.name.split(' ')[0];
@@ -55,6 +57,19 @@ export function Dashboard({ me, settings: s, cardToken }: { me: Me; settings: S;
           <h2 style={{ fontSize: '1.3rem' }}>Updates from SHARIF TECHNOLOGIES</h2>
           {s.notice && <div className="info amber"><b>Notice</b><p>{s.notice}</p></div>}
           {s.announcements.map((a) => <div key={a.id} style={{ padding: '12px 0', borderTop: '1px solid var(--line)' }}><div style={{ fontSize: '.8rem', color: 'var(--muted)', fontWeight: 700 }}>{new Date(a.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>{a.text}</div>)}
+        </section>
+      )}
+
+      {project && (
+        <section className="panel" aria-label="My project" style={{ borderLeft: '6px solid var(--brand)' }}>
+          <div className="eyebrow">My project</div>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: 4 }}>{project.title || 'Start building your project proposal'}</h2>
+          <p style={{ color: 'var(--muted)', marginTop: 0 }}>{project.started === 0 ? 'Develop your idea, problem, users and solution a little at a time, all the way to Day 30. It saves as you type.' : project.nextTitle ? <>Next up: <b>{project.nextTitle}</b></> : 'Every section is ready. Polish it and prepare to present on Day 30.'}</p>
+          <div className="progress-bar" style={{ background: 'var(--tint-2)' }} role="progressbar" aria-valuenow={Math.round((project.ready / project.total) * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Project completion"><i style={{ width: `${(project.ready / project.total) * 100}%`, background: 'var(--brand)' }} /></div>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+            <a className="btn btn-primary" href="/dashboard/project">{project.started === 0 ? 'START MY PROJECT' : 'CONTINUE MY PROJECT'} <span className="arrow">→</span></a>
+            <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{project.ready} of {project.total} sections ready · {project.journal} journal {project.journal === 1 ? 'entry' : 'entries'}{project.feedback > 0 ? ` · ${project.feedback} instructor ${project.feedback === 1 ? 'note' : 'notes'}` : ''}</span>
+          </div>
         </section>
       )}
 

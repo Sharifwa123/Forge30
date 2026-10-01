@@ -7,16 +7,15 @@ import { track } from '@/lib/track';
 import { Area, Check, Checks, Radios, Select, Text } from './fields';
 
 type Draft = Record<StepKey, Record<string, any>>;
-const EMPTY: Draft = { about: {}, commitment: {}, availability: { periods: [] }, device: {}, project: {}, finish: {} };
+const EMPTY: Draft = { about: {}, commitment: {}, availability: { periods: [] }, device: {}, finish: {} };
 const STEPS: { key: StepKey; title: string; short: string }[] = [
   { key: 'about', title: 'About you', short: 'You' },
   { key: 'commitment', title: 'Your commitment', short: 'Commitment' },
   { key: 'availability', title: 'Availability & format', short: 'Schedule' },
   { key: 'device', title: 'Device & access', short: 'Devices' },
-  { key: 'project', title: 'Your project idea', short: 'Project' },
-  { key: 'finish', title: 'Certificate & consent', short: 'Finish' },
+  { key: 'finish', title: 'Budget, certificate & consent', short: 'Finish' },
 ];
-const KEY = 'forge30-draft-v1';
+const KEY = 'forge30-draft-v2';
 
 export default function ApplyFlow({ open, notice }: { open: boolean; notice: string }) {
   const [phase, setPhase] = useState<'gate' | 'form' | 'review' | 'done'>('gate');
@@ -108,7 +107,7 @@ export default function ApplyFlow({ open, notice }: { open: boolean; notice: str
   }
 
   const e = (sec: StepKey, f: string) => errs[`${sec}.${f}`];
-  const A = d.about, C = d.commitment, V = d.availability, D = d.device, P = d.project, F = d.finish;
+  const A = d.about, C = d.commitment, V = d.availability, D = d.device, F = d.finish;
   const progress = phase === 'review' ? 100 : Math.round((step / (STEPS.length + 1)) * 100);
 
   if (!hydrated) return <div className="app-shell" />;
@@ -249,21 +248,10 @@ export default function ApplyFlow({ open, notice }: { open: boolean; notice: str
                 <Radios id="device-workspace" label="Do you have access to a suitable workspace?" required options={OPTIONS.workspace} value={D.workspace} error={e('device', 'workspace')} onChange={(v) => set('device', 'workspace', v)} hint="Somewhere you can focus for two hours and practise." />
               </>)}
 
-              {cur.key === 'project' && (<>
-                <p className="lead">Don’t just learn. Build something that matters to you. Your idea can be refined during the program, and a beginner’s first idea does not need to be technical. We want to understand your motivation and direction.</p>
-                <Text id="project-title" label="Project title / working name" required value={P.title} error={e('project', 'title')} onChange={(v) => set('project', 'title', v)} onBlur={() => blur('project', 'title')} maxLength={120} />
-                <Area id="project-idea" label="What do you want to build?" required value={P.idea} error={e('project', 'idea')} onChange={(v) => set('project', 'idea', v)} onBlur={() => blur('project', 'idea')} max={2000} />
-                <Area id="project-problem" label="What problem does it solve?" required value={P.problem} error={e('project', 'problem')} onChange={(v) => set('project', 'problem', v)} onBlur={() => blur('project', 'problem')} max={2000} />
-                <Area id="project-users" label="Who would use it?" required value={P.users} error={e('project', 'users')} onChange={(v) => set('project', 'users', v)} onBlur={() => blur('project', 'users')} rows={3} />
-                <Area id="project-benefits" label="What benefits would it provide?" required value={P.benefits} error={e('project', 'benefits')} onChange={(v) => set('project', 'benefits', v)} onBlur={() => blur('project', 'benefits')} rows={3} />
-                <Area id="project-growth" label="How could it grow in the future?" required value={P.growth} error={e('project', 'growth')} onChange={(v) => set('project', 'growth', v)} onBlur={() => blur('project', 'growth')} rows={3} />
-                <Area id="project-personalBenefit" label="How could you personally benefit from it?" required value={P.personalBenefit} error={e('project', 'personalBenefit')} onChange={(v) => set('project', 'personalBenefit', v)} onBlur={() => blur('project', 'personalBenefit')} rows={3} />
-                <Area id="project-vision" label="What do you imagine the project becoming?" required value={P.vision} error={e('project', 'vision')} onChange={(v) => set('project', 'vision', v)} onBlur={() => blur('project', 'vision')} rows={3} />
-                <div className="info amber"><b>Project budget</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project-development needs. This is <b>not</b> a training fee and not a payment to join. The exact use depends on the project, and we cannot guarantee it will be sufficient for every project.</p></div>
-                <Radios id="project-budget" label="Are you prepared to arrange approximately GH₵500 toward project-related development expenses?" required options={OPTIONS.budget} value={P.budget} error={e('project', 'budget')} onChange={(v) => set('project', 'budget', v)} />
-              </>)}
-
               {cur.key === 'finish' && (<>
+                <p className="lead">Your project is built after you apply. Inside your student dashboard you will develop your idea, problem, users, solution and proposal step by step, all the way to Day 30. Start thinking about something you genuinely care about.</p>
+                <div className="info amber"><b>Project budget</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project-development needs. This is <b>not</b> a training fee and not a payment to join. The exact use depends on the project, and we cannot guarantee it will be sufficient for every project.</p></div>
+                <Radios id="finish-budget" label="Are you prepared to arrange approximately GH₵500 toward project-related development expenses?" required options={OPTIONS.budget} value={F.budget} error={e('finish', 'budget')} onChange={(v) => set('finish', 'budget', v)} />
                 <Radios id="finish-certificate" label="Would you like to receive a certificate of completion if you successfully complete the program?" required two options={OPTIONS.certificate} value={F.certificate} error={e('finish', 'certificate')} onChange={(v) => set('finish', 'certificate', v)} />
                 <div className="hint" style={{ marginTop: -10, marginBottom: 24 }}>Certificates are associated with successful completion of the program requirements and are not automatically issued simply because someone registered.</div>
                 <div className="info"><b>Privacy</b><p>We use your answers only to review applications, form the cohort, plan delivery and contact you. We do not publish them. Read the <Link href="/privacy" target="_blank">privacy notice</Link>.</p></div>
@@ -295,7 +283,7 @@ function Top() {
 }
 
 function Review({ d, edit, heading }: { d: Draft; edit: (i: number) => void; heading: React.RefObject<HTMLHeadingElement | null> }) {
-  const A = d.about, C = d.commitment, V = d.availability, D = d.device, P = d.project, F = d.finish;
+  const A = d.about, C = d.commitment, V = d.availability, D = d.device, F = d.finish;
   const Sec = ({ t, i, rows }: { t: string; i: number; rows: [string, any][] }) => (
     <section><header><b>{t}</b><button onClick={() => edit(i)} aria-label={`Edit ${t}`}>Edit</button></header>
       <dl>{rows.filter((r) => r[1] !== undefined && r[1] !== '').map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl></section>
@@ -309,8 +297,7 @@ function Review({ d, edit, heading }: { d: Draft; edit: (i: number) => void; hea
       <Sec t="Your availability" i={2} rows={[['General availability', (V.periods || []).map((p: string) => label('period', p)).join(', ') + (V.periodOther ? ` (${V.periodOther})` : '')], ['Note', 'Not a reservation. Class time is assigned by SHARIF TECHNOLOGIES.']]} />
       <Sec t="Your learning-format preference" i={2} rows={[['Preference', label('format', V.format)], ['In-person contribution preference', V.format !== 'remote' ? label('contribPref', V.contribPref) : undefined], ['Comfortable contribution range', V.format !== 'remote' ? label('contribRange', V.contribRange) : undefined]]} />
       <Sec t="Your device" i={3} rows={[['Phone', label('phone', D.phone)], ['Computer', label('computer', D.computer)], ['Shared computer access', D.computer === 'none' ? label('sharedComputer', D.sharedComputer) : undefined], ['Internet', label('internet', D.internet)], ['Electricity', label('electricity', D.electricity)], ['Workspace', label('workspace', D.workspace)]]} />
-      <Sec t="Your project" i={4} rows={[['Working name', P.title], ['What you want to build', P.idea], ['Problem it solves', P.problem], ['Who would use it', P.users], ['Benefits', P.benefits], ['Growth', P.growth], ['Personal benefit', P.personalBenefit], ['Vision', P.vision], ['GH₵500 project budget', label('budget', P.budget)]]} />
-      <Sec t="Certificate preference" i={5} rows={[['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
+      <Sec t="Budget, certificate & consent" i={4} rows={[['GH₵500 project budget', label('budget', F.budget)], ['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
     </div>
   </>);
 }

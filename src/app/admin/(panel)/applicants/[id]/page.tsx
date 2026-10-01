@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { q } from '@/lib/db';
 import { label } from '@/lib/schema';
 import ApplicantActions from '@/components/admin/ApplicantActions';
+import ProjectView from '@/components/admin/ProjectView';
 
 const KV = ({ k, v }: { k: string; v?: string }) => v ? <div className="kv"><dt>{k}</dt><dd>{v}</dd></div> : null;
 
@@ -28,16 +29,14 @@ export default async function Applicant({ params }: { params: Promise<{ id: stri
             <KV k="Format preference" v={label('format', d.availability.format)} /><KV k="Contribution preference" v={label('contribPref', d.availability.contribPref)} /><KV k="Contribution range" v={label('contribRange', d.availability.contribRange)} />
             <KV k="Phone device" v={label('phone', d.device.phone)} /><KV k="Computer" v={label('computer', d.device.computer)} /><KV k="Shared computer" v={label('sharedComputer', d.device.sharedComputer)} /><KV k="Device note" v={d.device.deviceNote} />
             <KV k="Internet" v={label('internet', d.device.internet)} /><KV k="Electricity" v={label('electricity', d.device.electricity)} /><KV k="Workspace" v={label('workspace', d.device.workspace)} />
-            <KV k="Certificate" v={label('certificate', d.finish.certificate)} />
+            <KV k="Certificate" v={label('certificate', d.finish.certificate)} /><KV k="GH₵500 budget" v={label('budget', d.finish.budget ?? d.project?.budget)} />
             <KV k="WhatsApp" v={r.contact?.whatsapp} /><KV k="Alt phone" v={r.contact?.altPhone} /><KV k="Preferred contact" v={r.contact?.preferredMethod} /><KV k="Best time to reach" v={r.contact?.bestTime} /><KV k="Emergency contact" v={r.contact?.emergencyName ? `${r.contact.emergencyName} · ${r.contact.emergencyPhone}` : undefined} />
           </dl>
         </div>
         <div className="grid">
           <ApplicantActions id={Number(r.id)} status={r.status} notes={r.admin_notes} cohortNote={r.cohort_note} seat={r.seat} group={r.group_label} session={r.session_time} studentId={r.student_id} serial={r.serial} hasPhoto={!!r.photo_at} />
-          <div className="panel"><h3>Project</h3><dl>
-            <KV k="Working name" v={d.project.title} /><KV k="Idea" v={d.project.idea} /><KV k="Problem" v={d.project.problem} /><KV k="Users" v={d.project.users} />
-            <KV k="Benefits" v={d.project.benefits} /><KV k="Growth" v={d.project.growth} /><KV k="Personal benefit" v={d.project.personalBenefit} /><KV k="Vision" v={d.project.vision} /><KV k="GH₵500 budget" v={label('budget', d.project.budget)} />
-          </dl></div>
+          <ProjectView project={r.project ?? {}} legacy={d.project} id={Number(r.id)} />
+        
         </div>
       </div>
       <p style={{ color: 'var(--muted)' }}>Submitted {new Date(r.created_at).toLocaleString('en-GB')} · Last updated {new Date(r.updated_at).toLocaleString('en-GB')}</p>

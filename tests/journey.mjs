@@ -71,26 +71,22 @@ await page.locator('fieldset[data-field="device-electricity"] label.opt').first(
 await page.locator('fieldset[data-field="device-workspace"] label.opt').first().tap();
 await cont();
 
-// Step 5: project
-await page.fill('#project-title', 'FarmLink');
-for (const [f, t] of [['idea', 'A web app connecting farmers with buyers directly so prices are fair.'], ['problem', 'Farmers lose money to middlemen and cannot find buyers easily.'], ['users', 'Farmers and buyers in the north.'], ['benefits', 'Better prices and less waste.'], ['growth', 'Add more regions and crops.'], ['personalBenefit', 'Commission per sale.'], ['vision', 'A trusted marketplace.']]) await page.fill('#project-' + f, t);
-await cont(); ok(await page.getByText('Please choose an option').count() === 1, 'step 5: GH₵500 budget question required');
-await opt('Yes, I am prepared'); await cont();
-
-// Step 6
-await page.locator('fieldset[data-field="finish-certificate"] label.opt', { hasText: 'Yes' }).tap();
-await cont(); ok(await page.getByText('You must agree to the privacy notice').count() === 1, 'step 6: privacy consent required');
+// Step 5 (finish): budget, certificate, consent
+await cont(); ok(await page.locator('.error').count() === 3, 'finish: budget, certificate and consent all required');
+await opt('Yes, I am prepared'); await page.locator('fieldset[data-field="finish-certificate"] label.opt', { hasText: 'Yes' }).tap();
+await cont(); ok(await page.getByText('You must agree to the privacy notice').count() === 1, 'finish: privacy consent required');
 await page.locator('#finish-privacy').evaluate((el) => el.closest('label').click());
 await cont();
 ok(await page.getByRole('heading', { name: 'Review your application' }).count() === 1, 'review screen shown');
 const rv = await page.locator('.review').innerText();
-ok(['Kwame Asante', 'FarmLink', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.includes(x)), 'review shows all sections incl. contribution, device, project, format');
+ok(['Kwame Asante', 'GH₵500 project budget', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.includes(x)), 'review shows all sections incl. contribution, device, budget, format');
 await page.screenshot({ path: `${OUT}/apply-review.png`, fullPage: true });
-await page.getByRole('button', { name: 'Edit Your project' }).tap();
-ok(await page.getByRole('heading', { name: 'Your project idea' }).count() === 1, 'review: Edit jumps back to that step');
-await page.fill('#project-title', 'FarmLink Ghana');
-for (let i = 0; i < 2; i++) await cont();
-ok(await page.locator('.review').innerText().then((t) => t.includes('FarmLink Ghana')), 'edit persisted in review');
+ok(!(await page.locator('.review').innerText()).includes('Working name'), 'application no longer asks for the project idea (moved to dashboard)');
+await page.getByRole('button', { name: 'Edit Your information' }).tap();
+ok(await page.getByRole('heading', { name: 'About you' }).count() === 1, 'review: Edit jumps back to that step');
+await page.fill('#about-preferredName', 'Kwamena');
+for (let i = 0; i < 5; i++) await cont();
+ok(await page.locator('.review').innerText().then((t) => t.includes('Kwamena')), 'edit persisted in review');
 
 // network interruption
 await ctx.setOffline(true);
@@ -116,6 +112,20 @@ ok(await page.getByText('Submitted', { exact: true }).count() >= 1 && await page
 await page.fill('#c-whatsapp', '0551234567'); await page.locator('fieldset[data-field="c-method"] label.opt', { hasText: 'WhatsApp' }).tap(); await page.locator('fieldset[data-field="c-time"] label.opt', { hasText: 'Evening' }).tap(); await page.getByRole('button', { name: 'SAVE CONTACT DETAILS' }).tap(); await page.getByText('Saved. SHARIF TECHNOLOGIES').waitFor(); ok(true, 'dashboard: contact details saved');
 await page.screenshot({ path: `${OUT}/dashboard-mobile.png`, fullPage: true });
 await page.reload(); ok(await page.getByRole('heading', { name: /Welcome, Kwame/ }).count() === 1, 'dashboard: still signed in after reload (remembered)');
+// project workspace
+ok(await page.getByRole('link', { name: /START MY PROJECT/ }).count() === 1, 'dashboard: project card invites student to start');
+await page.getByRole('link', { name: /START MY PROJECT/ }).tap(); await page.waitForURL('**/dashboard/project');
+await page.fill('#ptitle', 'FarmLink'); await page.locator('#ptitle').blur(); await page.getByText('✓ Saved').first().waitFor();
+await page.fill('#t-problem', 'Farmers in the north lose money to middlemen and cannot reach buyers directly.'); await page.locator('#t-problem').blur(); await page.locator('#sec-problem').getByText('✓ Saved').waitFor({ timeout: 8000 });
+await page.locator('#sec-problem label.opt').tap(); await page.locator('#sec-problem').getByText('✓ Saved').waitFor({ timeout: 8000 }); await page.waitForTimeout(300);
+await page.reload(); await page.getByRole('button', { name: /The problem/ }).waitFor();
+ok((await page.locator('#ptitle').inputValue()) === 'FarmLink', 'project: title saved and restored after reload');
+await page.getByRole('button', { name: /The problem/ }).tap(); ok((await page.locator('#t-problem').inputValue()).includes('middlemen'), 'project: section autosaved and restored after reload');
+ok(await page.getByText('1 of 10 sections ready').count() === 1, 'project: ready progress counts');
+await page.screenshot({ path: `${OUT}/project-mobile.png`, fullPage: true });
+await page.getByRole('tab', { name: /Progress journal/ }).tap(); await page.fill('#jt', 'Today I wrote the problem statement.'); await page.getByRole('button', { name: 'ADD ENTRY' }).tap(); await page.getByText('Today I wrote the problem statement.').waitFor(); ok(true, 'project: journal entry added');
+await page.getByRole('tab', { name: 'Proposal' }).tap(); ok((await page.locator('.proposal').innerText()).includes('FarmLink') && (await page.locator('.proposal').innerText()).includes('middlemen'), 'project: proposal compiled from sections');
+await page.screenshot({ path: `${OUT}/project-proposal.png`, fullPage: true });
 
 // admin journey
 if (PW) {
@@ -126,8 +136,9 @@ if (PW) {
   await p.fill('input[name=search]', ref); await p.getByRole('button', { name: 'Apply filters' }).click(); await p.waitForURL(/search=/);
   ok(await p.getByText('Kwame Asante').count() === 1, 'admin: search by reference finds applicant');
   await p.screenshot({ path: `${OUT}/admin-list.png` });
-  await p.getByRole('link', { name: 'Kwame Asante' }).click(); await p.getByText('FarmLink Ghana').first().waitFor();
+  await p.getByRole('link', { name: 'Kwame Asante' }).click(); await p.getByText('FarmLink').first().waitFor();
   ok(await p.getByText('Mobile data only').count() >= 1 && await p.getByText('GH₵50–100').count() >= 1, 'admin: detail shows device + contribution');
+  ok(await p.getByText('Farmers in the north lose money').count() >= 1, 'admin: sees the student’s project workspace');
   await p.selectOption('#st', 'selected'); await p.fill('#nt', 'Great project idea'); await p.getByRole('button', { name: 'Save' }).click(); await p.getByText('Saved').waitFor(); ok(true, 'admin: status + note saved');
   await p.screenshot({ path: `${OUT}/admin-detail.png`, fullPage: true });
   await p.goto(BASE + '/admin/settings'); await p.fill('#notice', 'Applications close soon'); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();

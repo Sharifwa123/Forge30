@@ -10,8 +10,7 @@ const valid = (over = {}) => ({
   commitment: { why: 'I want to build software that solves real problems in my community.', hopeToBuild: 'A small web app for local shops to track customers.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'either', contribPref: 'flexible', contribRange: '50-100' },
   device: { phone: 'android', computer: 'none', sharedComputer: 'maybe', internet: 'mobile_data', electricity: 'reliable', workspace: 'yes' },
-  project: { title: 'ShopBook', idea: 'An app where shop owners record customers and debts simply.', problem: 'Shop owners lose track of who owes them money.', users: 'Small shop owners', benefits: 'Fewer lost debts', growth: 'Add SMS reminders', personalBenefit: 'Could become a paid product', vision: 'Used by shops across Ghana', budget: 'yes' },
-  finish: { certificate: 'yes', privacy: true },
+  finish: { certificate: 'yes', budget: 'yes', privacy: true },
   ...over,
 });
 
@@ -34,7 +33,7 @@ ok(r.status === 422, 'canCommit=no cannot be submitted (server-side)');
 const noAck = valid(); noAck.commitment.ackDiscipline = false;
 ok((await post('/api/apply', noAck)).status === 422, 'discipline acknowledgement required server-side');
 
-const inp = valid(); inp.about.email = `xss${uniq}@example.com`; inp.about.phone = '025' + uniq.slice(0, 7); inp.about.fullName = '<script>alert(1)</script>Kofi'; inp.project.title = '=HYPERLINK("http://evil.example","click")';
+const inp = valid(); inp.about.email = `xss${uniq}@example.com`; inp.about.phone = '025' + uniq.slice(0, 7); inp.about.fullName = '<script>alert(1)</script>Kofi'; inp.about.preferredName = '=HYPERLINK("http://evil.example","click")';
 r = await post('/api/apply', inp);
 ok(r.status === 200, 'malicious strings accepted as inert text (sanitised / parameterised)');
 
@@ -68,8 +67,8 @@ if (PW) {
   ok(filt.includes('Ama Mensah'), 'filters (device/format/availability) find the applicant');
   const filt2 = await (await fetch(BASE + '/admin?location=Accra', { headers: A })).text();
   ok(!filt2.includes('Ama Mensah'), 'location filter excludes non-matching applicant');
-  const csv = await (await fetch(BASE + '/api/admin/export?search=ShopBook', { headers: A })).text();
-  ok(csv.includes(ref) === false || csv.includes('Ama Mensah'), 'CSV export works');
+  const csv = await (await fetch(BASE + '/api/admin/export?search=Ama', { headers: A })).text();
+  ok(csv.includes(ref) && csv.includes('Ama Mensah'), 'CSV export works');
   const all = await (await fetch(BASE + '/api/admin/export', { headers: A })).text();
   ok(all.includes('"\'=HYPERLINK(') && !all.includes('"=HYPERLINK('), 'CSV export neutralises spreadsheet formula injection');
   ok(!all.includes('<script>'), 'angle brackets stripped from stored text');
