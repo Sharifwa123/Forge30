@@ -1,14 +1,16 @@
 'use client';
+import { NoticeStack, type NoticeItem } from './Notices';
+import NoticePopup from './NoticePopup';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib/schema';
 import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
 
-type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
-type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; notice: string; announcements: { id: string; text: string; at: string }[]; organizer: Organizer };
+type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
+type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
 const MSG: Record<Status, string> = {
@@ -23,7 +25,7 @@ const tbd = (v: string) => !v || /^to be determined/i.test(v);
 
 type ProjectSummary = { ready: number; started: number; total: number; nextTitle: string | null; title: string; feedback: number; journal: number };
 
-export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null }) {
+export function Dashboard({ me, settings: s, cardToken, project, rev }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null; rev: string }) {
   const router = useRouter();
   const idx = STAGES.indexOf(me.status);
   const first = me.name.split(' ')[0];
@@ -53,13 +55,9 @@ export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; set
         ) : <div style={{ height: 22 }} />}
       </section>
 
-      {(s.notice || s.announcements.length > 0) && (
-        <section className="panel" aria-label="Updates">
-          <h2 style={{ fontSize: '1.3rem' }}>Updates from SHARIF TECHNOLOGIES</h2>
-          {s.notice && <div className="info amber"><b>Notice</b><p>{s.notice}</p></div>}
-          {s.announcements.map((a) => <div key={a.id} style={{ padding: '12px 0', borderTop: '1px solid var(--line)' }}><div style={{ fontSize: '.8rem', color: 'var(--muted)', fontWeight: 700 }}>{new Date(a.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>{a.text}</div>)}
-        </section>
-      )}
+      {me.message && <NoticeStack label="Personal message" items={[{ id: 'msg', kind: 'Notice', title: 'A message for you', text: me.message, style: 'important', ctaLabel: '', ctaUrl: '', popup: false }]} />}
+      <NoticeStack items={s.items} label="Updates" />
+      <NoticePopup items={s.items} />
 
       {project && (
         <section className="panel" aria-label="My project" style={{ borderLeft: '6px solid var(--brand)' }}>
@@ -86,7 +84,7 @@ export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; set
         <p className="note" style={{ marginBottom: 0 }}>Your class time is assigned by SHARIF TECHNOLOGIES. You do not choose it.</p>
       </section>
 
-      {cardToken ? <CardPanel token={cardToken} hasPhoto={me.hasPhoto} studentId={me.studentId!} changesLeft={me.photoChangesLeft} /> : (
+      {cardToken ? <CardPanel rev={rev} token={cardToken} hasPhoto={me.hasPhoto} studentId={me.studentId!} changesLeft={me.photoChangesLeft} /> : (
         <section className="panel" aria-label="Student card"><h2 style={{ fontSize: '1.3rem' }}>Student card</h2>
           <p style={{ margin: 0, color: 'var(--muted)' }}>Your downloadable FORGE30 student card, with your photo, student ID and serial number, unlocks here once your place is <b>confirmed</b> by SHARIF TECHNOLOGIES.</p></section>
       )}
@@ -122,9 +120,12 @@ function Flip3D({ front, back, alt }: { front: string; back: string; alt: string
   );
 }
 
-function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { token: string; hasPhoto: boolean; studentId: string; changesLeft: number }) {
+function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft, rev }: { token: string; hasPhoto: boolean; studentId: string; changesLeft: number; rev: string }) {
   const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now()); const [left, setLeft] = useState(initialLeft);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
+  // Anything that changes the card (seat, group, class time, name, cohort, organizer, photo...) changes `rev`: re-fetch both faces.
+  const firstRev = useRef(true);
+  useEffect(() => { if (firstRev.current) { firstRev.current = false; return; } setV(Date.now()); setPhoto(hasPhoto); setLeft(initialLeft); }, [rev]); // also adopt a photo set from another device
   const input = useRef<HTMLInputElement>(null); const camera = useRef<HTMLInputElement>(null);
   const [prep, setPrep] = useState<{ file: File; from: React.RefObject<HTMLInputElement | null> } | null>(null);
   const locked = photo && left <= 0;

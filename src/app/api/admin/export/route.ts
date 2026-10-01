@@ -16,7 +16,9 @@ export async function GET(req: Request) {
   const sp = new URL(req.url).searchParams;
   const f: Filters = {};
   for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'sort'] as const) { const v = sp.get(k); if (v) f[k] = v; }
-  const rows = await listApplications(f, 5000);
+  const ids = (sp.get('ids') || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number);
+  const all = await listApplications(f, 5000);
+  const rows = ids.length ? all.filter((r: any) => ids.includes(Number(r.id))) : all;
   const head = ['Reference', 'Status', 'Submitted', 'Full name', 'Preferred name', 'Phone', 'Email', 'Location', 'Age', 'Experience', 'Can commit', 'Practise', 'Seriousness', 'Periods', 'Format pref', 'Contribution pref', 'Contribution range', 'Phone device', 'Computer', 'Shared computer', 'Internet', 'Electricity', 'Workspace', 'Project title', 'Project idea', 'Problem', 'Users', 'Budget GH₵500', 'Certificate', 'Why', 'Hope to build', 'Notes', 'Project sections ready', 'Student ID', 'Serial', 'Seat', 'Group', 'Session time', 'WhatsApp', 'Alt phone', 'Preferred contact', 'Best time', 'Emergency contact', 'Emergency phone'];
   const lines = [head.map(cell).join(',')];
   for (const r of rows) {

@@ -151,9 +151,9 @@ if (PW) {
   await ad.getByRole('button', { name: 'Cancel' }).click(); await ad.waitFor({ state: 'detached' }); ok(await p.getByText('OPEN', { exact: true }).count() >= 1, 'dialog: Cancel leaves applications open');
   await p.getByRole('button', { name: 'Close applications' }).click(); await ad.getByRole('button', { name: 'Close applications' }).click(); await p.getByText('CLOSED', { exact: true }).waitFor({ timeout: 8000 }); ok(true, 'dialog: branded confirm closes applications');
   await p.getByRole('button', { name: 'Re-open applications' }).click(); await p.getByText('OPEN', { exact: true }).waitFor({ timeout: 8000 }); ok(true, 'applications re-opened');
-  await p.fill('#notice', 'Applications close soon'); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();
+  await p.fill('#notice', 'Applications close soon'); await p.getByRole('button', { name: 'Save notice' }).click(); await p.getByText('Notice saved').waitFor();
   ok((await (await fetch(BASE + '/')).text()).includes('Applications close soon'), 'admin: public notice appears on landing page');
-  await p.fill('#notice', ''); await p.getByRole('button', { name: 'Save settings' }).click(); await p.getByText('Saved').waitFor();
+  await p.getByRole('button', { name: 'Remove notice' }).click(); await p.getByText('Notice removed').waitFor();
   await p.screenshot({ path: `${OUT}/admin-settings.png`, fullPage: true });
   const [dl] = await Promise.all([p.waitForEvent('download'), (async () => { await p.goto(BASE + '/admin'); await p.getByRole('link', { name: /Export CSV/ }).click(); })()]);
   ok(/forge30-applicants-.*\.csv/.test(dl.suggestedFilename()), 'admin: CSV export downloads');

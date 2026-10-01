@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { STATUSES, STATUS_LABEL } from '@/lib/schema';
 import { useDialog } from '../Dialog';
 
-export default function ApplicantActions({ id, status, notes, cohortNote, seat, group, session, studentId, serial, hasPhoto, photoUsed, photoAllowed }: { id: number; status: string; notes: string; cohortNote: string; seat: string; group: string; session: string; studentId: string | null; serial: string | null; hasPhoto: boolean; photoUsed: number; photoAllowed: number }) {
-  const { ask } = useDialog(); const [s, setS] = useState(status); const [n, setN] = useState(notes); const [c, setC] = useState(cohortNote); const [st, setSt] = useState(seat); const [g, setG] = useState(group); const [se, setSe] = useState(session); const [msg, setMsg] = useState(''); const r = useRouter();
+export default function ApplicantActions({ id, status, notes, cohortNote, seat, group, session, studentId, serial, hasPhoto, photoUsed, photoAllowed, message, name, email, phone, location, ref_ }: { message: string; name: string; email: string; phone: string; location: string; ref_: string; id: number; status: string; notes: string; cohortNote: string; seat: string; group: string; session: string; studentId: string | null; serial: string | null; hasPhoto: boolean; photoUsed: number; photoAllowed: number }) {
+  const { ask, confirm } = useDialog(); const [sm, setSm] = useState(message); const [ed, setEd] = useState({ fullName: name, email, phone, location }); const [s, setS] = useState(status); const [n, setN] = useState(notes); const [c, setC] = useState(cohortNote); const [st, setSt] = useState(seat); const [g, setG] = useState(group); const [se, setSe] = useState(session); const [msg, setMsg] = useState(''); const r = useRouter();
   async function save() {
-    const res = await fetch(`/api/admin/applicants/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: s, adminNotes: n, cohortNote: c, seat: st, groupLabel: g, sessionTime: se }) });
+    const res = await fetch(`/api/admin/applicants/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: s, adminNotes: n, cohortNote: c, studentMessage: sm, seat: st, groupLabel: g, sessionTime: se }) });
     setMsg(res.ok ? 'Saved' : 'Failed to save'); if (res.ok) r.refresh();
   }
   return (
@@ -19,7 +19,17 @@ export default function ApplicantActions({ id, status, notes, cohortNote, seat, 
       <div className="field"><label htmlFor="ses">Class time shown to the student</label><input id="ses" type="text" maxLength={60} value={se} onChange={(e) => setSe(e.target.value)} placeholder="e.g. 6:00–8:00 PM daily" /></div>
       <div className="field"><label htmlFor="cn">Internal class arrangement note</label><input id="cn" type="text" value={c} onChange={(e) => setC(e.target.value)} maxLength={500} /></div>
       <div className="field"><label htmlFor="nt">Internal notes <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(never shown to applicants)</span></label><textarea id="nt" value={n} onChange={(e) => setN(e.target.value)} maxLength={5000} /></div>
+      <div className="field"><label htmlFor="sm">Message to this student <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(shown as a highlighted notice in their dashboard; supports **bold** and links)</span></label><textarea id="sm" value={sm} onChange={(e) => setSm(e.target.value)} maxLength={1000} style={{ minHeight: 80 }} /></div>
       <button className="btn btn-primary sm" onClick={save}>Save</button> <span role="status" style={{ marginLeft: 10, fontWeight: 700 }}>{msg}</span>
+      <details style={{ marginTop: 22 }}>
+        <summary style={{ fontWeight: 800, cursor: 'pointer' }}>Edit applicant details</summary>
+        {([['fullName', 'Full name'], ['email', 'Email'], ['phone', 'Phone'], ['location', 'Location']] as const).map(([k, l]) => <div className="field" key={k}><label htmlFor={'ed-' + k}>{l}</label><input id={'ed-' + k} type="text" value={ed[k]} onChange={(e) => setEd({ ...ed, [k]: e.target.value })} /></div>)}
+        <button className="btn btn-line sm" onClick={async () => { const res = await fetch(`/api/admin/applicants/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ edit: ed }) }); const j = await res.json().catch(() => ({})); setMsg(res.ok ? 'Details updated' : j.error || 'Failed'); if (res.ok) r.refresh(); }}>Save details</button>
+      </details>
+      <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid var(--line)', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {hasPhoto && <button className="btn btn-line sm" onClick={async () => { if (!(await confirm({ title: 'Remove this photo?', body: <p>The student will be asked to upload a new one, and their photo-change count resets.</p>, confirmLabel: 'Remove photo', tone: 'danger' }))) return; const res = await fetch(`/api/admin/applicants/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ removePhoto: true }) }); setMsg(res.ok ? 'Photo removed' : 'Failed'); if (res.ok) r.refresh(); }}>Remove photo</button>}
+        <button className="btn btn-danger sm" onClick={async () => { const t = await ask({ title: 'Delete this applicant?', body: <p>This permanently deletes the application, project and card. It cannot be undone. Type the reference <b>{ref_}</b> to confirm.</p>, label: 'Reference', placeholder: ref_, minLength: ref_.length, confirmLabel: 'Delete permanently', tone: 'danger' }); if (!t) return; if (t.trim() !== ref_) { setMsg('Reference did not match'); return; } const res = await fetch(`/api/admin/applicants/${id}`, { method: 'DELETE' }); if (res.ok) { r.push('/admin'); r.refresh(); } else setMsg('Failed'); }}>Delete applicant</button>
+      </div>
     </div>
   );
 }

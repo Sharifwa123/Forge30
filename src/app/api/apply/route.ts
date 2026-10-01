@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { applicationSchema, normalizePhone } from '@/lib/schema';
 import { q } from '@/lib/db';
-import { getSettings } from '@/lib/settings';
+import { getSettings, acceptingApplications } from '@/lib/settings';
 import { newRef, rateLimit, sameOrigin } from '@/lib/security';
 
 export async function POST(req: Request) {
@@ -14,7 +14,8 @@ export async function POST(req: Request) {
     try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: 'Invalid request.' }, { status: 400 }); }
 
     const settings = await getSettings();
-    if (!settings.applicationsOpen) return NextResponse.json({ error: 'Applications are currently closed.', closed: true }, { status: 403 });
+    const acc = await acceptingApplications(settings);
+    if (!acc.open) return NextResponse.json({ error: acc.full ? 'Applications are closed: all places have been filled.' : 'Applications are currently closed.', closed: true }, { status: 403 });
 
     const parsed = applicationSchema.safeParse(body);
     if (!parsed.success) {

@@ -2,11 +2,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 /** Branded, accessible replacement for window.confirm / window.prompt. Uses the native <dialog> element for focus trapping, Esc and focus restore. */
-export type ConfirmOpts = { title: string; body?: React.ReactNode; confirmLabel?: string; cancelLabel?: string; tone?: 'default' | 'danger' };
+export type ConfirmOpts = { title: string; body?: React.ReactNode; confirmLabel?: string; cancelLabel?: string; tone?: 'default' | 'danger'; checkbox?: { label: string; checked?: boolean } };
 export type AskOpts = ConfirmOpts & { label: string; placeholder?: string; hint?: string; minLength?: number };
 
-type Req = { kind: 'confirm'; o: ConfirmOpts; done: (v: boolean) => void } | { kind: 'ask'; o: AskOpts; done: (v: string | null) => void };
-const Ctx = createContext<{ confirm: (o: ConfirmOpts) => Promise<boolean>; ask: (o: AskOpts) => Promise<string | null> } | null>(null);
+type Req = { kind: 'confirm'; o: ConfirmOpts; done: (v: boolean, checked: boolean) => void } | { kind: 'ask'; o: AskOpts; done: (v: string | null) => void };
+const Ctx = createContext<{ confirm: (o: ConfirmOpts) => Promise<boolean>; confirmWith: (o: ConfirmOpts) => Promise<{ ok: boolean; checked: boolean }>; ask: (o: AskOpts) => Promise<string | null> } | null>(null);
 
 export function useDialog() {
   const c = useContext(Ctx);
@@ -16,17 +16,18 @@ export function useDialog() {
 
 export function DialogProvider({ children }: { children: React.ReactNode }) {
   const [req, setReq] = useState<Req | null>(null);
-  const confirm = useCallback((o: ConfirmOpts) => new Promise<boolean>((done) => setReq({ kind: 'confirm', o, done })), []);
+  const confirmWith = useCallback((o: ConfirmOpts) => new Promise<{ ok: boolean; checked: boolean }>((resolve) => setReq({ kind: 'confirm', o, done: (ok, checked) => resolve({ ok, checked }) })), []);
+  const confirm = useCallback(async (o: ConfirmOpts) => (await confirmWith(o)).ok, [confirmWith]);
   const ask = useCallback((o: AskOpts) => new Promise<string | null>((done) => setReq({ kind: 'ask', o, done })), []);
-  return <Ctx.Provider value={{ confirm, ask }}>{children}{req && <Sheet req={req} close={() => setReq(null)} />}</Ctx.Provider>;
+  return <Ctx.Provider value={{ confirm, confirmWith, ask }}>{children}{req && <Sheet req={req} close={() => setReq(null)} />}</Ctx.Provider>;
 }
 
 function Sheet({ req, close }: { req: Req; close: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const [val, setVal] = useState(''); const [err, setErr] = useState('');
+  const [val, setVal] = useState(''); const [err, setErr] = useState(''); const [checked, setChecked] = useState(!!(req.o as ConfirmOpts).checkbox?.checked);
   const o = req.o; const danger = o.tone === 'danger';
   const finish = (ok: boolean) => {
-    if (req.kind === 'confirm') req.done(ok);
+    if (req.kind === 'confirm') req.done(ok, checked);
     else {
       if (!ok) req.done(null);
       else { const t = val.trim(); if (t.length < ((o as AskOpts).minLength ?? 1)) { setErr('Please fill this in.'); return; } req.done(t); }
@@ -45,6 +46,9 @@ function Sheet({ req, close }: { req: Req; close: () => void }) {
           <div className="eyebrow" style={{ marginBottom: 8 }}>FORGE30 · SHARIF TECHNOLOGIES</div>
           <h2 id="sheet-t">{o.title}</h2>
           <div id="sheet-b" className="sheet-body">{o.body}</div>
+          {req.kind === 'confirm' && o.checkbox && (
+            <label className="opt cb" style={{ marginTop: 14 }}><input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} /><span className="mk" aria-hidden /><span>{o.checkbox.label}</span></label>
+          )}
           {req.kind === 'ask' && (
             <div className="field" style={{ marginTop: 14, marginBottom: 0 }}>
               <label htmlFor="sheet-input">{(o as AskOpts).label}</label>
