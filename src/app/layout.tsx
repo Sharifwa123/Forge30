@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'EducationalOrganization', name: 'SHARIF TECHNOLOGIES', slogan: 'Knowledge Is Power', url: SITE.url, logo: `${SITE.url}/brand/sharif-logo-512.png` }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'EducationalOrganization', name: 'SHARIF TECHNOLOGIES', slogan: 'Knowledge Is Power', url: SITE.url, logo: `${SITE.url}/brand/sharif-logo.png` }) }} />
         {children}
       </body>
     </html>

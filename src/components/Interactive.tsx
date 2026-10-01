@@ -125,18 +125,16 @@ export function DeviceSelector() {
 const DEL = [
   ['In person', 'Physical classroom-based participation.', 'May involve additional logistical costs. Venue to be determined by SHARIF TECHNOLOGIES.'],
   ['Remote', 'Live online participation.', 'Needs a reliable internet connection, power and a suitable place to work. Platform to be determined by SHARIF TECHNOLOGIES.'],
-  ['Final arrangement', 'Decided by SHARIF TECHNOLOGIES after applications close.', 'It may be remote, in person or a combination, depending on the applicants and practical considerations. You state a preference; you do not choose.'],
 ];
 export function DeliverySelector() {
-  const [i, setI] = useState(2);
+  const [i, setI] = useState(0);
   return (
     <div>
-      <div className="seg c3" role="group" aria-label="Delivery options">
+      <div className="seg c3" role="group" aria-label="Delivery options" style={{ gridTemplateColumns: '1fr 1fr' }}>
         {DEL.map((d, n) => <button key={d[0]} aria-pressed={i === n} onClick={() => setI(n)}><b>{d[0]}</b><span>{d[1]}</span></button>)}
       </div>
-      <div className="info amber" style={{ marginTop: 18 }} aria-live="polite" key={i}><b>{DEL[i][0]}</b><p>{DEL[i][2]}</p></div>
-      <p style={{ fontWeight: 700 }}>Your class time is assigned by SHARIF TECHNOLOGIES.</p>
-      <p className="note">Applicants may indicate their general availability during application, but the final timetable will be determined by SHARIF TECHNOLOGIES after the application period closes. We do not promise that every option will be available.</p>
+      <div className="info amber" style={{ marginTop: 14, color: 'var(--ink)' }} aria-live="polite" key={i}><p style={{ margin: 0 }}>{DEL[i][2]}</p></div>
+      <p className="note" style={{ margin: 0 }}>The final arrangement (remote, in person or a combination) and your class time are assigned by SHARIF TECHNOLOGIES after applications close. We do not promise that every option will be available.</p>
     </div>
   );
 }
@@ -158,7 +156,7 @@ export function Day30() {
 }
 
 export function Faq() {
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
   return (
     <div className="faq">
       {FAQ.map(([q, a], i) => (
@@ -169,6 +167,19 @@ export function Faq() {
           <div className="body" data-open={open === i} id={`fa-${i}`} role="region" aria-labelledby={`fq-${i}`}><div><p>{a}</p></div></div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* Delivery + devices in one compact tabbed block */
+export function FormatAndDevices() {
+  const [tab, setTab] = useState<'delivery' | 'devices'>('delivery');
+  return (
+    <div>
+      <div className="chips" role="tablist" aria-label="Format and devices">
+        {([['delivery', 'How we deliver'], ['devices', 'What you need']] as const).map(([k, l]) => <button key={k} role="tab" className="chip" aria-selected={tab === k} onClick={() => setTab(k)}>{l}</button>)}
+      </div>
+      <div role="tabpanel" key={tab} style={{ animation: 'rise .35s both' }}>{tab === 'delivery' ? <DeliverySelector /> : <DeviceSelector />}</div>
     </div>
   );
 }

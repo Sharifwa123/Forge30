@@ -6,7 +6,7 @@ import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib
 import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 
-type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
+type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; notice: string; announcements: { id: string; text: string; at: string }[]; organizer: Organizer };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
@@ -85,7 +85,7 @@ export function Dashboard({ me, settings: s, cardToken, project }: { me: Me; set
         <p className="note" style={{ marginBottom: 0 }}>Your class time is assigned by SHARIF TECHNOLOGIES. You do not choose it.</p>
       </section>
 
-      {cardToken ? <CardPanel token={cardToken} hasPhoto={me.hasPhoto} studentId={me.studentId!} /> : (
+      {cardToken ? <CardPanel token={cardToken} hasPhoto={me.hasPhoto} studentId={me.studentId!} changesLeft={me.photoChangesLeft} /> : (
         <section className="panel" aria-label="Student card"><h2 style={{ fontSize: '1.3rem' }}>Student card</h2>
           <p style={{ margin: 0, color: 'var(--muted)' }}>Your downloadable FORGE30 student card, with your photo, student ID and serial number, unlocks here once your place is <b>confirmed</b> by SHARIF TECHNOLOGIES.</p></section>
       )}
@@ -109,16 +109,41 @@ async function shrink(file: File): Promise<Blob> {
   return await new Promise<Blob>((res) => c.toBlob((b) => res(b || file), 'image/jpeg', 0.9));
 }
 
-function CardPanel({ token, hasPhoto, studentId }: { token: string; hasPhoto: boolean; studentId: string }) {
-  const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now());
-  const [busy, setBusy] = useState(false); const [err, setErr] = useState(''); const [side, setSide] = useState<'front' | 'back'>('front');
+function Flip3D({ front, back, alt }: { front: string; back: string; alt: string }) {
+  const [flipped, setFlipped] = useState(false); const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const r = e.currentTarget.getBoundingClientRect(); setTilt({ x: ((e.clientY - r.top) / r.height - 0.5) * -14, y: ((e.clientX - r.left) / r.width - 0.5) * 18 });
+  };
+  const face: React.CSSProperties = { position: 'absolute', inset: 0, width: '100%', height: '100%', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', borderRadius: 16, boxShadow: '0 18px 50px rgba(7,18,48,.35)' };
+  return (
+    <div>
+      <div style={{ perspective: 1400 }} onPointerMove={move} onPointerLeave={() => setTilt({ x: 0, y: 0 })}>
+        <button onClick={() => setFlipped((f) => !f)} aria-label={`Flip card to see the ${flipped ? 'front' : 'back'}`} style={{ display: 'block', width: '100%', aspectRatio: '1012 / 638', padding: 0, border: 0, background: 'none', cursor: 'pointer', position: 'relative', transformStyle: 'preserve-3d', transition: 'transform .8s cubic-bezier(.2,.7,.2,1)', transform: `rotateX(${tilt.x}deg) rotateY(${(flipped ? 180 : 0) + tilt.y}deg)` }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={front} alt={`${alt} front`} style={face} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={back} alt={`${alt} back`} style={{ ...face, transform: 'rotateY(180deg)' }} />
+        </button>
+      </div>
+      <p className="note" style={{ marginTop: 14 }}>Tap the card to flip it. Move your pointer over it to tilt it.</p>
+    </div>
+  );
+}
+
+function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { token: string; hasPhoto: boolean; studentId: string; changesLeft: number }) {
+  const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now()); const [left, setLeft] = useState(initialLeft);
+  const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
   const input = useRef<HTMLInputElement>(null);
+  const locked = photo && left <= 0;
   async function upload(f: File | undefined) {
-    if (!f) return; setBusy(true); setErr('');
+    if (!f) return;
+    if (photo && !confirm(`You can change your photo only ${left === 1 ? 'once' : left + ' more times'}. After that it is locked, and any further change needs a legal document or card with your photo verified by SHARIF TECHNOLOGIES.\n\nChange it now?`)) { if (input.current) input.current.value = ''; return; }
+    setBusy(true); setErr('');
     try {
       const fd = new FormData(); fd.append('token', token); fd.append('photo', await shrink(f), 'photo.jpg');
       const r = await fetch('/api/card/photo', { method: 'POST', body: fd }); const j = await r.json().catch(() => ({}));
-      if (r.ok) { setPhoto(true); setV(Date.now()); } else setErr(j.error || 'Upload failed. Try again.');
+      if (r.ok) { if (photo) setLeft(j.changesLeft ?? left - 1); setPhoto(true); setV(Date.now()); } else { setErr(j.error || 'Upload failed. Try again.'); if (j.locked) setLeft(0); }
     } catch { setErr('Network problem. Check your connection and try again.'); }
     setBusy(false); if (input.current) input.current.value = '';
   }
@@ -127,22 +152,20 @@ function CardPanel({ token, hasPhoto, studentId }: { token: string; hasPhoto: bo
     <section className="panel" aria-label="Student card" id="card">
       <div className="eyebrow">Student card · {studentId}</div>
       <h2 style={{ fontSize: '1.5rem' }}>{photo ? 'Your FORGE30 student card' : 'Add your passport photo to create your card'}</h2>
-      {!photo && <p style={{ color: 'var(--muted)' }}>Use a clear, front-facing passport-style photo: plain background, face fully visible, no sunglasses or hat. Your photo is used only for your card and is visible only to SHARIF TECHNOLOGIES administrators.</p>}
+      {!photo && <p style={{ color: 'var(--muted)' }}>Use a clear, front-facing passport-style photo: plain background, face fully visible, no sunglasses or hat. <b>Choose carefully: you can change it only once afterwards.</b> Your photo appears on your card, and is shown to anyone who scans your card’s QR code so they can match it to you.</p>}
       <input ref={input} type="file" accept="image/*" capture="user" hidden onChange={(e) => upload(e.target.files?.[0])} id="photo-input" />
       {photo && (<>
-        <div className="chips" role="tablist" aria-label="Card side" style={{ paddingBottom: 8 }}>
-          {(['front', 'back'] as const).map((sd) => <button key={sd} role="tab" className="chip" aria-selected={side === sd} onClick={() => setSide(sd)}>{sd === 'front' ? 'Front' : 'Back'}</button>)}
-        </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url(side)} alt={`Student card ${side}`} width={1012} height={638} style={{ width: '100%', height: 'auto', borderRadius: 14, boxShadow: '0 12px 40px rgba(7,18,48,.3)', background: 'var(--tint-2)', aspectRatio: '1012 / 638' }} />
+        <Flip3D front={url('front')} back={url('back')} alt="Student card" />
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
           <a className="btn btn-primary" href={url('front', true)} download>DOWNLOAD FRONT</a>
           <a className="btn btn-primary" href={url('back', true)} download>DOWNLOAD BACK</a>
+          <a className="btn btn-line" href={url('3d', true)} download>3D SHOWCASE (OPTIONAL)</a>
         </div>
-        <p className="note" style={{ marginTop: 14 }}>Print size: standard ID card (85.6 × 54 mm). Your seat, group and class time appear on the card once SHARIF TECHNOLOGIES assigns them; download again to get the latest version.</p>
+        <p className="note" style={{ marginTop: 14 }}>Print size: standard ID card (85.6 × 54 mm). The QR code opens your verification page. Seat, group and class time appear once assigned; download again for the latest version.</p>
       </>)}
+      {locked && <div className="info amber" style={{ marginTop: 14 }}><b>Your photo is locked</b><p style={{ margin: 0 }}>You have used your photo change. To change it again, present a legal document or card showing your photo (for example a Ghana Card, passport or driver’s licence) to SHARIF TECHNOLOGIES. An administrator will verify you and unlock one more change.</p></div>}
       {err && <div className="error" role="alert" style={{ marginTop: 10 }}>⚠ {err}</div>}
-      <div style={{ marginTop: 14 }}><button className={'btn ' + (photo ? 'btn-line' : 'btn-primary')} disabled={busy} onClick={() => input.current?.click()}>{busy ? 'UPLOADING…' : photo ? 'CHANGE PHOTO' : 'TAKE OR CHOOSE PHOTO'}</button></div>
+      {!locked && <div style={{ marginTop: 14 }}><button className={'btn ' + (photo ? 'btn-line' : 'btn-primary')} disabled={busy} onClick={() => input.current?.click()}>{busy ? 'UPLOADING…' : photo ? 'CHANGE PHOTO' : 'TAKE OR CHOOSE PHOTO'}</button>{photo && <span style={{ marginLeft: 12, color: 'var(--muted)', fontWeight: 600 }}>{left === 1 ? '1 change left' : `${left} changes left`}</span>}</div>}
     </section>
   );
 }
@@ -187,7 +210,7 @@ export function OrganizerCard({ o, dark }: { o: Organizer; dark?: boolean }) {
   return (
     <section className="panel" aria-label="Contact the organizer" style={dark ? { background: 'var(--navy-800)', borderColor: 'var(--line-dark)', color: '#fff' } : undefined}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <Image src="/brand/sharif-logo-512.png" alt="" width={64} height={64} style={{ borderRadius: '50%' }} />
+        <Image unoptimized src="/brand/sharif-logo.png" alt="" width={64} height={64} style={{ borderRadius: '50%' }} />
         <div style={{ flex: '1 1 260px' }}>
           <div className="eyebrow" style={{ margin: 0, color: dark ? 'var(--amber)' : undefined }}>{o.title || 'Organizer'}</div>
           <h2 style={{ fontSize: '1.4rem', margin: '2px 0 6px' }}>{o.name}</h2>

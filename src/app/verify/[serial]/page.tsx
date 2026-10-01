@@ -7,7 +7,7 @@ import { getSettings } from '@/lib/settings';
 export const metadata: Metadata = { title: 'Verify student card', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
-// Public on purpose: shows only name, student ID and whether the card is active. No contact details.
+// Public on purpose: shows name, photo, student ID and whether the card is active, so the scanner can compare the person. No contact details.
 export default async function Verify({ params }: { params: Promise<{ serial: string }> }) {
   const { serial } = await params;
   const valid = /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(serial);
@@ -23,13 +23,14 @@ export default async function Verify({ params }: { params: Promise<{ serial: str
             <div className="eyebrow">Card verification</div>
             {r ? (<>
               <h1 style={{ fontSize: 'clamp(1.8rem,5vw,2.4rem)' }}>{active ? '✓ Valid FORGE30 student card' : 'This card is no longer active'}</h1>
+              {active && <div style={{ margin: '18px 0' }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={`/api/verify/photo/${serial}`} alt={`Photo of ${r.name}`} width={200} height={250} style={{ width: 200, height: 250, objectFit: 'cover', borderRadius: 14, border: '4px solid #fff', boxShadow: '0 8px 30px rgba(7,18,48,.25)' }} /></div>}
               <dl className="kv" style={{ marginTop: 20 }}>
                 <div><dt>Name</dt><dd style={{ fontSize: '1.3rem', fontWeight: 700 }}>{r.name}</dd></div>
                 <div><dt>Student ID</dt><dd style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontWeight: 700 }}>{r.student_id}</dd></div>
                 <div><dt>Status</dt><dd><span className={'pill ' + (active ? 'selected' : 'not_selected')}>{active ? 'Confirmed participant' : 'Not active'}</span></dd></div>
                 <div><dt>Issued by</dt><dd>SHARIF TECHNOLOGIES · FORGE30</dd></div>
               </dl>
-              <p className="note">Compare the name and photo on the card with the person presenting it.</p>
+              <p className="note">Compare this photo and name with the person presenting the card.</p>
             </>) : (<>
               <h1 style={{ fontSize: 'clamp(1.8rem,5vw,2.4rem)' }}>Card not recognised</h1>
               <p className="lead">No FORGE30 student card matches this code. It may be invalid or forged.</p>

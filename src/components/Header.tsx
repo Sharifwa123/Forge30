@@ -31,11 +31,12 @@ export default function Header({ open }: { open: boolean }) {
       <header className="hdr">
         <div className="wrap row">
           <Link href="/" className="brand" aria-label="FORGE30 by SHARIF TECHNOLOGIES — home" onClick={() => setMenu(false)}>
-            <Image src="/brand/sharif-logo-512.png" alt="SHARIF TECHNOLOGIES" width={40} height={40} priority />
+            <Image unoptimized src="/brand/sharif-logo.png" alt="SHARIF TECHNOLOGIES" width={44} height={44} priority />
             <span>FORGE30<small>SHARIF TECHNOLOGIES</small></span>
           </Link>
           <nav className="nav" aria-label="Main">
             {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} aria-current={active === id}>{t}</a>)}
+            <Link className="l" href="/status">Dashboard</Link>
             <Link className="btn btn-amber" href="/apply">{open ? 'APPLY' : 'DASHBOARD'}</Link>
           </nav>
           <button className="burger" aria-label={menu ? 'Close menu' : 'Open menu'} aria-expanded={menu} aria-controls="drawer" onClick={() => setMenu((m) => !m)}>
@@ -46,8 +47,14 @@ export default function Header({ open }: { open: boolean }) {
         </div>
       </header>
       <div id="drawer" className={'drawer' + (menu ? ' open' : '')} aria-hidden={!menu} inert={!menu}>
-        {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} onClick={() => setMenu(false)}>{t}</a>)}
         <Link className="btn btn-amber" href="/apply" onClick={() => setMenu(false)}>{open ? 'APPLY FOR FORGE30' : 'STUDENT DASHBOARD'}</Link>
+        <div className="dlabel">The program</div>
+        {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} onClick={() => setMenu(false)}>{t}</a>)}
+        <div className="dlabel">Students</div>
+        <Link className="l" href="/status" onClick={() => setMenu(false)}>Student dashboard</Link>
+        <Link className="l" href="/dashboard/project" onClick={() => setMenu(false)}>My project</Link>
+        <div className="dlabel">More</div>
+        <Link className="l" href="/privacy" onClick={() => setMenu(false)}>Privacy notice</Link>
       </div>
     </>
   );

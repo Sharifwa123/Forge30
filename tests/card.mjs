@@ -80,15 +80,33 @@ ok((await fetch(`${BASE}/api/admin/photo/${id}`)).status === 401, 'admin photo r
 r = await fetch(`${BASE}/api/admin/photo/${id}`, { headers: A }); const stored = Buffer.from(await r.arrayBuffer()); const sm = await sharp(stored).metadata();
 ok(r.status === 200 && sm.width === 480 && sm.height === 600 && !sm.exif, 'stored photo normalised to 480×600 with EXIF stripped');
 
+// photo policy: first upload free, ONE change, then locked until an admin verifies ID
+r = await photoTest(jpeg); ok(r.status === 200 && (await r.json()).changesLeft === 0, 'photo: the one allowed change succeeds (0 left)');
+r = await photoTest(jpeg); j = await r.json(); ok(r.status === 403 && j.locked && /legal document/.test(j.error), 'photo: a second change is refused and asks for a legal document');
+ok((await fetch(`${BASE}/api/admin/photo-unlock`, { method: 'POST', headers: J, body: JSON.stringify({ id: Number(id), idChecked: 'Ghana Card' }) })).status === 401, 'photo unlock requires admin');
+ok((await fetch(`${BASE}/api/admin/photo-unlock`, { method: 'POST', headers: { ...J, ...A }, body: JSON.stringify({ id: Number(id) }) })).status === 400, 'photo unlock requires naming the document verified');
+ok((await fetch(`${BASE}/api/admin/photo-unlock`, { method: 'POST', headers: { ...J, ...A }, body: JSON.stringify({ id: Number(id), idChecked: 'Ghana Card' }) })).status === 200, 'admin unlocks one more change after ID check');
+ok((await photoTest(jpeg)).status === 200, 'photo: change works after unlock');
+ok((await photoTest(jpeg)).status === 403, 'photo: locked again after using the unlock');
+const det3 = strip(await (await fetch(`${BASE}/admin/applicants/${id}`, { headers: A })).text()); ok(/Photo changes used:\s*3\s*of\s*3/.test(det3.replace(/\s+/g, ' ')) || det3.includes('(locked)'), 'admin sees photo change count and locked state');
+// 3D showcase + both faces
+r = await img('3d'); { const b = Buffer.from(await r.arrayBuffer()); const m = await sharp(b).metadata().catch(() => ({})); ok(r.status === 200 && m.width === 1600 && m.height === 1000, '3D showcase: 1600×1000 PNG'); writeFileSync(`${OUT}/card-3d.png`, b); }
+r = await img('front'); writeFileSync(`${OUT}/card-front.png`, Buffer.from(await r.arrayBuffer()));
+// public verify photo
+r = await fetch(`${BASE}/api/verify/photo/${serial}`); ok(r.status === 200 && r.headers.get('content-type') === 'image/jpeg', 'verify photo served for an active card');
+ok((await fetch(`${BASE}/api/verify/photo/AAAA-BBBB-CCCC`)).status === 404, 'verify photo: unknown serial 404');
+ok((await fetch(`${BASE}/api/verify/photo/x'%20OR%201=1`)).status === 404, 'verify photo: malformed serial rejected');
+
 // verification
-let v = await (await fetch(`${BASE}/verify/${serial}`)).text(); ok(v.includes('Valid FORGE30 student card') && v.includes('Akosua Boateng-Owusu') && !v.includes(app.about.email) && !v.includes(app.about.phone), 'verify page: valid, shows name only (no contact details)');
+let v = await (await fetch(`${BASE}/verify/${serial}`)).text(); ok(v.includes('Valid FORGE30 student card') && v.includes('Akosua Boateng-Owusu') && v.includes(`/api/verify/photo/${serial}`) && !v.includes(app.about.email) && !v.includes(app.about.phone), 'verify page: valid, shows name + photo, no contact details');
 v = await (await fetch(`${BASE}/verify/AAAA-BBBB-CCCC`)).text(); ok(v.includes('Card not recognised'), 'verify page: unknown serial');
 v = await (await fetch(`${BASE}/verify/'%20OR%201=1--`)).text(); ok(v.includes('Card not recognised'), 'verify page: injection string safely rejected');
 
 // revocation
 await fetch(`${BASE}/api/admin/applicants/${id}`, { method: 'PATCH', headers: { ...J, ...A }, body: JSON.stringify({ status: 'withdrawn' }) });
 ok((await img()).status === 403, 'card stops rendering once status is no longer Confirmed');
-v = await (await fetch(`${BASE}/verify/${serial}`)).text(); ok(v.includes('no longer active'), 'verify page shows card inactive after withdrawal');
+v = await (await fetch(`${BASE}/verify/${serial}`)).text(); ok(v.includes('no longer active') && !v.includes('/api/verify/photo/'), 'verify page shows card inactive (no photo) after withdrawal');
+ok((await fetch(`${BASE}/api/verify/photo/${serial}`)).status === 404, 'verify photo hidden once card is inactive');
 await fetch(`${BASE}/api/admin/applicants/${id}`, { method: 'PATCH', headers: { ...J, ...A }, body: JSON.stringify({ status: 'confirmed' }) });
 ok((await img()).status === 200, 'card works again after re-confirmation');
 // sign out
