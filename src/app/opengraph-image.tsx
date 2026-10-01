@@ -7,7 +7,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default async function Image() {
-  const logo = 'data:image/png;base64,' + (await readFile(join(process.cwd(), 'public/brand/sharif-logo-512.png'))).toString('base64');
+  const logo = 'data:image/png;base64,' + (await readFile(join(process.cwd(), 'public/brand/sharif-logo.png'))).toString('base64');
   return new ImageResponse(
     (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 70, background: '#071230', color: '#fff', backgroundImage: 'linear-gradient(135deg,#071230 55%,#1e5ecf 140%)' }}>

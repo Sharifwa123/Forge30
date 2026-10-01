@@ -37,3 +37,6 @@ export async function cardByRef(ref: string) {
   const [r] = await q<CardRow>(`SELECT ref, name, student_id, serial, seat, group_label, session_time, status, photo IS NOT NULL AS has_photo, confirmed_at, data FROM applications WHERE ref=$1`, [ref]);
   return r;
 }
+
+/** Replacements a student may still make: 1 free change after the first upload, plus any an admin granted after ID verification. */
+export const photoChangesLeft = (r: { photo_changes: number; photo_allow: number }) => 1 + (r.photo_allow ?? 0) - (r.photo_changes ?? 0);

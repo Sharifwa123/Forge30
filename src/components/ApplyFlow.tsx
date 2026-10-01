@@ -276,7 +276,7 @@ export default function ApplyFlow({ open, notice }: { open: boolean; notice: str
 function Top() {
   return (
     <header className="hdr"><div className="wrap row">
-      <Link href="/" className="brand" aria-label="FORGE30 home"><Image src="/brand/sharif-logo-512.png" alt="SHARIF TECHNOLOGIES" width={40} height={40} /><span>FORGE30<small>SHARIF TECHNOLOGIES</small></span></Link>
+      <Link href="/" className="brand" aria-label="FORGE30 home"><Image unoptimized src="/brand/sharif-logo.png" alt="SHARIF TECHNOLOGIES" width={44} height={44} /><span>FORGE30<small>SHARIF TECHNOLOGIES</small></span></Link>
       <Link href="/" style={{ color: '#d6e1fa', fontWeight: 600, textDecoration: 'none' }}>✕ Exit</Link>
     </div></header>
   );

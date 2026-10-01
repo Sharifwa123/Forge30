@@ -7,7 +7,6 @@ import { q } from '@/lib/db';
 import { cardByRef, readCardToken } from '@/lib/card';
 import { rateLimit } from '@/lib/security';
 import { getSettings } from '@/lib/settings';
-import { SITE } from '@/lib/content';
 
 export const runtime = 'nodejs';
 const W = 1012, H = 638; // CR80 (3.375 x 2.125 in) at 300 dpi
@@ -27,12 +26,15 @@ export async function GET(req: Request) {
   const [ph] = await q<{ photo: Buffer | null }>('SELECT photo FROM applications WHERE ref=$1', [ref]);
   if (!ph?.photo) return NextResponse.json({ error: 'Upload your passport photo first.' }, { status: 409 });
 
-  const side = u.searchParams.get('side') === 'back' ? 'back' : 'front';
+  const sideParam = u.searchParams.get('side');
+  const side = sideParam === 'back' ? 'back' : sideParam === '3d' ? '3d' : 'front';
+  const h = req.headers;
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL || `${h.get('x-forwarded-proto') || 'https'}://${h.get('x-forwarded-host') || h.get('host')}`).replace(/\/$/, '');
   const s = await getSettings();
   const [logo, sans, bold, mono, serif, qr] = await Promise.all([
-    asset('public/brand/sharif-logo-512.png'), asset('src/assets/fonts/LiberationSans-Regular.ttf'), asset('src/assets/fonts/LiberationSans-Bold.ttf'),
+    asset('public/brand/sharif-logo.png'), asset('src/assets/fonts/LiberationSans-Regular.ttf'), asset('src/assets/fonts/LiberationSans-Bold.ttf'),
     asset('src/assets/fonts/LiberationMono-Bold.ttf'), asset('src/assets/fonts/LiberationSerif-Italic.ttf'),
-    QRCode.toBuffer(`${SITE.url}/verify/${c.serial}`, { margin: 1, width: 360, errorCorrectionLevel: 'M', color: { dark: NAVY, light: '#ffffff' } }),
+    QRCode.toBuffer(`${origin}/verify/${c.serial}`, { margin: 1, width: 360, errorCorrectionLevel: 'M', color: { dark: NAVY, light: '#ffffff' } }),
   ]);
   const logoUri = dataUri(logo, 'image/png'), qrUri = dataUri(qr, 'image/png');
   const cohortDates = TBD.test(s.cohortDates) ? '' : s.cohortDates;
@@ -53,19 +55,19 @@ export async function GET(req: Request) {
       <div style={{ position: 'absolute', display: 'flex', right: -220, top: -280, width: 640, height: 640, borderRadius: 320, background: 'rgba(30,94,207,0.35)' }} />
       <div style={{ position: 'absolute', display: 'flex', right: -60, top: -120, width: 360, height: 360, borderRadius: 180, border: '2px solid rgba(255,255,255,0.12)' }} />
       <div style={{ position: 'absolute', display: 'flex', left: 0, top: 0, bottom: 0, width: 14, background: AMBER }} />
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '34px 44px 0 58px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '26px 44px 0 58px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoUri} width={68} height={68} alt="" style={{ borderRadius: 34 }} />
-            <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 18 }}>
+            <img src={logoUri} width={88} height={88} alt="" style={{ borderRadius: 44 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20 }}>
               <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>FORGE<span style={{ color: AMBER }}>30</span></div>
               <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES DEVELOPER FORGE</div>
             </div>
           </div>
           <div style={{ display: 'flex', background: AMBER, color: '#2a1c00', fontWeight: 700, fontSize: 16, letterSpacing: 3, padding: '9px 18px', borderRadius: 999 }}>STUDENT ID CARD</div>
         </div>
-        <div style={{ display: 'flex', marginTop: 26 }}>
+        <div style={{ display: 'flex', marginTop: 22 }}>
           <div style={{ display: 'flex', width: 236, height: 296, padding: 6, borderRadius: 18, background: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.45)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUri(ph.photo, 'image/jpeg')} width={224} height={284} alt="" style={{ borderRadius: 13, objectFit: 'cover' }} />
@@ -105,7 +107,7 @@ export async function GET(req: Request) {
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 52px' }}>
         <div style={{ display: 'flex', alignItems: 'center', height: 92 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoUri} width={58} height={58} alt="" style={{ borderRadius: 29 }} />
+          <img src={logoUri} width={72} height={72} alt="" style={{ borderRadius: 36 }} />
           <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, color: '#fff' }}>
             <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>SHARIF TECHNOLOGIES</div>
             <div style={{ display: 'flex', fontSize: 13, letterSpacing: 4, color: '#9db5e8', marginTop: 5, fontWeight: 700 }}>FORGE30 · DEVELOPER FORGE</div>
@@ -137,14 +139,41 @@ export async function GET(req: Request) {
     </div>
   );
 
-  const res = new ImageResponse(side === 'back' ? back : front, {
-    width: W, height: H,
-    fonts: [
-      { name: 'Sans', data: sans, weight: 400, style: 'normal' }, { name: 'Sans', data: bold, weight: 700, style: 'normal' },
-      { name: 'Mono', data: mono, weight: 700, style: 'normal' }, { name: 'Serif', data: serif, weight: 400, style: 'italic' },
-    ],
-    headers: { 'Cache-Control': 'private, no-store' },
-  });
+  const fonts = [
+    { name: 'Sans', data: sans, weight: 400 as const, style: 'normal' as const }, { name: 'Sans', data: bold, weight: 700 as const, style: 'normal' as const },
+    { name: 'Mono', data: mono, weight: 700 as const, style: 'normal' as const }, { name: 'Serif', data: serif, weight: 400 as const, style: 'italic' as const },
+  ];
+  const headers = { 'Cache-Control': 'private, no-store' };
+  const png = async (el: React.ReactElement) => Buffer.from(await new ImageResponse(el, { width: W, height: H, fonts }).arrayBuffer());
+
+  let res: ImageResponse;
+  if (side === '3d') {
+    // 3D-style showcase: both faces of the real card, slanted with depth and shadow, for sharing.
+    const [f, b] = await Promise.all([png(front), png(back)]);
+    const fu = dataUri(f, 'image/png'), bu = dataUri(b, 'image/png');
+    const tilt = 'skew(-10deg, 3deg)';
+    res = new ImageResponse((
+      <div style={{ width: 1600, height: 1000, display: 'flex', position: 'relative', overflow: 'hidden', fontFamily: 'Sans', color: '#fff', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, #0b2257 60%, #1e5ecf 150%)` }}>
+        <div style={{ position: 'absolute', display: 'flex', left: -200, bottom: -300, width: 900, height: 900, borderRadius: 450, background: 'rgba(30,94,207,0.28)' }} />
+        <div style={{ position: 'absolute', display: 'flex', right: -150, top: -250, width: 700, height: 700, borderRadius: 350, border: '2px solid rgba(255,255,255,0.1)' }} />
+        <div style={{ position: 'absolute', display: 'flex', left: 520, top: 300, width: 900, transform: `rotate(7deg) ${tilt}`, opacity: 0.92, boxShadow: '0 40px 80px rgba(0,0,0,0.55)', borderRadius: 26 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={bu} width={900} height={567} alt="" style={{ borderRadius: 26 }} />
+        </div>
+        <div style={{ position: 'absolute', display: 'flex', left: 150, top: 150, width: 960, transform: `rotate(-9deg) ${tilt}`, boxShadow: '-30px 50px 90px rgba(0,0,0,0.6)', borderRadius: 28 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={fu} width={960} height={605} alt="" style={{ borderRadius: 28 }} />
+        </div>
+        <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', left: 70, bottom: 56 }}>
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: 6, color: AMBER, fontWeight: 700 }}>FORGE30 · SHARIF TECHNOLOGIES</div>
+          <div style={{ display: 'flex', fontSize: 54, fontWeight: 700, marginTop: 6 }}>{c.name}</div>
+          <div style={{ display: 'flex', fontFamily: 'Mono', fontSize: 30, fontWeight: 700, color: '#9db5e8', marginTop: 4, letterSpacing: 2 }}>{c.student_id}</div>
+        </div>
+      </div>
+    ), { width: 1600, height: 1000, fonts, headers });
+  } else {
+    res = new ImageResponse(side === 'back' ? back : front, { width: W, height: H, fonts, headers });
+  }
   if (u.searchParams.get('dl')) res.headers.set('Content-Disposition', `attachment; filename="forge30-student-card-${c.student_id}-${side}.png"`);
   return res;
 }

@@ -30,6 +30,8 @@ for (const [name, opts] of Object.entries(VIEWS)) {
   const small = await page.evaluate(() => [...document.querySelectorAll('a.btn,button,.chip,input,select,textarea')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.height < 32 && getComputedStyle(e).opacity !== '0' && e.type !== 'range' && e.type !== 'checkbox'; }).length);
   ok(small === 0, `${name}: no undersized tap targets (${small})`);
 
+  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10000, `${name}: page length is reasonable (${hgt}px)`);
+  ok(await page.evaluate(() => [...document.querySelectorAll('[data-anim]')].every((e) => e.classList.contains('in'))), `${name}: every scroll animation fired (nothing left hidden)`);
   // interactions
   await page.locator('#journey .chip').nth(4).click();
   ok((await page.locator('#stage-panel h3').innerText()) === 'Backend', `${name}: journey stage click reveals Backend`);
@@ -37,6 +39,7 @@ for (const [name, opts] of Object.entries(VIEWS)) {
   ok((await page.locator('#stage-panel h3').innerText()) === 'Data', `${name}: journey keyboard arrow`);
   await page.locator('.days button').nth(9).scrollIntoViewIfNeeded(); await page.locator('.days button').nth(9).click();
   ok(/20/.test(await page.locator('#commitment [aria-live]').first().innerText()), `${name}: commitment counter shows 20 hours after day 10`);
+  await page.getByRole('tab', { name: 'What you need' }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: 'What you need' }).click();
   await page.getByRole('button', { name: 'macOS' }).click();
   ok(/Mac laptops/.test(await page.locator('#delivery').innerText()), `${name}: device selector macOS`);
   await page.getByRole('button', { name: 'No computer' }).click();
@@ -54,6 +57,8 @@ for (const [name, opts] of Object.entries(VIEWS)) {
     ok(await page.locator('.sticky.show').count() === 1, `${name}: sticky mobile CTA appears after hero`);
     await page.locator('.burger').click(); await page.waitForTimeout(300);
     ok(await page.locator('.drawer.open a.btn').isVisible(), `${name}: mobile nav drawer opens with Apply`);
+    const dtxt = await page.locator('.drawer.open').innerText(); ok(['Student dashboard', 'My project', 'FAQ', 'Final Project', 'Privacy notice'].every((t) => dtxt.includes(t)), `${name}: hamburger holds all links incl. Student dashboard`);
+    const top = await page.locator('.drawer.open a.btn').evaluate((e) => e.getBoundingClientRect().top); ok(top < 140, `${name}: Apply sits at the top of the menu (${Math.round(top)}px)`);
     await page.screenshot({ path: `${OUT}/${name}-drawer.png` });
     await page.locator('.drawer.open a.l').nth(2).click(); await page.waitForTimeout(400);
     ok(await page.locator('.drawer.open').count() === 0, `${name}: drawer closes on navigate`);

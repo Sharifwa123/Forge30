@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { q } from '@/lib/db';
-import { cardByRef, readCardToken } from '@/lib/card';
+import { cardByRef, readCardToken, photoChangesLeft } from '@/lib/card';
 import { rateLimit, sameOrigin } from '@/lib/security';
 
 export const runtime = 'nodejs';
@@ -15,6 +15,8 @@ export async function POST(req: Request) {
     if (!ref) return NextResponse.json({ error: 'Your session expired. Look up your status again.' }, { status: 401 });
     const c = await cardByRef(ref);
     if (!c || c.status !== 'confirmed' || !c.student_id) return NextResponse.json({ error: 'Student cards are available once your place is confirmed.' }, { status: 403 });
+    const [pc] = await q<{ has: boolean; photo_changes: number; photo_allow: number }>('SELECT photo IS NOT NULL AS has, photo_changes, photo_allow FROM applications WHERE ref=$1', [ref]);
+    if (pc.has && photoChangesLeft(pc) <= 0) return NextResponse.json({ error: 'Your photo is locked. To change it, present a legal document or card showing your photo to SHARIF TECHNOLOGIES so an administrator can verify you and unlock one more change.', locked: true }, { status: 403 });
     const file = form!.get('photo');
     if (!(file instanceof File) || file.size === 0) return NextResponse.json({ error: 'Choose a photo first.' }, { status: 400 });
     if (file.size > 8 * 1024 * 1024) return NextResponse.json({ error: 'That photo is too large (max 8 MB).' }, { status: 413 });
@@ -27,8 +29,8 @@ export async function POST(req: Request) {
       if ((meta.width || 0) < 200 || (meta.height || 0) < 200) return NextResponse.json({ error: 'That photo is too small. Use a clear photo at least 200×200 pixels.' }, { status: 422 });
       out = await img.resize(480, 600, { fit: 'cover', position: 'attention' }).jpeg({ quality: 86 }).toBuffer();
     } catch { return NextResponse.json({ error: 'We could not read that file. Use a JPG, PNG or WebP photo.' }, { status: 422 }); }
-    await q('UPDATE applications SET photo=$2, photo_at=now() WHERE ref=$1', [ref, out]);
-    return NextResponse.json({ ok: true });
+    await q('UPDATE applications SET photo=$2, photo_at=now(), photo_changes = photo_changes + $3 WHERE ref=$1', [ref, out, pc.has ? 1 : 0]);
+    return NextResponse.json({ ok: true, changesLeft: photoChangesLeft({ photo_changes: pc.photo_changes + (pc.has ? 1 : 0), photo_allow: pc.photo_allow }) });
   } catch (e) {
     console.error('photo failed', e);
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
