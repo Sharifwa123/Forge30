@@ -134,18 +134,19 @@ function Flip3D({ front, back, alt }: { front: string; back: string; alt: string
 function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { token: string; hasPhoto: boolean; studentId: string; changesLeft: number }) {
   const [photo, setPhoto] = useState(hasPhoto); const [v, setV] = useState(Date.now()); const [left, setLeft] = useState(initialLeft);
   const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
-  const input = useRef<HTMLInputElement>(null);
+  const input = useRef<HTMLInputElement>(null); const camera = useRef<HTMLInputElement>(null);
   const locked = photo && left <= 0;
-  async function upload(f: File | undefined) {
+  async function upload(f: File | undefined, from: React.RefObject<HTMLInputElement | null>) {
+    const reset = () => { if (from.current) from.current.value = ''; };
     if (!f) return;
-    if (photo && !confirm(`You can change your photo only ${left === 1 ? 'once' : left + ' more times'}. After that it is locked, and any further change needs a legal document or card with your photo verified by SHARIF TECHNOLOGIES.\n\nChange it now?`)) { if (input.current) input.current.value = ''; return; }
+    if (photo && !confirm(`You can change your photo only ${left === 1 ? 'once' : left + ' more times'}. After that it is locked, and any further change needs a legal document or card with your photo verified by SHARIF TECHNOLOGIES.\n\nChange it now?`)) { reset(); return; }
     setBusy(true); setErr('');
     try {
       const fd = new FormData(); fd.append('token', token); fd.append('photo', await shrink(f), 'photo.jpg');
       const r = await fetch('/api/card/photo', { method: 'POST', body: fd }); const j = await r.json().catch(() => ({}));
       if (r.ok) { if (photo) setLeft(j.changesLeft ?? left - 1); setPhoto(true); setV(Date.now()); } else { setErr(j.error || 'Upload failed. Try again.'); if (j.locked) setLeft(0); }
     } catch { setErr('Network problem. Check your connection and try again.'); }
-    setBusy(false); if (input.current) input.current.value = '';
+    setBusy(false); reset();
   }
   const url = (sd: string, dl = false) => `/api/card/image?t=${encodeURIComponent(token)}&side=${sd}${dl ? '&dl=1' : ''}&v=${v}`;
   return (
@@ -153,7 +154,9 @@ function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { t
       <div className="eyebrow">Student card · {studentId}</div>
       <h2 style={{ fontSize: '1.5rem' }}>{photo ? 'Your FORGE30 student card' : 'Add your passport photo to create your card'}</h2>
       {!photo && <p style={{ color: 'var(--muted)' }}>Use a clear, front-facing passport-style photo: plain background, face fully visible, no sunglasses or hat. <b>Choose carefully: you can change it only once afterwards.</b> Your photo appears on your card, and is shown to anyone who scans your card’s QR code so they can match it to you.</p>}
-      <input ref={input} type="file" accept="image/*" capture="user" hidden onChange={(e) => upload(e.target.files?.[0])} id="photo-input" />
+      {/* Two inputs: one opens the camera, the other opens the gallery / file picker (no `capture`). */}
+      <input ref={camera} type="file" accept="image/*" capture="user" hidden onChange={(e) => upload(e.target.files?.[0], camera)} id="photo-camera" />
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/*" hidden onChange={(e) => upload(e.target.files?.[0], input)} id="photo-file" />
       {photo && (<>
         <Flip3D front={url('front')} back={url('back')} alt="Student card" />
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
@@ -165,7 +168,15 @@ function CardPanel({ token, hasPhoto, studentId, changesLeft: initialLeft }: { t
       </>)}
       {locked && <div className="info amber" style={{ marginTop: 14 }}><b>Your photo is locked</b><p style={{ margin: 0 }}>You have used your photo change. To change it again, present a legal document or card showing your photo (for example a Ghana Card, passport or driver’s licence) to SHARIF TECHNOLOGIES. An administrator will verify you and unlock one more change.</p></div>}
       {err && <div className="error" role="alert" style={{ marginTop: 10 }}>⚠ {err}</div>}
-      {!locked && <div style={{ marginTop: 14 }}><button className={'btn ' + (photo ? 'btn-line' : 'btn-primary')} disabled={busy} onClick={() => input.current?.click()}>{busy ? 'UPLOADING…' : photo ? 'CHANGE PHOTO' : 'TAKE OR CHOOSE PHOTO'}</button>{photo && <span style={{ marginLeft: 12, color: 'var(--muted)', fontWeight: 600 }}>{left === 1 ? '1 change left' : `${left} changes left`}</span>}</div>}
+      {!locked && (
+        <div style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className={'btn ' + (photo ? 'btn-line' : 'btn-primary')} disabled={busy} onClick={() => camera.current?.click()}>{busy ? 'UPLOADING…' : photo ? 'TAKE NEW PHOTO' : 'TAKE PHOTO'}</button>
+            <button className="btn btn-line" disabled={busy} onClick={() => input.current?.click()}>{photo ? 'CHOOSE FROM FILES' : 'CHOOSE FROM GALLERY / FILES'}</button>
+          </div>
+          {photo && <p style={{ margin: '10px 0 0', color: 'var(--muted)', fontWeight: 600 }}>{left === 1 ? '1 change left' : `${left} changes left`}</p>}
+        </div>
+      )}
     </section>
   );
 }
