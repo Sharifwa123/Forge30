@@ -86,9 +86,9 @@ if (PW) {
   ok(r.status === 200, 'admin closes applications');
   r = await post('/api/apply', valid({ about: { ...valid().about, email: `late${uniq}@example.com`, phone: '028' + uniq.slice(0, 7) } }));
   ok(r.status === 403, 'submission refused while applications closed');
-  ok((await (await fetch(BASE + '/')).text()).includes('APPLICATIONS CLOSED'), 'landing page reflects closed state');
+  { const h = await (await fetch(BASE + '/')).text(); ok(h.includes('Applications are closed for now') && !h.includes('APPLY FOR THE COHORT'), 'landing page reflects closed state (note shown, apply button replaced)'); ok(!/APPLICATIONS (OPEN|CLOSED)/.test(h), 'no status badge is rendered'); }
   await post('/api/admin/settings', { applicationsOpen: true }, A);
-  ok((await (await fetch(BASE + '/')).text()).includes('APPLICATIONS OPEN'), 'applications re-opened');
+  { const h = await (await fetch(BASE + '/')).text(); ok(h.includes('APPLY FOR THE COHORT') && !h.includes('Applications are closed for now'), 'applications re-opened (apply button back, no closed note)'); }
   const forged = await fetch(BASE + '/admin', { headers: { Cookie: 'f30_admin=9999999999.abc.forged' }, redirect: 'manual' });
   ok(forged.status === 307, 'forged session cookie rejected');
 }

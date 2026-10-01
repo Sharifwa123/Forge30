@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-const LINKS = [['/#program', 'Programme', 'program'], ['/#how', 'How it works', 'how'], ['/#project', 'Project', 'project'], ['/#faq', 'FAQ', 'faq']] as const;
+const LINKS = [['/#program', 'The Program', 'program'], ['/#journey', '30 Days', 'journey'], ['/#project', 'Final Project', 'project'], ['/#faq', 'FAQ', 'faq']] as const;
 
 export default function Header({ open }: { open: boolean }) {
   const [menu, setMenu] = useState(false);
@@ -48,7 +48,7 @@ export default function Header({ open }: { open: boolean }) {
       </header>
       <div id="drawer" className={'drawer' + (menu ? ' open' : '')} aria-hidden={!menu} inert={!menu}>
         <Link className="btn btn-amber" href="/apply" onClick={() => setMenu(false)}>{open ? 'APPLY FOR FORGE30' : 'STUDENT DASHBOARD'}</Link>
-        <div className="dlabel">The programme</div>
+        <div className="dlabel">The program</div>
         {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} onClick={() => setMenu(false)}>{t}</a>)}
         <div className="dlabel">Students</div>
         <Link className="l" href="/status" onClick={() => setMenu(false)}>Student dashboard</Link>
