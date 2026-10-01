@@ -1,3 +1,5 @@
+import { normalizeOrigin } from './site';
+
 export const SITE = {
   name: 'FORGE30',
   org: 'SHARIF TECHNOLOGIES',
@@ -6,7 +8,7 @@ export const SITE = {
   slogan: 'Knowledge Is Power',
   description:
     'FORGE30 is an intensive, live 30-day developer program by SHARIF TECHNOLOGIES: 60 hours of practical software-development training for committed beginners, ending in a real project you present on Day 30.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://forge30.example.com',
+  url: normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL) ?? 'https://forge30.example.com',
 };
 
 export const STAGES = [

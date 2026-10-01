@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import { q } from '@/lib/db';
 import { cardByRef, readCardToken } from '@/lib/card';
 import { rateLimit } from '@/lib/security';
+import { siteOrigin } from '@/lib/site';
 import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
@@ -29,12 +30,12 @@ export async function GET(req: Request) {
   const sideParam = u.searchParams.get('side');
   const side = sideParam === 'back' ? 'back' : sideParam === '3d' ? '3d' : 'front';
   const h = req.headers;
-  const origin = (process.env.NEXT_PUBLIC_SITE_URL || `${h.get('x-forwarded-proto') || 'https'}://${h.get('x-forwarded-host') || h.get('host')}`).replace(/\/$/, '');
+  const origin = siteOrigin(h);
   const s = await getSettings();
   const [logo, sans, bold, mono, serif, qr] = await Promise.all([
     asset('public/brand/sharif-logo.png'), asset('src/assets/fonts/LiberationSans-Regular.ttf'), asset('src/assets/fonts/LiberationSans-Bold.ttf'),
     asset('src/assets/fonts/LiberationMono-Bold.ttf'), asset('src/assets/fonts/LiberationSerif-Italic.ttf'),
-    QRCode.toBuffer(`${origin}/verify/${c.serial}`, { margin: 1, width: 360, errorCorrectionLevel: 'M', color: { dark: NAVY, light: '#ffffff' } }),
+    QRCode.toBuffer(`${origin}/v/${c.serial}`, { margin: 2, width: 560, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } }),
   ]);
   const logoUri = dataUri(logo, 'image/png'), qrUri = dataUri(qr, 'image/png');
   const cohortDates = TBD.test(s.cohortDates) ? '' : s.cohortDates;
@@ -83,9 +84,9 @@ export async function GET(req: Request) {
             <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, marginTop: 2 }}>{s.cohortName}{cohortDates ? ` · ${cohortDates}` : ''}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: 'auto' }}>
-            <div style={{ display: 'flex', background: '#fff', padding: 8, borderRadius: 12 }}>
+            <div style={{ display: 'flex', background: '#fff', padding: 6, borderRadius: 12 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrUri} width={132} height={132} alt="" />
+              <img src={qrUri} width={168} height={168} alt="" />
             </div>
             <div style={{ display: 'flex', fontSize: 12, letterSpacing: 2, color: '#9db5e8', marginTop: 8, fontWeight: 700 }}>SCAN TO VERIFY</div>
           </div>
