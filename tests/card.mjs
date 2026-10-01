@@ -1,5 +1,6 @@
 // Student card / dashboard lifecycle. BASE=... ADMIN_PASSWORD=... node tests/card.mjs
 import sharp from 'sharp';
+import jsQR from 'jsqr';
 import { writeFileSync } from 'node:fs';
 const BASE = process.env.BASE || 'http://localhost:3000', PW = process.env.ADMIN_PASSWORD, OUT = process.env.OUT || '/tmp/shots';
 let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
@@ -94,6 +95,15 @@ const det3 = strip(await (await fetch(`${BASE}/admin/applicants/${id}`, { header
 // 3D showcase + both faces
 r = await img('3d'); { const b = Buffer.from(await r.arrayBuffer()); const m = await sharp(b).metadata().catch(() => ({})); ok(r.status === 200 && m.width === 1600 && m.height === 1000, '3D showcase: 1600×1000 PNG'); writeFileSync(`${OUT}/card-3d.png`, b); }
 r = await img('front'); writeFileSync(`${OUT}/card-front.png`, Buffer.from(await r.arrayBuffer()));
+// the QR on the card, decoded from the real PNG, must be a clean absolute https/http URL that goes to the verify page
+for (const side of ['front', 'back']) {
+  const { data, info } = await sharp(Buffer.from(await (await img(side)).arrayBuffer())).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const qr = jsQR(new Uint8ClampedArray(data), info.width, info.height);
+  ok(!!qr && /^https?:\/\/[^\s/]+\/v\/[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(qr.data) && qr.data.endsWith('/v/' + serial), `QR on card ${side} decodes to a clean absolute link: ${qr?.data}`);
+}
+r = await fetch(`${BASE}/v/${serial}`, { redirect: 'manual' }); ok(r.status === 307 && r.headers.get('location').endsWith('/verify/' + serial), 'short link /v/<serial> redirects to the verify page');
+ok((await fetch(`${BASE}/v/bad`, { redirect: 'manual' })).status === 404, 'short link rejects malformed serial');
+ok((await fetch(`${BASE}/scan`)).status === 200, 'scan page available');
 // public verify photo
 r = await fetch(`${BASE}/api/verify/photo/${serial}`); ok(r.status === 200 && r.headers.get('content-type') === 'image/jpeg', 'verify photo served for an active card');
 ok((await fetch(`${BASE}/api/verify/photo/AAAA-BBBB-CCCC`)).status === 404, 'verify photo: unknown serial 404');

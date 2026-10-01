@@ -54,6 +54,7 @@ export default function Header({ open }: { open: boolean }) {
         <Link className="l" href="/status" onClick={() => setMenu(false)}>Student dashboard</Link>
         <Link className="l" href="/dashboard/project" onClick={() => setMenu(false)}>My project</Link>
         <div className="dlabel">More</div>
+        <Link className="l" href="/scan" onClick={() => setMenu(false)}>Scan a student card</Link>
         <Link className="l" href="/privacy" onClick={() => setMenu(false)}>Privacy notice</Link>
       </div>
     </>
