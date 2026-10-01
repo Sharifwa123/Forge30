@@ -137,7 +137,7 @@ section { padding: clamp(40px, 7vw, 96px) 0; position: relative; }
 .commit-grid .panel { padding: 18px; font-weight: 700; display: flex; gap: 10px; align-items: flex-start; }
 .commit-grid .ic { color: var(--amber); font-size: 1.3rem; line-height: 1; }
 .days { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 18px 0 8px; }
-@media (max-width: 480px) { .days { grid-template-columns: repeat(6, 1fr); } }
+@media (max-width: 480px) { .days { grid-template-columns: repeat(10, 1fr); gap: 3px; } .days button { min-height: 34px; aspect-ratio: auto; font-size: .66rem; } .day30 .big { font-size: 4.2rem; margin-bottom: 8px; } }
 .days button { aspect-ratio: 1; min-height: 34px; border: 0; border-radius: 4px; background: rgba(255,255,255,.14); color: #fff; font: 700 .72rem var(--font); cursor: pointer; transition: background .15s; }
 .days button.on { background: var(--amber); color: #2a1c00; }
 .warn { border: 1px solid #ffffff55; background: rgba(0,0,0,.2); border-radius: var(--radius); padding: 18px 20px; }

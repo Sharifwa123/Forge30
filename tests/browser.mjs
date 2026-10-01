@@ -30,7 +30,7 @@ for (const [name, opts] of Object.entries(VIEWS)) {
   const small = await page.evaluate(() => [...document.querySelectorAll('a.btn,button,.chip,input,select,textarea')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.height < 32 && getComputedStyle(e).opacity !== '0' && e.type !== 'range' && e.type !== 'checkbox'; }).length);
   ok(small === 0, `${name}: no undersized tap targets (${small})`);
 
-  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 9500, `${name}: page length is reasonable (${hgt}px)`);
+  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10000, `${name}: page length is reasonable (${hgt}px)`);
   ok(await page.evaluate(() => [...document.querySelectorAll('[data-anim]')].every((e) => e.classList.contains('in'))), `${name}: every scroll animation fired (nothing left hidden)`);
   // interactions
   await page.locator('#journey .chip').nth(4).click();

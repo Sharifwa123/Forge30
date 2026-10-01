@@ -119,9 +119,9 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="organizer" className="tint">
+        <section id="organizer" className="tint" style={{ paddingBlock: 36 }}>
           <div className="wrap grid g2" style={{ gap: 28, alignItems: 'center' }}>
-            <div data-anim="fold"><div className="eyebrow">Who runs FORGE30</div><h2>Questions before you apply?</h2></div>
+            <div data-anim="fold"><div className="eyebrow">Who runs FORGE30</div><h2 style={{ marginBottom: 0 }}>Questions before you apply?</h2></div>
             <div data-anim="flip"><OrganizerCard o={s.organizer} /></div>
           </div>
         </section>
