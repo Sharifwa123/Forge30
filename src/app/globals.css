@@ -86,9 +86,6 @@ section { padding: clamp(40px, 7vw, 96px) 0; position: relative; }
 .cta-row .btn { flex: 1 1 220px; }
 @media (min-width: 720px) { .cta-row .btn { flex: 0 0 auto; } }
 @media (min-width: 980px) { .hero .wrap { grid-template-columns: 1.25fr .75fr; } }
-.badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--line-dark); border-radius: 999px; font-size: .82rem; font-weight: 700; letter-spacing: .05em; color: #d6e1fa; margin-bottom: 22px; }
-.dot { width: 9px; height: 9px; border-radius: 50%; background: #39d98a; }
-.dot.off { background: #ff6b5e; }
 
 /* Hero day-tracker (interactive) */
 .tracker { background: rgba(255,255,255,.06); border: 1px solid var(--line-dark); border-radius: 14px; padding: 22px; }

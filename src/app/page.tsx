@@ -25,7 +25,6 @@ export default async function Home() {
         <section id="hero" className="hero">
           <div className="wrap">
             <div>
-              <div className="badge"><span className={'dot' + (open ? '' : ' off')} aria-hidden /> {open ? 'APPLICATIONS OPEN' : 'APPLICATIONS CLOSED'}</div>
               <h1>FORGE<em>30</em></h1>
               <div className="sub">SHARIF TECHNOLOGIES Developer Forge</div>
               <p className="tag">30 days. 60 hours. Build for real.</p>
