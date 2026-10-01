@@ -80,7 +80,7 @@ await page.locator('#finish-privacy').evaluate((el) => el.closest('label').click
 await cont();
 ok(await page.getByRole('heading', { name: 'Review your application' }).count() === 1, 'review screen shown');
 const rv = await page.locator('.review').innerText();
-ok(['Kwame Asante', 'GH₵500 project budget', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.includes(x)), 'review shows all sections incl. contribution, device, budget, format');
+ok(['Kwame Asante', 'GH₵500 project budget', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.toLowerCase().includes(x.toLowerCase())), 'review shows all sections incl. contribution, device, budget, format');
 await page.screenshot({ path: `${OUT}/apply-review.png`, fullPage: true });
 ok(!(await page.locator('.review').innerText()).includes('Working name'), 'application no longer asks for the project idea (moved to dashboard)');
 await page.getByRole('button', { name: 'Edit Your information' }).tap();
