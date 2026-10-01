@@ -2,10 +2,8 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { Settings } from '@/lib/settings';
-import { useDialog } from '../Dialog';
 
 export default function SettingsForm({ s }: { s: Settings }) {
-  const { confirm } = useDialog();
   const [v, setV] = useState({ notice: s.notice, cohortName: s.cohortName, cohortDates: s.cohortDates, deliveryArrangement: s.deliveryArrangement, classArrangement: s.classArrangement });
   const [o, setO] = useState(s.organizer); const [ann, setAnn] = useState(''); const [msg, setMsg] = useState(''); const r = useRouter();
   async function post(body: object, ok = 'Saved') {
@@ -18,7 +16,7 @@ export default function SettingsForm({ s }: { s: Settings }) {
       <div className="panel">
         <h3>Applications</h3>
         <p><span className={'pill ' + (s.applicationsOpen ? 'selected' : 'not_selected')}>{s.applicationsOpen ? 'OPEN' : 'CLOSED'}</span></p>
-        <button className={'btn sm ' + (s.applicationsOpen ? 'btn-line' : 'btn-primary')} onClick={async () => { if (s.applicationsOpen && !(await confirm({ title: 'Close applications?', body: <p>New submissions will be refused and the landing page will show applications as closed. You can re-open them at any time.</p>, confirmLabel: 'Close applications', tone: 'danger' }))) return; post({ applicationsOpen: !s.applicationsOpen }, s.applicationsOpen ? 'Applications closed' : 'Applications opened'); }}>{s.applicationsOpen ? 'Close applications' : 'Re-open applications'}</button>
+        <button className={'btn sm ' + (s.applicationsOpen ? 'btn-line' : 'btn-primary')} onClick={() => { if (!s.applicationsOpen || confirm('Close applications? New submissions will be refused.')) post({ applicationsOpen: !s.applicationsOpen }, s.applicationsOpen ? 'Applications closed' : 'Applications opened'); }}>{s.applicationsOpen ? 'Close applications' : 'Re-open applications'}</button>
         <div className="field" style={{ marginTop: 20 }}><label htmlFor="notice">Application notice (shown publicly)</label><input id="notice" type="text" maxLength={500} value={v.notice} onChange={(e) => setV({ ...v, notice: e.target.value })} /></div>
       </div>
       <div className="panel">

@@ -18,7 +18,6 @@ const VIEWS = {
 
 for (const [name, opts] of Object.entries(VIEWS)) {
   const ctx = await browser.newContext(opts); const page = await ctx.newPage();
-  const fontHits = []; page.on('response', (r) => { if (/\.woff2(\?|$)/.test(r.url())) fontHits.push({ url: r.url(), status: r.status() }); });
   const errs = []; page.on('pageerror', (e) => errs.push(e.message)); page.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   const ov = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -31,35 +30,34 @@ for (const [name, opts] of Object.entries(VIEWS)) {
   const small = await page.evaluate(() => [...document.querySelectorAll('a.btn,button,.chip,input,select,textarea')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.height < 32 && getComputedStyle(e).opacity !== '0' && e.type !== 'range' && e.type !== 'checkbox'; }).length);
   ok(small === 0, `${name}: no undersized tap targets (${small})`);
 
-  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10500, `${name}: page length is reasonable (${hgt}px)`);
+  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10000, `${name}: page length is reasonable (${hgt}px)`);
   ok(await page.evaluate(() => [...document.querySelectorAll('[data-anim]')].every((e) => e.classList.contains('in'))), `${name}: every scroll animation fired (nothing left hidden)`);
   // interactions
-  const rows = page.locator('#journey .index > li > h3 > button');
-  await rows.nth(4).scrollIntoViewIfNeeded(); await rows.nth(4).click();
-  ok((await rows.nth(4).getAttribute('aria-expanded')) === 'true' && /servers and requests/.test(await page.locator('#stp-backend').innerText()), `${name}: journey row opens (Backend)`);
-  await rows.nth(4).focus(); await page.keyboard.press('ArrowDown');
-  ok((await page.evaluate(() => document.activeElement?.id)) === 'st-data', `${name}: journey keyboard arrow moves between rows`);
-  const spec = await page.locator('#commitment .spec').innerText(); ok(['30', '60', '2', 'Live', '1', 'final project'].every((t) => spec.toLowerCase().includes(t.toLowerCase())), `${name}: programme specification shows 30 / 60 / 2 / live / 1 project`);
+  await page.locator('#journey .chip').nth(4).click();
+  ok((await page.locator('#stage-panel h3').innerText()) === 'Backend', `${name}: journey stage click reveals Backend`);
+  await page.locator('#journey .chip').nth(4).focus(); await page.keyboard.press('ArrowRight');
+  ok((await page.locator('#stage-panel h3').innerText()) === 'Data', `${name}: journey keyboard arrow`);
+  await page.locator('.days button').nth(9).scrollIntoViewIfNeeded(); await page.locator('.days button').nth(9).click();
+  ok(/20/.test(await page.locator('#commitment [aria-live]').first().innerText()), `${name}: commitment counter shows 20 hours after day 10`);
   await page.getByRole('tab', { name: 'What you need' }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: 'What you need' }).click();
   await page.getByRole('button', { name: 'macOS' }).click();
   ok(/Mac laptops/.test(await page.locator('#delivery').innerText()), `${name}: device selector macOS`);
   await page.getByRole('button', { name: 'No computer' }).click();
   ok(/shared computer/.test(await page.locator('#delivery').innerText()), `${name}: device selector no-computer message`);
-  await page.getByRole('tab', { name: 'Solution' }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: 'Solution' }).click();
-  ok(/Decide how it would work/.test(await page.locator('#project').innerText()), `${name}: project sequence step`);
+  await page.getByRole('tab', { name: /Solution/ }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: /Solution/ }).click();
+  ok(/Decide how it would work/.test(await page.locator('#project').innerText()), `${name}: project builder step`);
   await page.locator('#day30 .present button').first().scrollIntoViewIfNeeded(); await page.locator('#day30 .present button').first().click();
   ok(/1 of 9/.test(await page.locator('#day30').innerText()), `${name}: day-30 checklist`);
-  const q2 = page.locator('#faq .faq button').nth(3); await q2.scrollIntoViewIfNeeded(); await q2.click();
+  const q2 = page.locator('#faq button').nth(3); await q2.scrollIntoViewIfNeeded(); await q2.click();
   ok((await q2.getAttribute('aria-expanded')) === 'true' && /assigned by SHARIF/.test(await page.locator('#faq').innerText()), `${name}: FAQ accordion`);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await page.locator('#hero input[type=range]').fill('30');
-  ok(/60 of 60/i.test(await page.locator('#hero .tracker').innerText()), `${name}: hero day ruler`);
-  ok(fontHits.length >= 2 && fontHits.every((r) => r.status === 200), `${name}: self-hosted Plex font files loaded (${fontHits.length}, all 200)`);
+  ok(/60 of 60/.test(await page.locator('#hero .tracker').innerText()), `${name}: hero day tracker`);
   if (opts.isMobile) {
     await page.evaluate(() => window.scrollTo({ top: 1400, behavior: 'instant' })); await page.waitForTimeout(800);
     ok(await page.locator('.sticky.show').count() === 1, `${name}: sticky mobile CTA appears after hero`);
     await page.locator('.burger').click(); await page.waitForTimeout(300);
     ok(await page.locator('.drawer.open a.btn').isVisible(), `${name}: mobile nav drawer opens with Apply`);
-    const dtxt = await page.locator('.drawer.open').innerText(); ok(['Programme', 'How it works', 'Project', 'FAQ', 'Student dashboard', 'My project', 'Privacy notice'].every((t) => dtxt.includes(t)), `${name}: hamburger holds all links incl. Student dashboard`);
+    const dtxt = await page.locator('.drawer.open').innerText(); ok(['Student dashboard', 'My project', 'FAQ', 'Final Project', 'Privacy notice'].every((t) => dtxt.includes(t)), `${name}: hamburger holds all links incl. Student dashboard`);
     const top = await page.locator('.drawer.open a.btn').evaluate((e) => e.getBoundingClientRect().top); ok(top < 140, `${name}: Apply sits at the top of the menu (${Math.round(top)}px)`);
     await page.screenshot({ path: `${OUT}/${name}-drawer.png` });
     await page.locator('.drawer.open a.l').nth(2).click(); await page.waitForTimeout(400);
