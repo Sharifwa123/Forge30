@@ -315,3 +315,6 @@ tr:hover td { background: #fafcff; }
 .present { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 .present button { padding: 10px 12px; min-height: 48px; font-size: .92rem; }
 @media (max-width: 719px) { .stats .s { padding: 14px 14px; } .stats .n { font-size: 1.9rem; } .stats .t { font-size: .68rem; margin-top: 4px; } .hero { padding-bottom: 96px; } }
+
+/* Animated elements start offset sideways; never let that create horizontal scroll */
+main, section { overflow-x: clip; }
