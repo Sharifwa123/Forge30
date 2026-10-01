@@ -53,6 +53,8 @@ const detail2 = await (await fetch(`${BASE}/admin/applicants/${id}`, { headers: 
 d = strip(await (await fetch(BASE + '/dashboard', { headers: S })).text());
 ok(d.includes('Add your passport photo') && d.includes('B-14') && d.includes('Group A') && d.includes('6:00–8:00 PM daily'), 'dashboard: card unlocked, seat/group/time shown');
 const T = await token(); ok(!!T, 'card token present when confirmed');
+const dsrc = await (await fetch(BASE + '/dashboard', { headers: S })).text(); const fileInputs = dsrc.match(/<input[^>]*type="file"[^>]*>/g) || [];
+ok(fileInputs.length === 2 && fileInputs.filter((x) => /capture/.test(x)).length === 1, 'photo: one camera input (capture) AND one gallery/file input (no capture)');
 const img = (side = 'front', t = T) => fetch(`${BASE}/api/card/image?t=${t}&side=${side}`);
 ok((await img()).status === 409, 'card image refused until photo uploaded (409)');
 
