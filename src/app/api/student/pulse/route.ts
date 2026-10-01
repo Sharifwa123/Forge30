@@ -9,7 +9,7 @@ export async function GET() {
   const ref = await getStudentRef();
   if (!ref) return NextResponse.json({ error: 'Not signed in.' }, { status: 401 });
   const [[r], s] = await Promise.all([
-    q<any>('SELECT name, status, student_id, serial, seat, group_label, session_time, confirmed_at, photo_at, project FROM applications WHERE ref=$1', [ref]),
+    q<any>('SELECT name, status, student_id, serial, seat, group_label, session_time, student_message, confirmed_at, photo_at, project FROM applications WHERE ref=$1', [ref]),
     getSettings(),
   ]);
   if (!r) return NextResponse.json({ error: 'Not found.' }, { status: 404 });

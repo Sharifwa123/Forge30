@@ -4,13 +4,16 @@ import Enhance from '@/components/Enhance';
 import Footer from '@/components/Footer';
 import { CommitCounter, Day30, DayTracker, Faq, FormatAndDevices, Journey, ProjectBuilder } from '@/components/Interactive';
 import { OrganizerCard } from '@/components/Dashboard';
-import { getSettings, DEFAULTS } from '@/lib/settings';
+import { getSettings, DEFAULTS, acceptingApplications } from '@/lib/settings';
+import { NoticeStack, toItems } from '@/components/Notices';
+import NoticePopup from '@/components/NoticePopup';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const s = await getSettings().catch(() => DEFAULTS);
-  const open = s.applicationsOpen;
+  const open = (await acceptingApplications(s).catch(() => ({ open: s.applicationsOpen }))).open;
+  const items = toItems(s);
   const CTA = open ? 'APPLY FOR THE COHORT' : 'STUDENT DASHBOARD';
 
   return (
@@ -18,12 +21,8 @@ export default async function Home() {
       <div className="scrollbar" aria-hidden />
       <Header open={open} />
       <main id="main">
-        {(s.notice || s.announcements.length > 0) && (
-          <div className="banner" role="region" aria-label="Notices"><div className="wrap">
-            {s.notice && <p><b>Notice: </b>{s.notice}</p>}
-            {s.announcements.slice(0, 3).map((a) => <p key={a.id}><b>{new Date(a.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: </b>{a.text}</p>)}
-          </div></div>
-        )}
+        <NoticeStack items={items} />
+        <NoticePopup items={items} />
 
         <section id="hero" className="hero">
           <div className="wrap">

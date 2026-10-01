@@ -17,7 +17,7 @@ const STEPS: { key: StepKey; title: string; short: string }[] = [
 ];
 const KEY = 'forge30-draft-v2';
 
-export default function ApplyFlow({ open, notice, announcements = [] }: { open: boolean; notice: string; announcements?: string[] }) {
+export default function ApplyFlow({ open }: { open: boolean }) {
   const [phase, setPhase] = useState<'gate' | 'form' | 'review' | 'done'>('gate');
   const [step, setStep] = useState(0);
   const [d, setD] = useState<Draft>(EMPTY);
@@ -116,7 +116,6 @@ export default function ApplyFlow({ open, notice, announcements = [] }: { open: 
     <div className="app-shell"><Top /><div className="wrap" style={{ maxWidth: 760, padding: '40px 0 80px' }}><div className="form-card" style={{ transform: 'none' }}>
       <h2>Applications are closed</h2>
       <p className="lead">SHARIF TECHNOLOGIES is no longer accepting applications for this cohort. Applications close when the organizer is satisfied that enough have been received.</p>
-      {(notice || announcements.length > 0) && <div className="info amber"><b>{notice && announcements.length ? 'Notices' : notice ? 'Notice' : 'Announcement'}</b>{notice && <p>{notice}</p>}{announcements.map((t, i) => <p key={i}>{t}</p>)}</div>}
       <Link href="/status" className="btn btn-primary">CHECK AN EXISTING APPLICATION</Link>
     </div></div></div>
   );
@@ -137,7 +136,6 @@ export default function ApplyFlow({ open, notice, announcements = [] }: { open: 
             <li>Submitting is an application. <b>It does not guarantee selection.</b></li>
           </ul>
           <div className="info blue"><p>If you are prepared to show up, practise, make mistakes, solve problems and build for 30 days, continue. It takes about 10–15 minutes, and your progress is saved on this device.</p></div>
-          {(notice || announcements.length > 0) && <div className="info amber"><b>{notice && announcements.length ? 'Notices' : notice ? 'Notice' : 'Announcement'}</b>{notice && <p>{notice}</p>}{announcements.map((t, i) => <p key={i}>{t}</p>)}</div>}
           <div className="actions" style={{ marginTop: 10 }}>
             <Link className="btn btn-line" href="/">Not for me right now</Link>
             <button className="btn btn-primary" onClick={() => { started.current = true; track('gate_passed'); track('application_started'); setPhase('form'); setStep(0); }}>I’M READY TO APPLY <span className="arrow">→</span></button>

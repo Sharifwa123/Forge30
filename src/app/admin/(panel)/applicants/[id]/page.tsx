@@ -34,7 +34,7 @@ export default async function Applicant({ params }: { params: Promise<{ id: stri
           </dl>
         </div>
         <div className="grid">
-          <ApplicantActions id={Number(r.id)} status={r.status} notes={r.admin_notes} cohortNote={r.cohort_note} seat={r.seat} group={r.group_label} session={r.session_time} studentId={r.student_id} serial={r.serial} hasPhoto={!!r.photo_at} photoUsed={r.photo_changes} photoAllowed={r.photo_allow} />
+          <ApplicantActions id={Number(r.id)} status={r.status} notes={r.admin_notes} cohortNote={r.cohort_note} seat={r.seat} group={r.group_label} session={r.session_time} studentId={r.student_id} serial={r.serial} hasPhoto={!!r.photo_at} photoUsed={r.photo_changes} photoAllowed={r.photo_allow} message={r.student_message} name={r.name} email={r.email} phone={r.phone} location={r.location} ref_={r.ref} />
           <ProjectView project={r.project ?? {}} legacy={d.project} id={Number(r.id)} />
         
         </div>

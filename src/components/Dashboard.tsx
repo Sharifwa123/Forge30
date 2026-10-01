@@ -1,4 +1,6 @@
 'use client';
+import { NoticeStack, type NoticeItem } from './Notices';
+import NoticePopup from './NoticePopup';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -7,8 +9,8 @@ import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
 
-type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
-type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; notice: string; announcements: { id: string; text: string; at: string }[]; organizer: Organizer };
+type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
+type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
 const MSG: Record<Status, string> = {
@@ -53,13 +55,9 @@ export function Dashboard({ me, settings: s, cardToken, project, rev }: { me: Me
         ) : <div style={{ height: 22 }} />}
       </section>
 
-      {(s.notice || s.announcements.length > 0) && (
-        <section className="panel" aria-label="Updates">
-          <h2 style={{ fontSize: '1.3rem' }}>Updates from SHARIF TECHNOLOGIES</h2>
-          {s.notice && <div className="info amber"><b>Notice</b><p>{s.notice}</p></div>}
-          {s.announcements.map((a) => <div key={a.id} style={{ padding: '12px 0', borderTop: '1px solid var(--line)' }}><div style={{ fontSize: '.8rem', color: 'var(--muted)', fontWeight: 700 }}>{new Date(a.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>{a.text}</div>)}
-        </section>
-      )}
+      {me.message && <NoticeStack label="Personal message" items={[{ id: 'msg', kind: 'Notice', title: 'A message for you', text: me.message, style: 'important', ctaLabel: '', ctaUrl: '', popup: false }]} />}
+      <NoticeStack items={s.items} label="Updates" />
+      <NoticePopup items={s.items} />
 
       {project && (
         <section className="panel" aria-label="My project" style={{ borderLeft: '6px solid var(--brand)' }}>

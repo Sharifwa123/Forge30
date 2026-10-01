@@ -12,7 +12,7 @@ const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbo
 const al = await fetch(BASE + '/api/admin/login', { method: 'POST', headers: J, body: JSON.stringify({ password: PW }) }); const A = { Cookie: cookieOf(al).join('; ') };
 const settings = (b) => fetch(BASE + '/api/admin/settings', { method: 'POST', headers: { ...J, ...A }, body: JSON.stringify(b) });
 const landing = async () => (await fetch(BASE + '/')).text();
-await settings({ notice: '', applicationsOpen: true, cohortName: 'FORGE30 — first cohort' }); // known starting state, even after an aborted run
+await settings({ notice: '', applicationsOpen: true, maxApplications: 0, cohortName: 'FORGE30 — first cohort', clearAnnouncements: true }); // known starting state, even after an aborted run
 
 // ---------- 1. notice AND announcement both show (previously the announcement was hidden by the notice)
 await settings({ notice: 'NOTICE-ONE class registration closes Friday' });
@@ -88,5 +88,25 @@ const fresh = await (await fetch(`${BASE}/api/card/image?t=${encodeURIComponent(
 // notices reach the open dashboard too
 await settings({ notice: 'LIVE-NOTICE bring your laptop tomorrow' });
 await sp.getByText('LIVE-NOTICE bring your laptop tomorrow').waitFor({ timeout: 15000 }); ok(await sp.evaluate(() => window.__marker) === 'not-reloaded', 'a new notice appears on the open dashboard without a reload');
-await settings({ notice: '', cohortName: 'FORGE30 — first cohort' });
+
+// ---------- 4. decorated notices, popup, personal message, capacity, admin delete
+await settings({ addAnnouncement: { title: 'STYLE-HEAD', text: 'Line **bold-bit** and [go](https://example.com)\n\n- one\n- two\n<script>alert(1)</script>', style: 'urgent', ctaLabel: 'Apply now', ctaUrl: '/apply', popup: true } });
+let h4 = await landing();
+ok(h4.includes('nt-urgent') && h4.includes('STYLE-HEAD') && h4.includes('<strong>bold-bit</strong>') && h4.includes('<li>one</li>'), 'announcement renders as a decorated card with headline, bold text and bullets');
+ok(!h4.includes('<script>alert(1)</script>'), 'raw HTML in a notice is never rendered');
+ok(h4.includes('Apply now') && h4.includes('NEW'), 'button and NEW badge show');
+const bad = await settings({ addAnnouncement: { title: '', text: 'x', style: 'info', ctaLabel: 'Go', ctaUrl: 'javascript:alert(1)', popup: false } }); ok(bad.status === 400, 'unsafe button links are rejected');
+const pctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const pp = await pctx.newPage(); await pp.goto(BASE + '/', { waitUntil: 'networkidle' });
+await pp.getByRole('dialog').getByRole('button', { name: 'Got it' }).click(); await pp.reload({ waitUntil: 'networkidle' });
+ok(await pp.getByRole('dialog').count() === 0 || !(await pp.getByRole('dialog').isVisible()), 'pop-up shows once, not again after dismissal');
+await patch({ studentMessage: 'PERSONAL-MSG see me after class' });
+await sp.getByText('PERSONAL-MSG see me after class').waitFor({ timeout: 15000 }); ok(true, 'a personal message appears on the student dashboard live');
+await settings({ maxApplications: 1 });
+h4 = await landing(); ok(!h4.includes('APPLY FOR THE COHORT'), 'capacity reached closes applications automatically');
+const full = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(app) }); ok(full.status === 403, 'apply API refuses when full');
+await settings({ maxApplications: 0 });
+const ed = await patch({ edit: { fullName: 'Live Renamed', email: app.about.email, phone: app.about.phone, location: 'Kumasi' } }); ok(ed.status === 200, 'admin can edit applicant details');
+const del = await fetch(`${BASE}/api/admin/applicants/${id}`, { method: 'DELETE', headers: { ...J, ...A } }); ok(del.status === 200, 'admin can delete an applicant');
+ok((await fetch(BASE + '/api/student/pulse', { headers: S })).status !== 200, 'deleted applicant no longer has a dashboard');
+await settings({ notice: '', cohortName: 'FORGE30 — first cohort', clearAnnouncements: true });
 await browser.close(); console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);
