@@ -68,8 +68,8 @@ export const phoneOk = (p: string) => /^\+?\d{9,15}$/.test(normalizePhone(p));
 export const aboutSchema = z.object({
   fullName: text(2, 100, 'Full name'),
   preferredName: optText(60),
-  phone: z.string().transform((s) => s.trim()).pipe(z.string().refine(phoneOk, 'Enter a valid phone number, e.g. 0241234567 or +233241234567')),
-  email: z.string().transform((s) => s.trim().toLowerCase()).pipe(z.string().email('Enter a valid email address').max(200)),
+  phone: z.string({ message: 'Phone number is required' }).transform((s) => s.trim()).pipe(z.string().refine(phoneOk, 'Enter a valid phone number, e.g. 0241234567 or +233241234567')),
+  email: z.string({ message: 'Email address is required' }).transform((s) => s.trim().toLowerCase()).pipe(z.string().email('Enter a valid email address').max(200)),
   location: text(2, 120, 'Town / city and region'),
   ageBracket: en('ageBracket'),
   experience: en('experience'),
@@ -89,7 +89,7 @@ const always = (p: { value: unknown }) => typeof p.value === 'object' && p.value
 const rule = <T,>(test: (v: T) => boolean, path: string, message: string) => [test, { path: [path], message, when: always }] as [(v: T) => boolean, { path: string[]; message: string; when: typeof always }];
 
 export const availabilitySchema = z.object({
-  periods: z.array(z.enum(vals('period'))).min(1, 'Choose at least one period'),
+  periods: z.array(z.enum(vals('period'), { message: 'Choose at least one period' }), { message: 'Choose at least one period' }).min(1, 'Choose at least one period'),
   periodOther: optText(200),
   format: en('format'),
   contribPref: z.enum(vals('contribPref')).optional(),

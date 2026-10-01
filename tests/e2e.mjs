@@ -51,6 +51,8 @@ r = await post('/api/status', { ref, email }); j = await r.json();
 ok(r.status === 200 && j.status === 'submitted', 'status lookup with ref+email');
 ok((await post('/api/status', { ref, email: 'other@example.com' })).status === 404, 'status lookup with wrong email -> 404');
 
+// the scan page needs the camera: the Permissions-Policy header must allow it for our own origin
+{ const pp = (await fetch(BASE + '/scan')).headers.get('permissions-policy') || ''; ok(/camera=\(self\)/.test(pp) && /microphone=\(\)/.test(pp) && /geolocation=\(\)/.test(pp), 'Permissions-Policy allows the camera for our own pages only (needed by /scan): ' + pp); }
 // admin
 ok((await fetch(BASE + '/api/admin/export')).status === 401, 'export requires admin');
 ok((await fetch(BASE + '/api/admin/applicants/1', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Origin: BASE }, body: '{"status":"selected"}' })).status === 401, 'patch requires admin');

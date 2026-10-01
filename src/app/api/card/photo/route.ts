@@ -22,12 +22,13 @@ export async function POST(req: Request) {
     if (file.size > 8 * 1024 * 1024) return NextResponse.json({ error: 'That photo is too large (max 8 MB).' }, { status: 413 });
     let out: Buffer;
     try {
-      // Re-encode: verifies it is a real image, strips EXIF/location metadata, normalises orientation and size.
+      // Re-encode: verifies it is a real image, strips EXIF/location metadata, fixes orientation, evens out lighting and sharpens slightly.
       const img = sharp(Buffer.from(await file.arrayBuffer()), { limitInputPixels: 50_000_000 }).rotate();
       const meta = await img.metadata();
       if (!['jpeg', 'png', 'webp'].includes(meta.format || '')) throw new Error('format');
       if ((meta.width || 0) < 200 || (meta.height || 0) < 200) return NextResponse.json({ error: 'That photo is too small. Use a clear photo at least 200×200 pixels.' }, { status: 422 });
-      out = await img.resize(480, 600, { fit: 'cover', position: 'attention' }).jpeg({ quality: 86 }).toBuffer();
+      // Passport size (35 x 45 mm at 300 dpi). The student's dialog already centres the face; this also protects direct uploads.
+      out = await img.resize(413, 531, { fit: 'cover', position: 'attention' }).normalise({ lower: 1, upper: 99 }).sharpen({ sigma: 0.6 }).jpeg({ quality: 90 }).toBuffer();
     } catch { return NextResponse.json({ error: 'We could not read that file. Use a JPG, PNG or WebP photo.' }, { status: 422 }); }
     await q('UPDATE applications SET photo=$2, photo_at=now(), photo_changes = photo_changes + $3 WHERE ref=$1', [ref, out, pc.has ? 1 : 0]);
     return NextResponse.json({ ok: true, changesLeft: photoChangesLeft({ photo_changes: pc.photo_changes + (pc.has ? 1 : 0), photo_allow: pc.photo_allow }) });
