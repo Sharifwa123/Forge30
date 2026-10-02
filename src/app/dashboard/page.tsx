@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   const ref = await getStudentRef();
   if (!ref) redirect('/status');
-  const [r] = await q<any>('SELECT ref, name, email, phone, status, student_id, serial, seat, group_label, session_time, student_message, contact, created_at, photo IS NOT NULL AS has_photo, photo_at, confirmed_at, photo_changes, photo_allow, project FROM applications WHERE ref=$1', [ref]);
+  const [r] = await q<any>('SELECT ref, name, email, phone, status, student_id, serial, seat, group_label, cohort_label, class_code, session_time, student_message, contact, created_at, photo IS NOT NULL AS has_photo, photo_at, confirmed_at, photo_changes, photo_allow, project FROM applications WHERE ref=$1', [ref]);
   if (!r) redirect('/status');
   const s = await getSettings();
   const confirmed = r.status === 'confirmed' && !!r.student_id;
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
       <main id="main" className="tint" style={{ padding: '40px 0 100px' }}>
         <div className="wrap" style={{ maxWidth: 980 }}>
           <Dashboard
-            me={{ ref: r.ref, name: r.name, email: r.email, phone: r.phone, status: r.status, studentId: r.student_id, seat: r.seat, group: r.group_label, session: r.session_time, message: r.student_message || '', hasPhoto: r.has_photo, photoChangesLeft: photoChangesLeft(r), submitted: new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), contact: r.contact }}
+            me={{ ref: r.ref, name: r.name, email: r.email, phone: r.phone, status: r.status, studentId: r.student_id, seat: r.seat, group: r.group_label, cohort: r.cohort_label, classCode: r.class_code, session: r.session_time, message: r.student_message || '', hasPhoto: r.has_photo, photoChangesLeft: photoChangesLeft(r), submitted: new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), contact: r.contact }}
             settings={{ cohortName: s.cohortName, cohortDates: s.cohortDates, delivery: s.deliveryArrangement, classArrangement: s.classArrangement, items: toItems(s), organizer: s.organizer }}
             rev={rev}
             cardToken={confirmed ? cardToken(ref, 6 * 3600) : null}

@@ -32,9 +32,9 @@ export async function issueCredentials(ids: number[]) {
   }
 }
 
-export type CardRow = { ref: string; name: string; student_id: string | null; serial: string | null; seat: string; group_label: string; session_time: string; status: string; has_photo: boolean; confirmed_at: string | null; data: any };
+export type CardRow = { ref: string; name: string; student_id: string | null; serial: string | null; seat: string; group_label: string; cohort_label: string; class_code: string; session_time: string; status: string; has_photo: boolean; confirmed_at: string | null; data: any };
 export async function cardByRef(ref: string) {
-  const [r] = await q<CardRow>(`SELECT ref, name, student_id, serial, seat, group_label, session_time, status, photo IS NOT NULL AS has_photo, confirmed_at, data FROM applications WHERE ref=$1`, [ref]);
+  const [r] = await q<CardRow>(`SELECT ref, name, student_id, serial, seat, group_label, cohort_label, class_code, session_time, status, photo IS NOT NULL AS has_photo, confirmed_at, data FROM applications WHERE ref=$1`, [ref]);
   return r;
 }
 

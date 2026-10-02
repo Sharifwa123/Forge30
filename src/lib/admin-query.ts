@@ -1,6 +1,6 @@
 import { q } from './db';
 
-export type Filters = { search?: string; status?: string; location?: string; device?: string; format?: string; period?: string; certificate?: string; contrib?: string; sort?: string };
+export type Filters = { search?: string; status?: string; location?: string; device?: string; format?: string; period?: string; certificate?: string; cohort?: string; group?: string; cls?: string; contrib?: string; sort?: string };
 
 const SORTS: Record<string, string> = { newest: 'created_at DESC', oldest: 'created_at ASC', name: 'name ASC' };
 
@@ -13,6 +13,9 @@ export function buildWhere(f: Filters) {
   if (f.device) { const n = push(f.device); w.push(`(data->'device'->>'computer' = ${n} OR data->'device'->>'phone' = ${n})`); }
   if (f.format) w.push(`data->'availability'->>'format' = ${push(f.format)}`);
   if (f.period) w.push(`(data->'availability'->'periods') @> ${push(JSON.stringify([f.period]))}::jsonb`);
+  if (f.cohort) w.push(`cohort_label = ${push(f.cohort)}`);
+  if (f.group) w.push(`group_label = ${push(f.group)}`);
+  if (f.cls) w.push(`class_code = ${push(f.cls)}`);
   if (f.certificate) w.push(`data->'finish'->>'certificate' = ${push(f.certificate)}`);
   if (f.contrib) w.push(`data->'availability'->>'contribPref' = ${push(f.contrib)}`);
   return { where: w.length ? 'WHERE ' + w.join(' AND ') : '', params: p, order: SORTS[f.sort || ''] || SORTS.newest };
@@ -20,5 +23,5 @@ export function buildWhere(f: Filters) {
 
 export async function listApplications(f: Filters, limit = 500) {
   const { where, params, order } = buildWhere(f);
-  return q<any>(`SELECT id, ref, email, phone, name, location, status, data, admin_notes, student_id, serial, seat, group_label, session_time, contact, project, created_at FROM applications ${where} ORDER BY ${order} LIMIT ${Math.min(limit, 5000)}`, params);
+  return q<any>(`SELECT id, ref, email, phone, name, location, status, data, admin_notes, student_id, serial, seat, group_label, cohort_label, class_code, session_time, contact, project, created_at FROM applications ${where} ORDER BY ${order} LIMIT ${Math.min(limit, 5000)}`, params);
 }
