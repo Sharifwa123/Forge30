@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Chevron from '@/components/Chevron';
 import Logo from '@/components/Logo';
 import Header from '@/components/Header';
 import Enhance from '@/components/Enhance';
@@ -29,7 +30,7 @@ export default async function Home() {
           <div className="wrap">
             <div>
               <Logo size={168} className="hero-logo" priority />
-              <h1>FORGE<em>30</em></h1>
+              <h1 style={{ display: 'flex', alignItems: 'center', gap: '.25em' }}><Chevron width={64} className="h1-chev" /><span>FORGE<em>30</em></span></h1>
               <div className="sub">SHARIF TECHNOLOGIES Developer Forge</div>
               <p className="tag">30 days. 60 hours. Build for real.</p>
               <p className="lead">An intensive, live developer program designed to take committed beginners from the fundamentals of computing and programming to building and presenting a real software project.</p>
