@@ -8,16 +8,18 @@ const J = { 'Content-Type': 'application/json', Origin: BASE };
 const db = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 await fetch(BASE + '/'); // runs the migrations on a fresh database
 await db.query('DELETE FROM applications; DELETE FROM rate_limits');
-let n = 0;
+let n = 0, lastCookie = '';
 const apply = async (experience, format) => {
   const u = String(Date.now()).slice(-6) + String(++n).padStart(3, '0');
   const a = { about: { fullName: 'Place Tester ' + n, phone: '024' + u, email: `pl${u}@example.com`, location: 'Wenchi', ageBracket: '18-24', experience },
     commitment: { why: 'I want to learn to build software for my community.', hopeToBuild: 'A web app for local shops.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
     availability: { periods: ['evening'], format, ...(format === 'remote' ? {} : { contribPref: 'willing', contribRange: '0' }) }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' }, finish: { certificate: 'yes', budget: 'yes', privacy: true } };
   const r = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(a) }); const j = await r.json();
+  lastCookie = (r.headers.getSetCookie() || []).map((c) => c.split(';')[0]).join('; ');
   if (!j.ref) console.log('apply failed', r.status, JSON.stringify(j));
   return j.ref;
 };
+const first = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: '{}' }); ok(first.status === 422 && !first.headers.get('set-cookie'), 'invalid submission does not sign anyone in');
 const row = async (ref) => (await db.query('SELECT cohort_label c, group_label g, class_code k, seat s FROM applications WHERE ref=$1', [ref])).rows[0];
 
 const refs = []; for (let i = 0; i < 16; i++) refs.push(await apply('none', 'remote'));
@@ -29,6 +31,7 @@ const ip = await row(await apply('some', 'in_person')); ok(ip.c === 'Wenchi CIC'
 const ac = await row(await apply('prior', 'remote')); ok(ac.c === 'Online' && ac.g === 'ACS' && ac.k === 'F30-004', 'experienced -> ACS class');
 const ei = await row(await apply('basic', 'either')); ok(ei.c === 'Online' && ei.g === 'LCS' && ei.k === 'F30-002' && ei.s === 'B-02', '"either" + basic -> Online / LCS, fills the open seat in F30-002');
 
+const dash = await fetch(BASE + '/dashboard', { headers: { Cookie: lastCookie }, redirect: 'manual' }); ok(/f30_student/.test(lastCookie) && dash.status === 200, 'submitting an application signs the applicant in: their dashboard opens straight away');
 // admin: card + dashboard show it; date & time are "coming soon"
 const al = await fetch(BASE + '/api/admin/login', { method: 'POST', headers: J, body: JSON.stringify({ password: process.env.ADMIN_PASSWORD }) });
 const A = { Cookie: (al.headers.getSetCookie() || []).map((c) => c.split(';')[0]).join('; ') };
