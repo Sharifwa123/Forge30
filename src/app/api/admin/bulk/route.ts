@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { q } from '@/lib/db';
 import { audit, isAdmin, sameOrigin } from '@/lib/security';
 import { STATUSES } from '@/lib/schema';
+import { placeUnassigned } from '@/lib/placement';
 import { issueCredentials } from '@/lib/card';
 
 const Body = z.object({
@@ -11,7 +12,8 @@ const Body = z.object({
   delete: z.boolean().optional(),
   assign: z.object({ group: z.string().max(40).optional(), session: z.string().max(60).optional(), seatPrefix: z.string().max(10).optional(), seatStart: z.number().int().min(0).max(100000).optional() }).optional(),
   message: z.string().max(1000).optional(),
-}).refine((b) => b.status || b.delete || b.assign || b.message !== undefined, 'Nothing to do');
+  autoPlace: z.boolean().optional(),
+}).refine((b) => b.autoPlace || b.status || b.delete || b.assign || b.message !== undefined, 'Nothing to do');
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,6 +26,7 @@ export async function POST(req: Request) {
     await audit('application.bulk_delete', undefined, { count: rows.length, refs: rows.map((r: any) => r.ref) });
     return NextResponse.json({ ok: true, updated: rows.length });
   }
+  if (p.data.autoPlace) { const n = await placeUnassigned(); await audit('application.auto_place', undefined, { placed: n }); return NextResponse.json({ ok: true, updated: n }); }
   let n = 0;
   if (status) {
     n = (await q('UPDATE applications SET status=$2, updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, status])).length;

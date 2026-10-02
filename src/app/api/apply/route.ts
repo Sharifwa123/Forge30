@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { applicationSchema, normalizePhone } from '@/lib/schema';
 import { q } from '@/lib/db';
 import { getSettings, acceptingApplications } from '@/lib/settings';
+import { placeApplicant } from '@/lib/placement';
 import { newRef, rateLimit, sameOrigin } from '@/lib/security';
 
 export async function POST(req: Request) {
@@ -28,8 +29,9 @@ export async function POST(req: Request) {
     const phone = normalizePhone(a.about.phone);
     const ref = newRef();
     try {
-      await q(`INSERT INTO applications(ref,email,phone,name,location,data) VALUES ($1,$2,$3,$4,$5,$6::jsonb)`,
+      const [ins] = await q<{ id: string }>(`INSERT INTO applications(ref,email,phone,name,location,data) VALUES ($1,$2,$3,$4,$5,$6::jsonb) RETURNING id`,
         [ref, a.about.email, phone, a.about.fullName, a.about.location, JSON.stringify(a)]);
+      await placeApplicant(ins.id).catch((e) => console.error('placement failed', e)); // never lose an application over placement; admin can re-run
     } catch (e: any) {
       if (e?.code === '23505') return NextResponse.json({ error: 'An application with this email address or phone number already exists. Sign in to your student dashboard with your reference code instead.', duplicate: true }, { status: 409 });
       throw e;

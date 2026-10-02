@@ -9,7 +9,7 @@ import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
 
-type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
+type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; cohort: string; classCode: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
@@ -75,13 +75,14 @@ export function Dashboard({ me, settings: s, cardToken, project, rev }: { me: Me
       <section className="panel" aria-label="My program">
         <h2 style={{ fontSize: '1.3rem' }}>My program</h2>
         <div className="grid g2">
-          <Fact k="Cohort" v={s.cohortName} /><Fact k="Program dates" v={s.cohortDates} />
+          <Fact k="Cohort" v={me.cohort || s.cohortName} /><Fact k="Program dates" v={s.cohortDates} />
           <Fact k="Delivery arrangement" v={s.delivery} /><Fact k="Class arrangement" v={s.classArrangement} />
           <Fact k="Your group" v={me.group || 'To be assigned by SHARIF TECHNOLOGIES'} dim={!me.group} />
-          <Fact k="Your class time" v={me.session || 'To be assigned by SHARIF TECHNOLOGIES'} dim={!me.session} />
+          {me.classCode && <Fact k="Your class" v={me.classCode} />}
+          <Fact k="Date & time" v={me.session || 'Coming soon'} dim={!me.session} />
           {me.seat && <Fact k="Your seat" v={me.seat} />}
         </div>
-        <p className="note" style={{ marginBottom: 0 }}>Your class time is assigned by SHARIF TECHNOLOGIES. You do not choose it.</p>
+        <p className="note" style={{ marginBottom: 0 }}>Your cohort, group, class and seat are assigned automatically from your application. The date and time will be announced soon.</p>
       </section>
 
       {cardToken ? <CardPanel rev={rev} token={cardToken} hasPhoto={me.hasPhoto} studentId={me.studentId!} changesLeft={me.photoChangesLeft} /> : (

@@ -12,7 +12,6 @@ import { getSettings } from '@/lib/settings';
 export const runtime = 'nodejs';
 const W = 1012, H = 638; // CR80 (3.375 x 2.125 in) at 300 dpi
 const NAVY = '#071230', BRAND = '#1e5ecf', AMBER = '#f6b93b';
-const TBD = /^to be determined/i;
 
 const asset = (p: string) => readFile(join(process.cwd(), p));
 const dataUri = (b: Buffer, t: string) => `data:${t};base64,${b.toString('base64')}`;
@@ -38,8 +37,7 @@ export async function GET(req: Request) {
     QRCode.toBuffer(`${origin}/v/${c.serial}`, { margin: 2, width: 560, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } }),
   ]);
   const logoUri = dataUri(logo, 'image/png'), qrUri = dataUri(qr, 'image/png');
-  const cohortDates = TBD.test(s.cohortDates) ? '' : s.cohortDates;
-  const name = c.name.toUpperCase();
+    const name = c.name.toUpperCase();
   const nameSize = name.length > 28 ? 28 : name.length > 20 ? 34 : 40;
   const issued = c.confirmed_at ? new Date(c.confirmed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase() : '';
 
@@ -49,7 +47,7 @@ export async function GET(req: Request) {
       {label(k)}<div style={{ display: 'flex', fontSize: 24, fontWeight: 700, marginTop: 2 }}>{v}</div>
     </div>
   );
-  const chips = [c.seat && ['SEAT', c.seat], c.group_label && ['GROUP', c.group_label], c.session_time && ['SESSION', c.session_time]].filter(Boolean) as string[][];
+  const chips = [c.seat && ['SEAT', c.seat], c.group_label && ['GROUP', c.group_label], c.class_code && ['CLASS', c.class_code], ['DATE & TIME', (c.session_time || 'COMING SOON').toUpperCase()]].filter(Boolean) as string[][];
 
   const front = (
     <div style={{ width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden', color: '#fff', fontFamily: 'Sans', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, #0a1a3f 55%, #143f93 135%)` }}>
@@ -81,7 +79,7 @@ export async function GET(req: Request) {
             <div style={{ display: 'flex', marginTop: 14 }}>{label('SERIAL NO.')}</div>
             <div style={{ display: 'flex', fontFamily: 'Mono', fontSize: 25, fontWeight: 700, marginTop: 2, letterSpacing: 2 }}>{c.serial}</div>
             <div style={{ display: 'flex', marginTop: 14 }}>{label('COHORT')}</div>
-            <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, marginTop: 2 }}>{s.cohortName}{cohortDates ? ` · ${cohortDates}` : ''}</div>
+            <div style={{ display: 'flex', fontSize: 22, fontWeight: 700, marginTop: 2 }}>{c.cohort_label || s.cohortName}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: 'auto' }}>
             <div style={{ display: 'flex', background: '#fff', padding: 6, borderRadius: 12 }}>

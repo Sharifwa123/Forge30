@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useDialog } from '../Dialog';
 import { STATUSES, STATUS_LABEL } from '@/lib/schema';
 
-type Row = { id: number; ref: string; name: string; email: string; phone: string; location: string; status: string; created: string; format: string; computer: string; periods: string; contrib: string; commit: string };
+type Row = { id: number; ref: string; name: string; email: string; phone: string; location: string; status: string; created: string; format: string; computer: string; periods: string; contrib: string; commit: string; place: string };
 
 export default function ApplicantTable({ rows }: { rows: Row[] }) {
   const [sel, setSel] = useState<Set<number>>(new Set());
@@ -43,18 +43,19 @@ export default function ApplicantTable({ rows }: { rows: Row[] }) {
           </div>
         </div>
       )}
+      <div style={{ marginBottom: 12 }}><button className="btn btn-line sm" onClick={async () => { const res = await fetch('/api/admin/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [1], autoPlace: true }) }); const j = await res.json().catch(() => ({})); setMsg(res.ok ? `Placed ${j.updated} unplaced applicant(s)` : 'Failed'); if (res.ok) r.refresh(); }}>Auto-place unplaced applicants</button></div>
       {msg && <div className="info blue" role="status">{msg}</div>}
       <div className="tbl-wrap">
         <table>
-          <thead><tr><th><input type="checkbox" checked={all} aria-label="Select all" onChange={() => setSel(all ? new Set() : new Set(rows.map((x) => x.id)))} /></th><th>Applicant</th><th>Location</th><th>Status</th><th>Format</th><th>Computer</th><th>Availability</th><th>Contribution</th><th>Seriousness</th><th>Date</th></tr></thead>
+          <thead><tr><th><input type="checkbox" checked={all} aria-label="Select all" onChange={() => setSel(all ? new Set() : new Set(rows.map((x) => x.id)))} /></th><th>Applicant</th><th>Location</th><th>Status</th><th>Placement</th><th>Format</th><th>Computer</th><th>Availability</th><th>Contribution</th><th>Seriousness</th><th>Date</th></tr></thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={10} style={{ padding: 28, textAlign: 'center' }}>No applicants match.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={11} style={{ padding: 28, textAlign: 'center' }}>No applicants match.</td></tr>}
             {rows.map((x) => (
               <tr key={x.id}>
                 <td><input type="checkbox" checked={sel.has(x.id)} onChange={() => toggle(x.id)} aria-label={`Select ${x.name}`} /></td>
                 <td><Link href={`/admin/applicants/${x.id}`}><b>{x.name}</b></Link><div style={{ color: 'var(--muted)', fontSize: 13 }}>{x.ref} · {x.phone}</div></td>
                 <td>{x.location}</td><td><span className={'pill ' + x.status}>{STATUS_LABEL[x.status as keyof typeof STATUS_LABEL]}</span></td>
-                <td>{x.format}</td><td>{x.computer}</td><td>{x.periods}</td><td>{x.contrib}</td><td style={{ fontSize: 13 }}>{x.commit}</td><td>{x.created}</td>
+                <td style={{ fontSize: 13 }}>{x.place}</td><td>{x.format}</td><td>{x.computer}</td><td>{x.periods}</td><td>{x.contrib}</td><td style={{ fontSize: 13 }}>{x.commit}</td><td>{x.created}</td>
               </tr>
             ))}
           </tbody>
