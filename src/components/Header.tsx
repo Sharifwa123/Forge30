@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+import Logo from './Logo';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -31,7 +31,7 @@ export default function Header({ open }: { open: boolean }) {
       <header className="hdr">
         <div className="wrap row">
           <Link href="/" className="brand" aria-label="FORGE30 by SHARIF TECHNOLOGIES — home" onClick={() => setMenu(false)}>
-            <Image unoptimized src="/brand/sharif-logo.png" alt="SHARIF TECHNOLOGIES" width={44} height={44} priority />
+            <Logo size={56} priority />
             <span>FORGE30<small>SHARIF TECHNOLOGIES</small></span>
           </Link>
           <nav className="nav" aria-label="Main">

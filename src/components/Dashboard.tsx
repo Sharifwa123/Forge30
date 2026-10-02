@@ -1,7 +1,7 @@
 'use client';
+import Logo from './Logo';
 import { NoticeStack, type NoticeItem } from './Notices';
 import NoticePopup from './NoticePopup';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib/schema';
@@ -217,7 +217,7 @@ export function OrganizerCard({ o, dark }: { o: Organizer; dark?: boolean }) {
   return (
     <section className="panel" aria-label="Contact the organizer" style={dark ? { background: 'var(--navy-800)', borderColor: 'var(--line-dark)', color: '#fff' } : undefined}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <Image unoptimized src="/brand/sharif-logo.png" alt="" width={64} height={64} style={{ borderRadius: '50%' }} />
+        <Logo size={96} alt="" />
         <div style={{ flex: '1 1 260px' }}>
           <div className="eyebrow" style={{ margin: 0, color: dark ? 'var(--amber)' : undefined }}>{o.title || 'Organizer'}</div>
           <h2 style={{ fontSize: '1.4rem', margin: '2px 0 6px' }}>{o.name}</h2>

@@ -31,13 +31,13 @@ export async function GET(req: Request) {
   const h = req.headers;
   const origin = siteOrigin(h);
   const s = await getSettings();
-  const [logo, sans, bold, mono, serif, qr] = await Promise.all([
-    asset('public/brand/sharif-logo.png'), asset('src/assets/fonts/LiberationSans-Regular.ttf'), asset('src/assets/fonts/LiberationSans-Bold.ttf'),
+  const [logo, logoSm, sans, bold, mono, serif, qr] = await Promise.all([
+    asset('public/brand/logo-136.png'), asset('public/brand/logo-84.png'), asset('src/assets/fonts/LiberationSans-Regular.ttf'), asset('src/assets/fonts/LiberationSans-Bold.ttf'),
     asset('src/assets/fonts/LiberationMono-Bold.ttf'), asset('src/assets/fonts/LiberationSerif-Italic.ttf'),
     QRCode.toBuffer(`${origin}/v/${c.serial}`, { margin: 2, width: 560, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } }),
   ]);
-  const logoUri = dataUri(logo, 'image/png'), qrUri = dataUri(qr, 'image/png');
-    const name = c.name.toUpperCase();
+  const logoUri = dataUri(logo, 'image/png'), logoSmUri = dataUri(logoSm, 'image/png'), qrUri = dataUri(qr, 'image/png');
+  const name = c.name.toUpperCase();
   const nameSize = name.length > 28 ? 28 : name.length > 20 ? 34 : 40;
   const issued = c.confirmed_at ? new Date(c.confirmed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase() : '';
 
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoUri} width={88} height={88} alt="" style={{ borderRadius: 44 }} />
+            <img src={logoUri} width={136} height={136} alt="" style={{ borderRadius: 68 }} />
             <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20 }}>
               <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>FORGE<span style={{ color: AMBER }}>30</span></div>
               <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES DEVELOPER FORGE</div>
@@ -106,7 +106,7 @@ export async function GET(req: Request) {
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 52px' }}>
         <div style={{ display: 'flex', alignItems: 'center', height: 92 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoUri} width={72} height={72} alt="" style={{ borderRadius: 36 }} />
+          <img src={logoSmUri} width={84} height={84} alt="" style={{ borderRadius: 42 }} />
           <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, color: '#fff' }}>
             <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>SHARIF TECHNOLOGIES</div>
             <div style={{ display: 'flex', fontSize: 13, letterSpacing: 4, color: '#9db5e8', marginTop: 5, fontWeight: 700 }}>FORGE30 · DEVELOPER FORGE</div>

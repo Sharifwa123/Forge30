@@ -46,7 +46,9 @@ p { margin: 0 0 1em; }
 .hdr { position: sticky; top: 0; z-index: 50; background: rgba(7,18,48,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-dark); color: #fff; }
 .hdr .row { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 16px; }
 .brand { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; font-weight: 800; letter-spacing: .02em; }
-.brand img { width: 44px; height: 44px; border-radius: 50%; image-rendering: auto; }
+.brand img { width: 56px; height: 56px; border-radius: 50%; }
+.hero-logo { display: block; margin: 0 0 18px; box-shadow: 0 0 0 4px rgba(255,255,255,.14), 0 18px 50px -10px rgba(0,0,0,.55); }
+@media (min-width: 900px) { .hero-logo { width: 200px; height: 200px; } }
 .brand small { display: block; font-size: .62rem; font-weight: 600; letter-spacing: .14em; color: #9db5e8; line-height: 1; margin-top: 3px; }
 .nav { display: none; gap: 4px; align-items: center; }
 .nav a.l { color: #d6e1fa; text-decoration: none; padding: 10px 14px; border-radius: 6px; font-weight: 600; font-size: .92rem; letter-spacing: .03em; position: relative; }

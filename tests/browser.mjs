@@ -32,7 +32,7 @@ for (const [name, opts] of Object.entries(VIEWS)) {
 
   const past = await page.evaluate(() => { const W = document.documentElement.clientWidth; return [...document.querySelectorAll('main *')].filter((el) => { if (el.closest('.chips')) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.right > W + 1 || r.left < -1); }).map((el) => `${el.closest('section')?.id || '-'}:${el.tagName.toLowerCase()}.${String(el.className).slice(0, 20)}`).slice(0, 4); });
   ok(past.length === 0, `${name}: no element extends past the screen edge (clipping can hide this) ${past.join(', ')}`);
-  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10000, `${name}: page length is reasonable (${hgt}px)`);
+  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 10300, `${name}: page length is reasonable (${hgt}px)`);
   ok(await page.evaluate(() => [...document.querySelectorAll('[data-anim]')].every((e) => e.classList.contains('in'))), `${name}: every scroll animation fired (nothing left hidden)`);
   // interactions
   await page.locator('#journey .chip').nth(4).click();

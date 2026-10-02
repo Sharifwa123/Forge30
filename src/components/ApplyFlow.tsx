@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+import Logo from './Logo';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OPTIONS, STEP_SCHEMAS, label, type StepKey } from '@/lib/schema';
@@ -274,7 +274,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
 function Top() {
   return (
     <header className="hdr"><div className="wrap row">
-      <Link href="/" className="brand" aria-label="FORGE30 home"><Image unoptimized src="/brand/sharif-logo.png" alt="SHARIF TECHNOLOGIES" width={44} height={44} /><span>FORGE30<small>SHARIF TECHNOLOGIES</small></span></Link>
+      <Link href="/" className="brand" aria-label="FORGE30 home"><Logo size={56} /><span>FORGE30<small>SHARIF TECHNOLOGIES</small></span></Link>
       <Link href="/" style={{ color: '#d6e1fa', fontWeight: 600, textDecoration: 'none' }}>✕ Exit</Link>
     </div></header>
   );

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Logo from '@/components/Logo';
 import Header from '@/components/Header';
 import Enhance from '@/components/Enhance';
 import Footer from '@/components/Footer';
@@ -27,6 +28,7 @@ export default async function Home() {
         <section id="hero" className="hero">
           <div className="wrap">
             <div>
+              <Logo size={168} className="hero-logo" priority />
               <h1>FORGE<em>30</em></h1>
               <div className="sub">SHARIF TECHNOLOGIES Developer Forge</div>
               <p className="tag">30 days. 60 hours. Build for real.</p>
