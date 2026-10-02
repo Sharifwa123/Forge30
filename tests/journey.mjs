@@ -107,7 +107,8 @@ await page.goto(BASE + '/apply', { waitUntil: 'networkidle' });
 ok(await page.getByText('Read this before applying').count() === 1, 'fresh visit starts at the gate again');
 
 // status page
-await page.goto(BASE + '/status'); await page.fill('#ref', ref); await page.fill('#em', `kwame${id}@example.com`); await page.getByRole('button', { name: 'OPEN MY DASHBOARD' }).tap();
+// submitting signed the applicant in on this device, so the dashboard link opens it directly (no sign-in form, no redirect loop)
+await page.goto(BASE + '/status');
 await page.waitForURL('**/dashboard'); await page.getByRole('heading', { name: /Welcome, Kwame/ }).waitFor(); ok(true, 'dashboard: student signed in and sees welcome');
 ok(await page.getByText('Submitted', { exact: true }).count() >= 1 && await page.getByText('unlocks here once your place is').count() === 1, 'dashboard: status shown, card locked until confirmed');
 await page.fill('#c-whatsapp', '0551234567'); await page.locator('fieldset[data-field="c-method"] label.opt', { hasText: 'WhatsApp' }).tap(); await page.locator('fieldset[data-field="c-time"] label.opt', { hasText: 'Evening' }).tap(); await page.getByRole('button', { name: 'SAVE CONTACT DETAILS' }).tap(); await page.getByText('Saved. SHARIF TECHNOLOGIES').waitFor(); ok(true, 'dashboard: contact details saved');

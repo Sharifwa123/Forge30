@@ -108,5 +108,7 @@ await settings({ maxApplications: 0 });
 const ed = await patch({ edit: { fullName: 'Live Renamed', email: app.about.email, phone: app.about.phone, location: 'Kumasi' } }); ok(ed.status === 200, 'admin can edit applicant details');
 const del = await fetch(`${BASE}/api/admin/applicants/${id}`, { method: 'DELETE', headers: { ...J, ...A } }); ok(del.status === 200, 'admin can delete an applicant');
 ok((await fetch(BASE + '/api/student/pulse', { headers: S })).status !== 200, 'deleted applicant no longer has a dashboard');
+const stale = await fetch(BASE + '/status', { headers: S, redirect: 'manual' }); ok(stale.status === 200, 'a stale student cookie shows the sign-in form instead of looping');
+const dd = await fetch(BASE + '/dashboard', { headers: S, redirect: 'manual' }); ok([302, 303, 307, 308].includes(dd.status) && /\/status/.test(dd.headers.get('location') || ''), 'dashboard sends a stale cookie to sign-in');
 await settings({ notice: '', cohortName: 'FORGE30 — first cohort', clearAnnouncements: true });
 await browser.close(); console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);

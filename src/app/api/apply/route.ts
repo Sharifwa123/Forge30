@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { applicationSchema, normalizePhone } from '@/lib/schema';
 import { q } from '@/lib/db';
 import { getSettings, acceptingApplications } from '@/lib/settings';
+import { setStudentSession } from '@/lib/student';
 import { placeApplicant } from '@/lib/placement';
 import { newRef, rateLimit, sameOrigin } from '@/lib/security';
 
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       if (e?.code === '23505') return NextResponse.json({ error: 'An application with this email address or phone number already exists. Sign in to your student dashboard with your reference code instead.', duplicate: true }, { status: 409 });
       throw e;
     }
+    await setStudentSession(ref); // the submitter is signed in on this device, so "Student dashboard" opens straight away
     return NextResponse.json({ ok: true, ref });
   } catch (e) {
     console.error('apply failed', e);

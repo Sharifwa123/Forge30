@@ -3,13 +3,16 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import StatusForm from '@/components/StatusForm';
 import { redirect } from 'next/navigation';
+import { q } from '@/lib/db';
 import { getStudentRef } from '@/lib/student';
 import { getSettings, DEFAULTS } from '@/lib/settings';
 export const metadata: Metadata = { title: 'Student dashboard', alternates: { canonical: '/status' } };
 export const dynamic = 'force-dynamic';
 
 export default async function Status() {
-  if (await getStudentRef()) redirect('/dashboard');
+  // Only bounce to the dashboard when the remembered applicant still exists; a stale cookie (deleted/reset record) must not cause a redirect loop.
+  const ref = await getStudentRef();
+  if (ref && (await q('SELECT 1 FROM applications WHERE ref=$1', [ref]).catch(() => [])).length) redirect('/dashboard');
   const s = await getSettings().catch(() => DEFAULTS);
   return (
     <>
