@@ -16,6 +16,8 @@ const NAVY = '#071230', BRAND = '#1e5ecf', AMBER = '#f6b93b';
 const asset = (p: string) => readFile(join(process.cwd(), p));
 const dataUri = (b: Buffer, t: string) => `data:${t};base64,${b.toString('base64')}`;
 
+const CHEV = 'data:image/svg+xml;base64,' + Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 310" width="420" height="310"><defs><linearGradient id="a" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FF4500"/><stop offset="100%" stop-color="#FFA500"/></linearGradient><linearGradient id="b" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#702963"/></linearGradient></defs><polygon points="50,40 210,140 370,40 410,90 210,210 10,90" fill="url(#b)" opacity="0.9"/><polygon points="50,130 210,230 370,130 410,180 210,300 10,180" fill="url(#a)"/></svg>`).toString('base64');
+
 export async function GET(req: Request) {
   const u = new URL(req.url);
   if (!(await rateLimit('card', 60, 600))) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
@@ -60,7 +62,7 @@ export async function GET(req: Request) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logoUri} width={136} height={136} alt="" style={{ borderRadius: 68 }} />
             <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20 }}>
-              <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>FORGE<span style={{ color: AMBER }}>30</span></div>
+              <div style={{ display: 'flex', alignItems: 'center', fontSize: 40, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={CHEV} width={56} height={41} alt="" style={{ marginRight: 12 }} />FORGE<span style={{ color: AMBER }}>30</span></div>
               <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES DEVELOPER FORGE</div>
             </div>
           </div>

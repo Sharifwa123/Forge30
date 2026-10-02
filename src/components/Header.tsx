@@ -1,4 +1,5 @@
 'use client';
+import Chevron from './Chevron';
 import Logo from './Logo';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -32,7 +33,7 @@ export default function Header({ open }: { open: boolean }) {
         <div className="wrap row">
           <Link href="/" className="brand" aria-label="FORGE30 by SHARIF TECHNOLOGIES — home" onClick={() => setMenu(false)}>
             <Logo size={56} priority />
-            <span>FORGE30<small>SHARIF TECHNOLOGIES</small></span>
+            <span style={{ display: 'flex', flexDirection: 'column' }}><b style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Chevron width={24} />FORGE30</b><small>SHARIF TECHNOLOGIES</small></span>
           </Link>
           <nav className="nav" aria-label="Main">
             {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} aria-current={active === id}>{t}</a>)}
