@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export const alt = 'FORGE30 — SHARIF TECHNOLOGIES Developer Forge. 30 days, 60 hours, build for real.';
+export const alt = 'FORGE30 — SHARIF TECHNOLOGIES Skills Forge. 30 days, 60 hours, build for real.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -18,7 +18,7 @@ export default async function Image() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', fontSize: 190, fontWeight: 800, letterSpacing: -8, lineHeight: 1 }}>FORGE30</div>
-          <div style={{ display: 'flex', fontSize: 34, letterSpacing: 8, color: '#f6b93b', fontWeight: 700, marginTop: 14 }}>DEVELOPER FORGE</div>
+          <div style={{ display: 'flex', fontSize: 34, letterSpacing: 8, color: '#f6b93b', fontWeight: 700, marginTop: 14 }}>SKILLS FORGE</div>
         </div>
         <div style={{ display: 'flex', fontSize: 38, fontWeight: 700, letterSpacing: 4 }}>30 DAYS • 60 HOURS • BUILD FOR REAL</div>
       </div>

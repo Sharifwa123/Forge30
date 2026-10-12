@@ -32,9 +32,9 @@ export default async function Home() {
             <div>
               <Logo size={168} className="hero-logo" priority />
               <h1 style={{ display: 'flex', alignItems: 'center', gap: '.25em' }}><Chevron width={64} className="h1-chev" /><span>FORGE<em>30</em></span></h1>
-              <div className="sub">SHARIF TECHNOLOGIES Developer Forge</div>
+              <div className="sub">SHARIF TECHNOLOGIES Skills Forge</div>
               <p className="tag">30 days. 60 hours. Build for real.</p>
-              <p className="lead">An intensive, live developer program designed to take committed beginners from the fundamentals of computing and programming to building and presenting a real software project.</p>
+              <p className="lead">An intensive, live program in computer skills and software development for committed learners starting from zero. You finish with a real project you present.</p>
               <div className="cta-row">
                 <Link href={open ? '/apply' : '/status'} className="btn btn-primary">{CTA} <span className="arrow">→</span></Link>
                 <a href="#program" className="btn btn-ghost">SEE HOW IT WORKS</a>
@@ -49,16 +49,17 @@ export default async function Home() {
 
         <section id="simple" className="paper" style={{ paddingBlock: 32 }}>
           <div className="wrap">
-            <div className="hdgs" data-anim="fold" style={{ marginBottom: 14 }}><div className="eyebrow">FORGE30 in 30 seconds</div><h2 style={{ marginBottom: 0 }}>Learn to build real software in 30 days.</h2></div>
+            <div className="hdgs" data-anim="fold" style={{ marginBottom: 14 }}><div className="eyebrow">FORGE30 in 30 seconds</div><h2 style={{ marginBottom: 0 }}>Get real computer skills, or learn to build software, in 30 days.</h2></div>
             <div className="plain" data-anim="rise">
-              {[['👤', 'Who is it for?', 'Anyone who wants to build software, even complete beginners. No experience needed, just commitment.'],
+              {[['👤', 'Who is it for?', 'Anyone who wants to get confident with computers or learn to build software. Complete beginners welcome. No experience needed, just commitment.'],
+                ['🧭', 'Pick your path', 'Computer skills or software development. Not sure? Choose “Not sure yet” when you apply. You are placed by level: LCS, ICS or ACS (Low, Intermediate or Advanced Computer Skills).'],
                 ['📅', 'What do you do?', 'A live two-hour class every day for 30 days: learn, practise, solve, build.'],
-                ['🛠', 'What do you leave with?', 'A real project you built and presented on Day 30, plus practical skills and confidence.'],
+                ['🛠', 'What do you leave with?', 'A real project you made and presented on Day 30, plus practical skills and confidence.'],
                 ['💰', 'What does it cost?', 'No joining fee. Plan for about GH₵500 for your project. In person may add travel costs.']].map(([i, h, t]) => (
                 <div className="pl" key={h}><span aria-hidden>{i}</span><div><h3>{h}</h3><p>{t}</p></div></div>
               ))}
             </div>
-            <p className="note" style={{ marginTop: 14, marginBottom: 0 }}>Classes have a maximum of 15 people. Applications are reviewed first, and selection is not guaranteed.</p>
+            <p className="note" style={{ marginTop: 14, marginBottom: 0 }}>Classes have a maximum of 15 people. Exact topics are confirmed by SHARIF TECHNOLOGIES for each group. Applications are reviewed first, and selection is not guaranteed.</p>
           </div>
         </section>
 
@@ -66,9 +67,9 @@ export default async function Home() {
           <div className="wrap grid g2" style={{ alignItems: 'center', gap: 36 }}>
             <div data-anim="fold">
               <div className="eyebrow">What FORGE30 is</div>
-              <h2>A serious 30-day foundation for people who want to build.</h2>
+              <h2>A serious 30-day foundation for people who want to build real skills.</h2>
               <p className="lead">A live, instructor-led program run by SHARIF TECHNOLOGIES. Zero experience required, but commitment is.</p>
-              <p>It is designed to develop practical foundational software-development ability through 60 hours of live instruction, practice and project work. Participants who successfully complete the program should leave with practical experience, greater confidence and a working foundation for continuing their development journey.</p>
+              <p>It is designed to develop practical foundational computer skills and, for those who want it, software-development ability through 60 hours of live instruction, practice and project work. Participants who successfully complete the program should leave with practical experience, greater confidence and a working foundation for continuing their learning journey.</p>
               <p className="note">No guarantee of a job, accreditation or income.</p>
             </div>
             <div data-anim="flip" className="method" aria-label="The method">
@@ -80,7 +81,7 @@ export default async function Home() {
 
         <section id="journey" className="dark">
           <div className="wrap">
-            <div className="hdgs" data-anim="fold"><div className="eyebrow">The 30-day journey</div><h2>From the fundamentals to a real project.</h2>
+            <div className="hdgs" data-anim="fold"><div className="eyebrow">The 30-day journey · software development path</div><h2>From the fundamentals to a real project.</h2>
               <p className="lead">Tap a stage to see what you will encounter.</p></div>
             <div data-anim="rise"><Journey /></div>
           </div>
@@ -113,10 +114,10 @@ export default async function Home() {
 
         <section id="project" className="dark">
           <div className="wrap">
-            <div className="hdgs" data-anim="fold"><div className="eyebrow">The final project</div><h2>Don’t just learn. Build something that matters to you.</h2>
-              <p className="lead">Start thinking about a software idea you genuinely care about. After you apply, you build your project proposal piece by piece in your student dashboard, all the way to Day 30.</p></div>
+            <div className="hdgs" data-anim="fold"><div className="eyebrow">The final project</div><h2>Don’t just learn. Make something that matters to you.</h2>
+              <p className="lead">Start thinking about a project you genuinely care about: a software idea, or a practical digital project (such as a spreadsheet, presentation or simple website) on the computer-skills path. After you apply, you build your project proposal piece by piece in your student dashboard, all the way to Day 30.</p></div>
             <div data-anim="rise"><ProjectBuilder /></div>
-            <div className="info amber" data-anim="rise" style={{ marginTop: 28, marginBottom: 0, color: 'var(--ink)' }}><b>Project budget, not a training fee</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project-development needs. It is not a payment to join, and we cannot guarantee it will be sufficient for every project. An in-person arrangement may also involve additional logistical costs; the application asks about them for planning only.</p></div>
+            <div className="info amber" data-anim="rise" style={{ marginTop: 28, marginBottom: 0, color: 'var(--ink)' }}><b>Project budget, not a training fee</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project needs. What a project needs depends on the project and your path. It is not a payment to join, and we cannot guarantee it will be sufficient for every project. An in-person arrangement may also involve additional logistical costs; the application asks about them for planning only.</p></div>
           </div>
         </section>
 
@@ -125,8 +126,8 @@ export default async function Home() {
             <div data-anim="left">
               <div className="big" aria-hidden>30</div>
               <div className="eyebrow">Day 30</div>
-              <h2>Show what you built.</h2>
-              <p className="lead">You submit a completed project package and present it. This is the culmination of the 30 days.</p>
+              <h2>Show what you made.</h2>
+              <p className="lead">You submit a completed project package and present it. Developers present their software; computer-skills learners present a practical digital project. This is the culmination of the 30 days.</p>
               <p className="note">Not every project becomes a commercial product; the goal is practical experience and something real. A certificate of completion is associated with successfully completing the program requirements, and is never automatic.</p>
             </div>
             <div data-anim="right"><Day30 /></div>

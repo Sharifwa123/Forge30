@@ -9,8 +9,8 @@ test('phone validation', () => {
   for (const p of ['12', 'abc', '0241234', '+2332412345678901234']) assert.ok(!phoneOk(p), p);
 });
 test('about: email/phone/name errors reported together', () => {
-  const r = aboutSchema.safeParse({ fullName: '', phone: '1', email: 'x', location: '', ageBracket: '', experience: '' });
-  assert.deepEqual(paths(r).sort(), ['ageBracket', 'email', 'experience', 'fullName', 'location', 'phone']);
+  const r = aboutSchema.safeParse({ fullName: '', phone: '1', email: 'x', location: '', ageBracket: '', goal: '', experience: '' });
+  assert.deepEqual(paths(r).sort(), ['ageBracket', 'email', 'experience', 'fullName', 'goal', 'location', 'phone']);
 });
 test('commitment: "no" can never pass', () => {
   const base = { why: 'x'.repeat(40), hopeToBuild: 'y'.repeat(30), practise: 'yes', seriousness: 'all', ackDiscipline: true };
@@ -31,7 +31,7 @@ test('device: shared computer asked only when no computer; all errors at once', 
   assert.ok(deviceSchema.safeParse({ ...ok, computer: 'none', sharedComputer: 'maybe' }).success);
 });
 test('text is sanitised', () => {
-  const r = aboutSchema.parse({ fullName: ' <b>Ama</b>\u0000 ', phone: '0241234567', email: 'A@B.CO', location: 'Accra', ageBracket: '18-24', experience: 'none' });
+  const r = aboutSchema.parse({ fullName: ' <b>Ama</b>\u0000 ', phone: '0241234567', email: 'A@B.CO', location: 'Accra', ageBracket: '18-24', goal: 'both', experience: 'none' });
   assert.equal(r.fullName, 'bAma/b'); assert.equal(r.email, 'a@b.co');
 });
 

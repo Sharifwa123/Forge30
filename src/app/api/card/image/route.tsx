@@ -63,7 +63,7 @@ export async function GET(req: Request) {
             <img src={logoUri} width={136} height={136} alt="" style={{ borderRadius: 68 }} />
             <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', fontSize: 40, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={CHEV} width={56} height={41} alt="" style={{ marginRight: 12 }} />FORGE<span style={{ color: AMBER }}>30</span></div>
-              <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES DEVELOPER FORGE</div>
+              <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES SKILLS FORGE</div>
             </div>
           </div>
           <div style={{ display: 'flex', background: AMBER, color: '#2a1c00', fontWeight: 700, fontSize: 16, letterSpacing: 3, padding: '9px 18px', borderRadius: 999 }}>STUDENT ID CARD</div>
@@ -111,7 +111,7 @@ export async function GET(req: Request) {
           <img src={logoSmUri} width={84} height={84} alt="" style={{ borderRadius: 42 }} />
           <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, color: '#fff' }}>
             <div style={{ display: 'flex', fontSize: 28, fontWeight: 700, lineHeight: 1 }}>SHARIF TECHNOLOGIES</div>
-            <div style={{ display: 'flex', fontSize: 13, letterSpacing: 4, color: '#9db5e8', marginTop: 5, fontWeight: 700 }}>FORGE30 · DEVELOPER FORGE</div>
+            <div style={{ display: 'flex', fontSize: 13, letterSpacing: 4, color: '#9db5e8', marginTop: 5, fontWeight: 700 }}>FORGE30 · SKILLS FORGE</div>
           </div>
         </div>
         <div style={{ display: 'flex', marginTop: 38 }}>

@@ -22,8 +22,8 @@ export default async function Applicant({ params }: { params: Promise<{ id: stri
           <h3>Application</h3>
           <dl>
             <KV k="Preferred name" v={d.about.preferredName} /><KV k="Phone" v={r.phone} /><KV k="Email" v={r.email} /><KV k="Location" v={r.location} />
-            <KV k="Age" v={label('ageBracket', d.about.ageBracket)} /><KV k="Experience" v={label('experience', d.about.experience)} />
-            <KV k="Why become a developer" v={d.commitment.why} /><KV k="Hope to build" v={d.commitment.hopeToBuild} />
+            <KV k="Age" v={label('ageBracket', d.about.ageBracket)} /><KV k="Wants" v={d.about.goal ? label('goal', d.about.goal) : undefined} /><KV k="Computer skills level" v={label('experience', d.about.experience)} />
+            <KV k="Why join FORGE30" v={d.commitment.why} /><KV k="Hope to do or build" v={d.commitment.hopeToBuild} />
             <KV k="Seriousness" v={label('seriousness', d.commitment.seriousness)} /><KV k="Practise outside sessions" v={d.commitment.practise} />
             <KV k="Availability" v={d.availability.periods.join(', ') + (d.availability.periodOther ? ` (${d.availability.periodOther})` : '')} />
             <KV k="Format preference" v={label('format', d.availability.format)} /><KV k="Contribution preference" v={label('contribPref', d.availability.contribPref)} /><KV k="Contribution range" v={label('contribRange', d.availability.contribRange)} />

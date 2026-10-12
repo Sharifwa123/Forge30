@@ -11,7 +11,7 @@ await db.query('DELETE FROM applications; DELETE FROM rate_limits');
 let n = 0, lastCookie = '';
 const apply = async (experience, format) => {
   const u = String(Date.now()).slice(-6) + String(++n).padStart(3, '0');
-  const a = { about: { fullName: 'Place Tester ' + n, phone: '024' + u, email: `pl${u}@example.com`, location: 'Wenchi', ageBracket: '18-24', experience },
+  const a = { about: { fullName: 'Place Tester ' + n, phone: '024' + u, email: `pl${u}@example.com`, location: 'Wenchi', ageBracket: '18-24', goal: 'dev', experience },
     commitment: { why: 'I want to learn to build software for my community.', hopeToBuild: 'A web app for local shops.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
     availability: { periods: ['evening'], format, ...(format === 'remote' ? {} : { contribPref: 'willing', contribRange: '0' }) }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' }, finish: { certificate: 'yes', budget: 'yes', privacy: true } };
   const r = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(a) }); const j = await r.json();

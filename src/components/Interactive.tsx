@@ -75,11 +75,11 @@ export function CommitCounter() {
 /* Project builder */
 const PB = [
   ['Problem', 'Start with something real.', 'What annoys you or the people around you? Where do people waste time, money or effort?', 'Example: “Small shops in my area lose track of who owes them money.”'],
-  ['Idea', 'Turn it into a software idea.', 'What could a simple application do about it? It does not have to be clever. It has to be yours.', 'Example: “A simple app where a shop owner records customers and what they owe.”'],
+  ['Idea', 'Turn it into an idea you can make.', 'What could a simple app, website, spreadsheet or presentation do about it? It does not have to be clever. It has to be yours.', 'Example: “A simple app where a shop owner records customers and what they owe.”'],
   ['Solution', 'Decide how it would work.', 'Who uses it, what do they do first, and what do they see? You will refine this during the program.', 'Example: “The owner logs in, adds a customer, records a debt, and sees a list of balances.”'],
   ['Build', 'Build it, step by step, with guidance.', 'Everything you learn in the live sessions gets applied to your own project, in small pieces, every day.', 'You will hit problems. Solving them is the program.'],
-  ['Test', 'Put it in front of real people.', 'Does it work on a phone? Can someone else use it without your help? Fix what breaks.', 'Testing is where beginners start to think like developers.'],
-  ['Present', 'Show what you built on Day 30.', 'Explain the problem, the users, how it works, what you learned and how it could grow.', 'You submit a project package and present it.'],
+  ['Test', 'Put it in front of real people.', 'Does it work on a phone? Can someone else use it without your help? Fix what breaks.', 'Testing is where beginners start to think like professionals.'],
+  ['Present', 'Show what you made on Day 30.', 'Explain the problem, the users, how it works, what you learned and how it could grow.', 'You submit a project package and present it.'],
 ];
 export function ProjectBuilder() {
   const [i, setI] = useState(0);

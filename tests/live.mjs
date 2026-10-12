@@ -50,7 +50,7 @@ ok(native === 0, 'no native browser dialogs were shown');
 
 // ---------- 3. an open student dashboard (and its card) update themselves
 const u = Date.now().toString().slice(-8);
-const app = { about: { fullName: 'Live Tester', phone: '020' + u.slice(0, 7), email: `live${u}@example.com`, location: 'Accra', ageBracket: '18-24', experience: 'none' },
+const app = { about: { fullName: 'Live Tester', phone: '020' + u.slice(0, 7), email: `live${u}@example.com`, location: 'Accra', ageBracket: '18-24', goal: 'both', experience: 'none' },
   commitment: { why: 'I want to learn to build software for my community.', hopeToBuild: 'A web app for local shops.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'remote' }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' }, finish: { certificate: 'yes', budget: 'yes', privacy: true } };
 const { ref } = await (await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(app) })).json();

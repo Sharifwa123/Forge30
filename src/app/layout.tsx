@@ -7,12 +7,12 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1, them
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: { default: 'FORGE30 — 30-Day Developer Program by SHARIF TECHNOLOGIES', template: '%s · FORGE30' },
+  title: { default: 'FORGE30 — 30-Day Computer Skills & Software Development Program by SHARIF TECHNOLOGIES', template: '%s · FORGE30' },
   description: SITE.description,
-  keywords: ['developer training Ghana', 'software development training', 'web development', 'coding training', 'beginner developer program', '30-day developer program', 'SHARIF TECHNOLOGIES'],
+  keywords: ['computer skills training Ghana', 'learn computer skills', 'software development training', 'web development', 'coding training', 'beginner computer course', '30-day program', 'SHARIF TECHNOLOGIES'],
   alternates: { canonical: '/' },
-  openGraph: { type: 'website', siteName: 'FORGE30', title: 'FORGE30 — SHARIF TECHNOLOGIES Developer Forge', description: '30 DAYS • 60 HOURS • BUILD FOR REAL. An intensive live developer program for committed beginners.', url: '/', locale: 'en_GH' },
-  twitter: { card: 'summary_large_image', title: 'FORGE30 — SHARIF TECHNOLOGIES Developer Forge', description: '30 DAYS • 60 HOURS • BUILD FOR REAL.' },
+  openGraph: { type: 'website', siteName: 'FORGE30', title: 'FORGE30 — SHARIF TECHNOLOGIES Skills Forge', description: '30 DAYS • 60 HOURS • BUILD FOR REAL. An intensive live program in computer skills and software development for committed beginners.', url: '/', locale: 'en_GH' },
+  twitter: { card: 'summary_large_image', title: 'FORGE30 — SHARIF TECHNOLOGIES Skills Forge', description: '30 DAYS • 60 HOURS • BUILD FOR REAL.' },
   robots: { index: true, follow: true },
 };
 

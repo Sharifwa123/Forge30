@@ -7,7 +7,7 @@ import ApplicantTable from '@/components/admin/ApplicantTable';
 export default async function Admin({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const f: Filters = {};
-  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'cohort', 'group', 'cls', 'sort'] as const) if (sp[k]) f[k] = sp[k]!.slice(0, 100);
+  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'goal', 'cohort', 'group', 'cls', 'sort'] as const) if (sp[k]) f[k] = sp[k]!.slice(0, 100);
   const [rows, counts] = await Promise.all([listApplications(f), q<{ status: string; n: string }>('SELECT status, count(*) n FROM applications GROUP BY status')]);
   const total = counts.reduce((a, c) => a + Number(c.n), 0);
   const qs = new URLSearchParams(Object.entries(f).filter(([, v]) => v) as [string, string][]).toString();
@@ -27,6 +27,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<Re
         <select name="period" defaultValue={f.period ?? ''} aria-label="Availability"><option value="">Any availability</option>{OPTIONS.period.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         <select name="contrib" defaultValue={f.contrib ?? ''} aria-label="Contribution preference"><option value="">Any contribution pref.</option>{OPTIONS.contribPref.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         <select name="certificate" defaultValue={f.certificate ?? ''} aria-label="Certificate"><option value="">Any certificate pref.</option>{OPTIONS.certificate.map(([v, l]) => <option key={v} value={v}>Certificate: {l}</option>)}</select>
+        <select name="goal" defaultValue={f.goal ?? ''} aria-label="Goal"><option value="">Any goal</option>{OPTIONS.goal.map(([v, l]) => <option key={v} value={v}>{l.split(':')[0]}</option>)}</select>
         <select name="cohort" defaultValue={f.cohort ?? ''} aria-label="Cohort"><option value="">Any cohort</option><option>Wenchi CIC</option><option>Online</option></select>
         <select name="group" defaultValue={f.group ?? ''} aria-label="Group"><option value="">Any group</option><option>LCS</option><option>ICS</option><option>ACS</option></select>
         <input name="cls" placeholder="Class e.g. F30-001" defaultValue={f.cls} aria-label="Class" />

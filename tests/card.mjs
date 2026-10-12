@@ -6,7 +6,7 @@ const BASE = process.env.BASE || 'http://localhost:3000', PW = process.env.ADMIN
 let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
 const J = { 'Content-Type': 'application/json', Origin: BASE };
 const uniq = Date.now().toString().slice(-7);
-const app = { about: { fullName: 'Akosua Boateng-Owusu', preferredName: 'Akosua', phone: '020' + uniq, email: `akosua${uniq}@example.com`, location: 'Wenchi, Bono', ageBracket: '18-24', experience: 'none' },
+const app = { about: { fullName: 'Akosua Boateng-Owusu', preferredName: 'Akosua', phone: '020' + uniq, email: `akosua${uniq}@example.com`, location: 'Wenchi, Bono', ageBracket: '18-24', goal: 'both', experience: 'none' },
   commitment: { why: 'I want to learn to build software that helps people in my town.', hopeToBuild: 'A booking app for local clinics and salons.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'in_person', contribPref: 'flexible', contribRange: '50-100' },
   device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' },
