@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       if (e?.code === '23505') return NextResponse.json({ error: 'An application with this email address or phone number already exists. Sign in to your student dashboard with your reference code instead.', duplicate: true }, { status: 409 });
       throw e;
     }
-    await setStudentSession(ref); // the submitter is signed in on this device, so "Student dashboard" opens straight away
+    await setStudentSession(ref).catch((e) => console.error('sign-in after apply failed', e)); // never fail a saved application over this; the submitter is signed in on this device, so "Student dashboard" opens straight away
     return NextResponse.json({ ok: true, ref });
   } catch (e) {
     console.error('apply failed', e);
