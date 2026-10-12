@@ -72,15 +72,16 @@ await page.locator('fieldset[data-field="device-electricity"] label.opt').first(
 await page.locator('fieldset[data-field="device-workspace"] label.opt').first().tap();
 await cont();
 
-// Step 5 (finish): budget, certificate, consent
-await cont(); ok(await page.locator('.error').count() === 3, 'finish: budget, certificate and consent all required');
-await opt('Yes, I am prepared'); await page.locator('fieldset[data-field="finish-certificate"] label.opt', { hasText: 'Yes' }).tap();
+// Step 5 (finish): certificate, consent (the GH₵500 budget is no longer asked or shown before admission)
+await cont(); ok(await page.locator('.error').count() === 2, 'finish: certificate and consent required');
+ok((await page.locator('body').innerText()).includes('GH₵500') === false, 'finish: no GH₵500 budget shown before admission');
+await page.locator('fieldset[data-field="finish-certificate"] label.opt', { hasText: 'Yes' }).tap();
 await cont(); ok(await page.getByText('You must agree to the privacy notice').count() === 1, 'finish: privacy consent required');
 await page.locator('#finish-privacy').evaluate((el) => el.closest('label').click());
 await cont();
 ok(await page.getByRole('heading', { name: 'Review your application' }).count() === 1, 'review screen shown');
 const rv = await page.locator('.review').innerText();
-ok(['Kwame Asante', 'GH₵500 project budget', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.includes(x)), 'review shows all sections incl. contribution, device, budget, format');
+ok(['Kwame Asante', 'Tamale', 'GH₵50–100', 'Android', 'Evening', 'In person'].every((x) => rv.includes(x)), 'review shows all sections incl. contribution, device, format');
 await page.screenshot({ path: `${OUT}/apply-review.png`, fullPage: true });
 ok(!(await page.locator('.review').innerText()).includes('Working name'), 'application no longer asks for the project idea (moved to dashboard)');
 await page.getByRole('button', { name: 'Edit Your information' }).tap();

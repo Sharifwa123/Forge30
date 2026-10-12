@@ -118,7 +118,6 @@ export const deviceSchema = z.object({
 
 export const finishSchema = z.object({
   certificate: en('certificate'),
-  budget: en('budget'),
   privacy: z.literal(true, { message: 'You must agree to the privacy notice to apply' }),
 });
 

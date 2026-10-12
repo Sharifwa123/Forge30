@@ -55,7 +55,7 @@ export default async function Home() {
                 ['🧭', 'Pick your path', 'Computer skills or software development. Not sure? Choose “Not sure yet” when you apply. You are placed by level: LCS, ICS or ACS (Low, Intermediate or Advanced Computer Skills).'],
                 ['📅', 'What do you do?', 'A live two-hour class every day for 30 days: learn, practise, solve, build.'],
                 ['🛠', 'What do you leave with?', 'A real project you made and presented on Day 30, plus practical skills and confidence.'],
-                ['💰', 'What does it cost?', 'No joining fee. Plan for about GH₵500 for your project. In person may add travel costs.']].map(([i, h, t]) => (
+                ['💰', 'What does it cost?', 'No joining fee. Anything you need for your project is explained once your place is confirmed. In person may add travel costs.']].map(([i, h, t]) => (
                 <div className="pl" key={h}><span aria-hidden>{i}</span><div><h3>{h}</h3><p>{t}</p></div></div>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default async function Home() {
             <div className="hdgs" data-anim="fold"><div className="eyebrow">The final project</div><h2>Don’t just learn. Make something that matters to you.</h2>
               <p className="lead">Start thinking about a project you genuinely care about: a software idea, or a practical digital project (such as a spreadsheet, presentation or simple website) on the computer-skills path. After you apply, you build your project proposal piece by piece in your student dashboard, all the way to Day 30.</p></div>
             <div data-anim="rise"><ProjectBuilder /></div>
-            <div className="info amber" data-anim="rise" style={{ marginTop: 28, marginBottom: 0, color: 'var(--ink)' }}><b>Project budget, not a training fee</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project needs. What a project needs depends on the project and your path. It is not a payment to join, and we cannot guarantee it will be sufficient for every project. An in-person arrangement may also involve additional logistical costs; the application asks about them for planning only.</p></div>
+            <div className="info amber" data-anim="rise" style={{ marginTop: 28, marginBottom: 0, color: 'var(--ink)' }}><b>No joining fee</b><p>There is no fee to join. Anything you may need to arrange for your project is explained to you once your place is confirmed. An in-person arrangement may also involve additional logistical costs; the application asks about them for planning only.</p></div>
           </div>
         </section>
 

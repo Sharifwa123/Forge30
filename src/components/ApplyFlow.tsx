@@ -131,7 +131,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
             <li>A live two-hour session <b>every day for 30 days</b> (60 hours). No recordings to catch up on.</li>
             <li>Your <b>class time is assigned</b> by SHARIF TECHNOLOGIES. You cannot choose it.</li>
             <li>Practice outside the sessions and a <b>final project</b> you present on Day 30.</li>
-            <li>Approximately <b>GH₵500</b> arranged for your own project needs (not a training fee).</li>
+            <li>There is <b>no joining fee</b>. Anything you need for your project is explained once your place is confirmed.</li>
             <li>Unnecessary absence or serious misconduct may result in dismissal.</li>
             <li>Submitting is an application. <b>It does not guarantee selection.</b></li>
           </ul>
@@ -249,8 +249,6 @@ export default function ApplyFlow({ open }: { open: boolean }) {
 
               {cur.key === 'finish' && (<>
                 <p className="lead">Your final project is built after you apply. It can be a software project, or a practical digital project if you are on the computer-skills path. Inside your student dashboard you will develop your idea, problem, users, solution and proposal step by step, all the way to Day 30. Start thinking about something you genuinely care about.</p>
-                <div className="info amber"><b>Project budget</b><p>Applicants should be prepared to arrange approximately GH₵500 for their project needs. This is <b>not</b> a training fee and not a payment to join. What a project needs depends on the project and your path, and we cannot guarantee this amount will be sufficient for every project.</p></div>
-                <Radios id="finish-budget" label="Are you prepared to arrange approximately GH₵500 toward project-related expenses?" required options={OPTIONS.budget} value={F.budget} error={e('finish', 'budget')} onChange={(v) => set('finish', 'budget', v)} />
                 <Radios id="finish-certificate" label="Would you like to receive a certificate of completion if you successfully complete the program?" required two options={OPTIONS.certificate} value={F.certificate} error={e('finish', 'certificate')} onChange={(v) => set('finish', 'certificate', v)} />
                 <div className="hint" style={{ marginTop: -10, marginBottom: 24 }}>Certificates are associated with successful completion of the program requirements and are not automatically issued simply because someone registered.</div>
                 <div className="info"><b>Privacy</b><p>We use your answers only to review applications, form the cohort, plan delivery and contact you. We do not publish them. Read the <Link href="/privacy" target="_blank">privacy notice</Link>.</p></div>
@@ -296,7 +294,7 @@ function Review({ d, edit, heading }: { d: Draft; edit: (i: number) => void; hea
       <Sec t="Your availability" i={2} rows={[['General availability', (V.periods || []).map((p: string) => label('period', p)).join(', ') + (V.periodOther ? ` (${V.periodOther})` : '')], ['Note', 'Not a reservation. Class time is assigned by SHARIF TECHNOLOGIES.']]} />
       <Sec t="Your learning-format preference" i={2} rows={[['Preference', label('format', V.format)], ['In-person contribution preference', V.format !== 'remote' ? label('contribPref', V.contribPref) : undefined], ['Comfortable contribution range', V.format !== 'remote' ? label('contribRange', V.contribRange) : undefined]]} />
       <Sec t="Your device" i={3} rows={[['Phone', label('phone', D.phone)], ['Computer', label('computer', D.computer)], ['Shared computer access', D.computer === 'none' ? label('sharedComputer', D.sharedComputer) : undefined], ['Internet', label('internet', D.internet)], ['Electricity', label('electricity', D.electricity)], ['Workspace', label('workspace', D.workspace)]]} />
-      <Sec t="Budget, certificate & consent" i={4} rows={[['GH₵500 project budget', label('budget', F.budget)], ['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
+      <Sec t="Certificate & consent" i={4} rows={[['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
     </div>
   </>);
 }
