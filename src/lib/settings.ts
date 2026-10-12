@@ -16,6 +16,8 @@ export type Settings = {
   classArrangement: string;
   announcements: Announcement[];
   organizer: Organizer;
+  /** WhatsApp group invite link, shown to people who leave their number. Empty = not shown. */
+  whatsappGroupUrl: string;
 };
 export type Organizer = { name: string; title: string; bio: string; website: string; location: string; email: string; phone: string; whatsapp: string };
 
@@ -29,6 +31,7 @@ export const DEFAULTS: Settings = {
   deliveryArrangement: 'To be determined by SHARIF TECHNOLOGIES',
   classArrangement: 'To be determined by SHARIF TECHNOLOGIES',
   announcements: [],
+  whatsappGroupUrl: '',
   // Prefilled only from the public SHARIF TECHNOLOGIES GitHub profile. Edit in Admin → Cohort & settings.
   organizer: {
     name: 'SHARIF TECHNOLOGIES',

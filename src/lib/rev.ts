@@ -11,7 +11,7 @@ export function revOf(r: any, s: Settings): string {
     r.name, r.status, r.student_id, r.serial, r.seat, r.group_label, r.session_time, r.cohort_label, r.class_code, r.student_message, String(r.confirmed_at ?? ''), String(r.photo_at ?? ''),
     (r.project?.feedback ?? []).map((f: any) => f.id),
     s.applicationsOpen, s.notice, s.cohortName, s.cohortDates, s.deliveryArrangement, s.classArrangement,
-    s.noticeTitle, s.noticeStyle, s.noticeCtaLabel, s.noticeCtaUrl, s.noticePopup, s.announcements, s.organizer,
+    s.noticeTitle, s.noticeStyle, s.noticeCtaLabel, s.noticeCtaUrl, s.noticePopup, s.announcements, s.organizer, s.whatsappGroupUrl,
   ]);
   return createHash('sha1').update(payload).digest('hex').slice(0, 16);
 }

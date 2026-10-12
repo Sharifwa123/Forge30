@@ -10,7 +10,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   if (!(await isAdmin())) redirect('/admin/login');
   return (
     <div className="adm">
-      <div className="top"><div className="wrap row"><b style={{ marginRight: 12 }}>FORGE30 admin</b><Link href="/admin">Applicants</Link><Link href="/admin/settings">Cohort &amp; settings</Link><span style={{ flex: 1 }} /><LogoutButton /></div></div>
+      <div className="top"><div className="wrap row"><b style={{ marginRight: 12 }}>FORGE30 admin</b><Link href="/admin">Applicants</Link><Link href="/admin/interests">Interested</Link><Link href="/admin/settings">Cohort &amp; settings</Link><span style={{ flex: 1 }} /><LogoutButton /></div></div>
       <main><div className="wrap">{children}</div></main>
     </div>
   );
