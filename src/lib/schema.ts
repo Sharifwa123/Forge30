@@ -2,11 +2,17 @@ import { z } from 'zod';
 
 export const OPTIONS = {
   ageBracket: [['under18', 'Under 18'], ['18-24', '18–24'], ['25-34', '25–34'], ['35-44', '35–44'], ['45+', '45 or older']],
+  goal: [
+    ['skills', 'Computer skills: I want to get confident using computers'],
+    ['dev', 'Software development: I want to learn to build software'],
+    ['both', 'Both'],
+    ['unsure', 'Not sure yet'],
+  ],
   experience: [
-    ['none', 'None — I have never programmed'],
-    ['basic', 'Basic — I have used computers and the internet comfortably'],
-    ['some', 'Some — I have tried coding tutorials or small exercises'],
-    ['prior', 'Experienced — I have built things before'],
+    ['none', 'Beginner: I have never used a computer, or I am just starting'],
+    ['basic', 'Basic: I can do simple things like typing, messaging and browsing'],
+    ['some', 'Intermediate: I use computers regularly (documents, spreadsheets, apps) or have tried coding'],
+    ['prior', 'Advanced: I am very comfortable with computers and/or have built things before'],
   ],
   seriousness: [
     ['all', 'I will attend every session unless something truly unavoidable happens'],
@@ -72,6 +78,7 @@ export const aboutSchema = z.object({
   email: z.string({ message: 'Email address is required' }).transform((s) => s.trim().toLowerCase()).pipe(z.string().email('Enter a valid email address').max(200)),
   location: text(2, 120, 'Town / city and region'),
   ageBracket: en('ageBracket'),
+  goal: en('goal'),
   experience: en('experience'),
 });
 

@@ -3,16 +3,16 @@ import { normalizeOrigin } from './site';
 export const SITE = {
   name: 'FORGE30',
   org: 'SHARIF TECHNOLOGIES',
-  full: 'FORGE30 — SHARIF TECHNOLOGIES Developer Forge',
+  full: 'FORGE30 — SHARIF TECHNOLOGIES Skills Forge',
   tagline: '30 DAYS • 60 HOURS • BUILD FOR REAL',
   slogan: 'Knowledge Is Power',
   description:
-    'FORGE30 is an intensive, live 30-day developer program by SHARIF TECHNOLOGIES: 60 hours of practical software-development training for committed beginners, ending in a real project you present on Day 30.',
+    'FORGE30 is an intensive, live 30-day program by SHARIF TECHNOLOGIES: 60 hours of practical training in computer skills and software development, for committed learners from complete beginner up, ending in a real project you present on Day 30.',
   url: normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL) ?? 'https://forge30.example.com',
 };
 
 export const STAGES = [
-  { id: 'foundations', name: 'Foundations', blurb: 'Getting comfortable with the computer, files, the internet and the way developers work.', items: ['Using a computer confidently for development work', 'How the internet and software actually work', 'Setting up your tools and workspace', 'Thinking in steps: how to break a problem down'] },
+  { id: 'foundations', name: 'Foundations', blurb: 'Getting comfortable with the computer, files, the internet and the way digital work is done.', items: ['Using a computer confidently', 'How the internet and software actually work', 'Setting up your tools and workspace', 'Thinking in steps: how to break a problem down'] },
   { id: 'web', name: 'Web', blurb: 'The building blocks of every website: structure, style and behaviour.', items: ['Structuring pages with HTML', 'Styling and layout with CSS', 'Making pages work on phones and computers', 'Reading and fixing your own mistakes'] },
   { id: 'programming', name: 'Programming', blurb: 'The core ideas of programming, practised until they feel natural.', items: ['Variables, decisions and loops', 'Functions and organising code', 'Working with data', 'Solving small problems on your own'] },
   { id: 'applications', name: 'Applications', blurb: 'Turning separate skills into interactive applications people can use.', items: ['Responding to user actions', 'Forms, validation and feedback', 'Structuring a real application', 'Testing what you build'] },
@@ -25,8 +25,8 @@ export const STAGES = [
 ];
 
 export const DEVICES = {
-  Android: { kind: 'Phone', text: 'An Android phone is useful for following along and testing your work, but real development happens on a computer. Tell us honestly whether you have access to one.' },
-  iOS: { kind: 'Phone', text: 'An iPhone is useful for testing how your work looks on a phone. You will still need a computer for the main development work.' },
+  Android: { kind: 'Phone', text: 'An Android phone is useful for following along and testing your work, but most of the practical work happens on a computer. Tell us honestly whether you have access to one.' },
+  iOS: { kind: 'Phone', text: 'An iPhone is useful for testing how your work looks on a phone. You will still need a computer for most of the practical work.' },
   Windows: { kind: 'Computer', text: 'Windows laptops and desktops are fully suitable for FORGE30. We will guide everyone through setting up their tools.' },
   macOS: { kind: 'Computer', text: 'Mac laptops are fully suitable for FORGE30. We will guide everyone through setting up their tools.' },
   Linux: { kind: 'Computer', text: 'Linux laptops and desktops are fully suitable. You are likely already comfortable with a terminal, which helps.' },
@@ -34,8 +34,9 @@ export const DEVICES = {
 };
 
 export const FAQ = [
-  ['Is FORGE30 free?', 'FORGE30 is not advertised as a free course and there is no fixed course fee published at this time. Two things are separate from any course fee: an in-person arrangement may involve additional logistical costs, and you should be prepared to arrange approximately GH₵500 for your own project-development needs. Anything further is determined by SHARIF TECHNOLOGIES and will be communicated clearly.'],
-  ['Do I need any experience?', 'No. A committed beginner can start from zero programming knowledge. What you need is the ability to show up, practise and keep going.'],
+  ['Do I have to become a developer?', 'No. FORGE30 is for people who want computer skills as well as people who want to learn software development. In the application you tell us which you want, or that you are not sure yet. You are placed in a group by your current computer-skills level: LCS, ICS or ACS (Low, Intermediate or Advanced Computer Skills).'],
+  ['Is FORGE30 free?', 'FORGE30 is not advertised as a free course and there is no fixed course fee published at this time. Two things are separate from any course fee: an in-person arrangement may involve additional logistical costs, and you should be prepared to arrange approximately GH₵500 for your own project needs (what a project needs depends on the project). Anything further is determined by SHARIF TECHNOLOGIES and will be communicated clearly.'],
+  ['Do I need any experience?', 'No. A committed beginner can start from zero, whether you want computer skills or want to learn to build software. What you need is the ability to show up, practise and keep going.'],
   ['Can I watch recordings and catch up later?', 'No. FORGE30 is live and instructor-led. Recorded lessons are not provided as a substitute for attendance, and there is no self-paced version. Unnecessary absence may result in dismissal.'],
   ['Can I choose my class time or format?', 'No. You may tell us your general availability and preferred format in the application, but they are not reservations. Your class time and the delivery arrangement are assigned by SHARIF TECHNOLOGIES after applications close.'],
   ['When do applications close?', 'There is no fixed deadline. Applications close when SHARIF TECHNOLOGIES is satisfied that enough applications have been received. The application page always shows whether applications are currently open.'],

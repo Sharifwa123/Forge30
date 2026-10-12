@@ -13,7 +13,7 @@ const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbo
 
 async function confirmedStudent(tag) {
   const u = (Date.now() + tag).toString().slice(-8);
-  const app = { about: { fullName: 'Photo Tester', phone: '024' + u.slice(0, 7), email: `photo${u}@example.com`, location: 'Accra', ageBracket: '18-24', experience: 'none' },
+  const app = { about: { fullName: 'Photo Tester', phone: '024' + u.slice(0, 7), email: `photo${u}@example.com`, location: 'Accra', ageBracket: '18-24', goal: 'both', experience: 'none' },
     commitment: { why: 'I want to learn to build software for my community.', hopeToBuild: 'A small web app for local shops.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
     availability: { periods: ['evening'], format: 'remote' }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' }, finish: { certificate: 'yes', budget: 'yes', privacy: true } };
   const { ref } = await (await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(app) })).json();

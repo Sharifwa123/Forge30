@@ -14,7 +14,7 @@ const opt = (t) => page.locator('label.opt', { hasText: t }).first().tap();
 
 await page.goto(BASE + '/apply', { waitUntil: 'networkidle' });
 ok(await page.getByText('READ THIS BEFORE APPLYING', { exact: false }).count() > 0 || await page.getByText('Read this before applying').count() > 0, 'gate: "read this before applying" shown first');
-ok(await page.getByText('If you are only curious about coding').count() === 1, 'gate: casual-applicant warning shown');
+ok(await page.getByText('If you are only curious').count() === 1, 'gate: casual-applicant warning shown');
 await page.screenshot({ path: `${OUT}/apply-gate.png` });
 await page.getByRole('button', { name: /READY TO APPLY/ }).tap();
 
@@ -27,7 +27,7 @@ await page.fill('#about-fullName', 'Kwame Asante'); await page.fill('#about-pref
 await page.fill('#about-phone', '12'); await page.fill('#about-email', 'bad'); await page.locator('#about-email').blur();
 ok(await page.getByText('Enter a valid email address').count() === 1, 'step 1: invalid email message on blur');
 await page.fill('#about-phone', '024' + id); await page.fill('#about-email', `kwame${id}@example.com`);
-await page.fill('#about-location', 'Tamale, Northern'); await page.selectOption('#about-ageBracket', '18-24'); await opt('None — I have never');
+await page.fill('#about-location', 'Tamale, Northern'); await page.selectOption('#about-ageBracket', '18-24'); await opt('Both'); await opt('Beginner: I have never');
 ok(await page.getByText('Starting from zero is fine').count() === 1, 'step 1: zero-experience reassurance shown (conditional)');
 await cont();
 

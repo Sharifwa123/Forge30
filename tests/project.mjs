@@ -5,7 +5,7 @@ const J = { 'Content-Type': 'application/json', Origin: BASE };
 const uniq = Date.now().toString().slice(-7);
 const strip = (h) => h.replace(/<!--.*?-->/g, '');
 const cookieOf = (r) => (r.headers.getSetCookie?.() || []).map((c) => c.split(';')[0]).join('; ');
-const app = { about: { fullName: 'Efua Mensah', phone: '055' + uniq, email: `efua${uniq}@example.com`, location: 'Kumasi', ageBracket: '25-34', experience: 'basic' },
+const app = { about: { fullName: 'Efua Mensah', phone: '055' + uniq, email: `efua${uniq}@example.com`, location: 'Kumasi', ageBracket: '25-34', goal: 'skills', experience: 'basic' },
   commitment: { why: 'I want to build software that helps small businesses grow in my area.', hopeToBuild: 'A WhatsApp assistant for shops.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'remote' }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' },
   finish: { certificate: 'yes', budget: 'yes', privacy: true } };

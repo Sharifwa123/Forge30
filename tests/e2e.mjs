@@ -6,7 +6,7 @@ const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++
 const post = (p, body, h = {}) => fetch(BASE + p, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: BASE, ...h }, body: JSON.stringify(body) });
 const uniq = Date.now().toString().slice(-8);
 const valid = (over = {}) => ({
-  about: { fullName: 'Ama Mensah', preferredName: 'Ama', phone: '024' + uniq.slice(0, 7), email: `ama${uniq}@example.com`, location: 'Kumasi, Ashanti', ageBracket: '18-24', experience: 'none' },
+  about: { fullName: 'Ama Mensah', preferredName: 'Ama', phone: '024' + uniq.slice(0, 7), email: `ama${uniq}@example.com`, location: 'Kumasi, Ashanti', ageBracket: '18-24', goal: 'both', experience: 'none' },
   commitment: { why: 'I want to build software that solves real problems in my community.', hopeToBuild: 'A small web app for local shops to track customers.', canCommit: 'yes', practise: 'yes', seriousness: 'all', ackDiscipline: true },
   availability: { periods: ['evening'], format: 'either', contribPref: 'flexible', contribRange: '50-100' },
   device: { phone: 'android', computer: 'none', sharedComputer: 'maybe', internet: 'mobile_data', electricity: 'reliable', workspace: 'yes' },

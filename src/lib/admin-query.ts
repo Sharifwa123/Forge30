@@ -1,6 +1,6 @@
 import { q } from './db';
 
-export type Filters = { search?: string; status?: string; location?: string; device?: string; format?: string; period?: string; certificate?: string; cohort?: string; group?: string; cls?: string; contrib?: string; sort?: string };
+export type Filters = { search?: string; status?: string; location?: string; device?: string; format?: string; period?: string; certificate?: string; goal?: string; cohort?: string; group?: string; cls?: string; contrib?: string; sort?: string };
 
 const SORTS: Record<string, string> = { newest: 'created_at DESC', oldest: 'created_at ASC', name: 'name ASC' };
 
@@ -13,6 +13,7 @@ export function buildWhere(f: Filters) {
   if (f.device) { const n = push(f.device); w.push(`(data->'device'->>'computer' = ${n} OR data->'device'->>'phone' = ${n})`); }
   if (f.format) w.push(`data->'availability'->>'format' = ${push(f.format)}`);
   if (f.period) w.push(`(data->'availability'->'periods') @> ${push(JSON.stringify([f.period]))}::jsonb`);
+  if (f.goal) w.push(`data->'about'->>'goal' = ${push(f.goal)}`);
   if (f.cohort) w.push(`cohort_label = ${push(f.cohort)}`);
   if (f.group) w.push(`group_label = ${push(f.group)}`);
   if (f.cls) w.push(`class_code = ${push(f.cls)}`);

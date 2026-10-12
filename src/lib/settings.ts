@@ -36,7 +36,7 @@ export const DEFAULTS: Settings = {
   organizer: {
     name: 'SHARIF TECHNOLOGIES',
     title: 'Founder',
-    bio: 'Founder of SHARIF TECHNOLOGIES, working across software, AI and cybersecurity, and focused on building practical technology. FORGE30 is the program built to turn committed beginners into people who can build real software.',
+    bio: 'Founder of SHARIF TECHNOLOGIES, working across software, AI and cybersecurity, and focused on building practical technology. FORGE30 is the program built to turn committed beginners into confident computer users and, for those who want it, people who can build real software.',
     website: 'https://www.shariftechnologies.online',
     location: 'Wenchi, Bono Region, Ghana',
     email: '', phone: '', whatsapp: '',
