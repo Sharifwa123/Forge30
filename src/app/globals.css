@@ -387,3 +387,45 @@ main, section { overflow-x: clip; }
 .int-form { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; box-shadow: 0 10px 30px -18px rgba(7,18,48,.4); }
 .int-fields { display: grid; gap: 4px; grid-template-columns: 1fr; } @media (min-width: 640px) { .int-fields { grid-template-columns: 1fr 1fr; gap: 14px; } }
 .int-done { background: #e9f9f2; border: 1px solid #12805c55; border-radius: 16px; padding: 20px; } .int-done h3 { margin: 0 0 6px; }
+
+/* ---------- Landing explorer: one card at a time, no long scrolling ---------- */
+.hero-s { padding: clamp(28px, 6vw, 64px) 0 76px; }
+.hero-row { display: flex; gap: 16px; align-items: center; margin-bottom: 8px; }
+.hero-s .hero-logo { margin: 0; flex: none; width: 88px; height: 88px; } @media (min-width: 900px) { .hero-s .hero-logo { width: 120px; height: 120px; } }
+.hero-s h1 { margin: 0; font-size: clamp(2.4rem, 9vw, 4.2rem); } .hero-s .sub { margin-top: 4px; }
+.hero-s .tag { margin: 12px 0 6px; } .hero-s .lead { margin: 0 0 16px; max-width: 640px; } .hero-s .hero-int { margin-top: 10px; }
+.xplr { position: relative; z-index: 5; width: min(780px, 100% - 24px); margin: -48px auto 40px; scroll-margin-top: 76px; }
+.ex-card { background: #fff; color: var(--ink); border-radius: 22px; padding: 16px 16px 18px; box-shadow: 0 24px 60px -24px rgba(7,18,48,.55); border: 1px solid var(--line); }
+.ex-bars { display: flex; gap: 6px; } .ex-bars button { flex: 1; height: 32px; border: 0; background: transparent; cursor: pointer; padding: 0; position: relative; }
+.ex-bars button::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 10px; border-radius: 6px; background: var(--line); transition: .2s; } .ex-bars button.on::before { background: var(--brand); } .ex-bars button[aria-selected='true']::before { background: var(--amber); }
+.ex-title { margin: 12px 0 4px; font-size: .8rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); } .ex-title span { color: var(--brand); margin-right: 6px; }
+.ex-panel { animation: ex-in .35s cubic-bezier(.2,.8,.2,1) both; min-height: 340px; } .ex-panel[hidden] { display: none; }
+.ex-panel h2 { font-size: clamp(1.4rem, 5.2vw, 2rem); line-height: 1.15; margin: 4px 0 10px; } .ex-panel h3 { font-size: 1.05rem; margin: 18px 0 8px; }
+.ex-panel .lead { font-size: 1.02rem; margin: 0 0 14px; }
+@keyframes ex-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+.ex-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ex-stats button, .ex-paths button, .ex-levels button { font: inherit; color: var(--ink); background: var(--paper); border: 2px solid var(--line); border-radius: 16px; cursor: pointer; text-align: left; transition: .15s; }
+.ex-stats button { padding: 14px; display: flex; flex-direction: column; } .ex-stats b { font-size: 2.2rem; line-height: 1; letter-spacing: -.03em; color: var(--brand-600); } .ex-stats span { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.ex-stats button.on, .ex-paths button.on, .ex-levels button.on { border-color: var(--brand); background: #e8f0ff; box-shadow: 0 0 0 3px rgba(30,94,207,.18); }
+.ex-say { margin: 12px 0 0; padding: 12px 14px; border-left: 4px solid var(--amber); background: #fff8e6; border-radius: 0 12px 12px 0; font-weight: 600; min-height: 48px; }
+.ex-paths { display: grid; gap: 10px; } .ex-paths button { padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; column-gap: 12px; align-items: center; } .ex-paths button span { grid-row: span 2; font-size: 1.8rem; } .ex-paths b { font-size: 1.05rem; } .ex-paths small, .ex-levels small { color: var(--muted); line-height: 1.35; }
+@media (min-width: 640px) { .ex-paths { grid-template-columns: repeat(3, 1fr); } .ex-paths button { grid-template-columns: 1fr; text-align: center; justify-items: center; row-gap: 4px; } .ex-paths button span { grid-row: auto; } }
+.ex-levels { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; } .ex-levels button { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; } .ex-levels small { font-size: .8rem; }
+.ex-note { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: #e8f0ff; border: 1px solid #b7cdf5; }
+.ex-result { margin-top: 14px; padding: 14px 16px; border-radius: 16px; background: #ecf8f3; border: 1px solid #12805c55; } .ex-result p { margin: 0 0 8px; } .ex-result .btn { margin-top: 6px; width: 100%; }
+.ex-static[hidden] { display: none; }
+.ex-method { display: flex; flex-wrap: wrap; gap: 8px; } .ex-method button { font: 800 .95rem var(--font); min-height: 46px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; color: var(--ink); } .ex-method button span { color: var(--brand); font-size: .75rem; } .ex-method button.on { background: var(--brand); border-color: var(--brand); color: #fff; } .ex-method button.on span { color: var(--amber); }
+.ex-dark { border-radius: 16px; padding: 14px; background: var(--navy-900, #071230); color: #fff; }
+.ex-dark .days { grid-template-columns: repeat(10, 1fr); }
+.ex-big { width: 100%; min-height: 60px; font-size: 1.05rem; }
+.ex-nav { display: flex; gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); } .ex-nav .btn { flex: 1; } .ex-nav .btn[disabled] { opacity: .35; }
+@media (prefers-reduced-motion: reduce) { .ex-panel { animation: none; } }
+
+/* Application: keep the Continue / Back buttons in view while filling a long step */
+.form-card .actions { position: sticky; bottom: 0; z-index: 3; background: linear-gradient(to top, #fff 78%, rgba(255,255,255,0)); padding: 14px 0 calc(10px + env(safe-area-inset-bottom)); margin-top: 18px; }
+.hero-s .wrap { gap: 0; display: block; }
+.hero-s .cta-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; margin-top: 4px; } .hero-s .cta-row .btn { flex: 1 1 150px; min-height: 52px; }
+.hero-s .tag { font-size: 1.05rem; } .hero-s .lead { font-size: 1rem; line-height: 1.5; }
+.hero-s .hero-int { margin: 12px 0 0; padding: 0; border: 0; } .hero-s .hero-int a { font-size: .92rem; }
+.hero-s .tag { margin: 10px 0 4px; } .hero-s .lead { margin: 0 0 14px; } .hero-s { padding-bottom: 70px; }
+.hero-s .note.hero-int { border-left: 0; padding-left: 0; background: transparent; }

@@ -39,7 +39,7 @@ await p.getByRole('button', { name: 'Re-open applications' }).click(); const dlg
 await dlg.getByRole('heading', { name: 'Re-open applications?' }).waitFor();
 ok(await dlg.getByText('NOTICE-THREE').count() === 1 && await dlg.getByRole('checkbox', { name: 'Also remove this notice' }).isChecked(), 're-open dialog shows the live notice, with "also remove" ticked by default');
 await dlg.getByRole('button', { name: 'Re-open applications' }).click(); await p.getByText('OPEN', { exact: true }).waitFor();
-h = await landing(); ok(!h.includes('NOTICE-THREE') && h.includes('APPLY FOR THE COHORT'), 'after re-opening the old notice is gone and the apply button is back');
+h = await landing(); ok(!h.includes('NOTICE-THREE') && h.includes('APPLY NOW'), 'after re-opening the old notice is gone and the apply button is back');
 // re-open but KEEP the notice
 await p.getByRole('button', { name: 'Close applications' }).click(); await p.getByRole('dialog').getByRole('button', { name: 'Close applications' }).click(); await p.getByText('CLOSED', { exact: true }).waitFor();
 await p.fill('#notice', 'NOTICE-FOUR keep me'); await p.getByRole('button', { name: 'Save notice' }).click(); await p.getByText('Notice saved').waitFor();
@@ -102,7 +102,7 @@ ok(await pp.getByRole('dialog').count() === 0 || !(await pp.getByRole('dialog').
 await patch({ studentMessage: 'PERSONAL-MSG see me after class' });
 await sp.getByText('PERSONAL-MSG see me after class').waitFor({ timeout: 15000 }); ok(true, 'a personal message appears on the student dashboard live');
 await settings({ maxApplications: 1 });
-h4 = await landing(); ok(!h4.includes('APPLY FOR THE COHORT'), 'capacity reached closes applications automatically');
+h4 = await landing(); ok(!h4.includes('APPLY NOW'), 'capacity reached closes applications automatically');
 const full = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(app) }); ok(full.status === 403, 'apply API refuses when full');
 await settings({ maxApplications: 0 });
 const ed = await patch({ edit: { fullName: 'Live Renamed', email: app.about.email, phone: app.about.phone, location: 'Kumasi' } }); ok(ed.status === 200, 'admin can edit applicant details');

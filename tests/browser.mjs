@@ -32,31 +32,31 @@ for (const [name, opts] of Object.entries(VIEWS)) {
 
   const past = await page.evaluate(() => { const W = document.documentElement.clientWidth; return [...document.querySelectorAll('main *')].filter((el) => { if (el.closest('.chips')) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.right > W + 1 || r.left < -1); }).map((el) => `${el.closest('section')?.id || '-'}:${el.tagName.toLowerCase()}.${String(el.className).slice(0, 20)}`).slice(0, 4); });
   ok(past.length === 0, `${name}: no element extends past the screen edge (clipping can hide this) ${past.join(', ')}`);
-  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 11800, `${name}: page length is reasonable (${hgt}px)`);
+  const hgt = await page.evaluate(() => document.documentElement.scrollHeight); if (name.startsWith('android-small')) ok(hgt < 3200, `${name}: the landing page is short (${hgt}px), not a long scroll`);
   ok(await page.evaluate(() => [...document.querySelectorAll('[data-anim]')].every((e) => e.classList.contains('in'))), `${name}: every scroll animation fired (nothing left hidden)`);
-  // interactions
-  await page.locator('#journey .chip').nth(4).click();
-  ok((await page.locator('#stage-panel h3').innerText()) === 'Backend', `${name}: journey stage click reveals Backend`);
-  await page.locator('#journey .chip').nth(4).focus(); await page.keyboard.press('ArrowRight');
-  ok((await page.locator('#stage-panel h3').innerText()) === 'Data', `${name}: journey keyboard arrow`);
-  await page.locator('.days button').nth(9).scrollIntoViewIfNeeded(); await page.locator('.days button').nth(9).click();
-  ok(/20/.test(await page.locator('#commitment [aria-live]').first().innerText()), `${name}: commitment counter shows 20 hours after day 10`);
-  await page.getByRole('tab', { name: 'What you need' }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: 'What you need' }).click();
-  await page.getByRole('button', { name: 'macOS' }).click();
-  ok(/Mac laptops/.test(await page.locator('#delivery').innerText()), `${name}: device selector macOS`);
-  await page.getByRole('button', { name: 'No computer' }).click();
-  ok(/shared computer/.test(await page.locator('#delivery').innerText()), `${name}: device selector no-computer message`);
-  await page.getByRole('tab', { name: /Solution/ }).scrollIntoViewIfNeeded(); await page.getByRole('tab', { name: /Solution/ }).click();
-  ok(/Decide how it would work/.test(await page.locator('#project').innerText()), `${name}: project builder step`);
-  await page.locator('#day30 .present button').first().scrollIntoViewIfNeeded(); await page.locator('#day30 .present button').first().click();
-  ok(/1 of 9/.test(await page.locator('#day30').innerText()), `${name}: day-30 checklist`);
-  const q2 = page.locator('#faq button').nth(3); await q2.scrollIntoViewIfNeeded(); await q2.click();
-  ok((await q2.getAttribute('aria-expanded')) === 'true' && /assigned by SHARIF/.test(await page.locator('#faq').innerText()), `${name}: FAQ accordion`);
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await page.locator('#hero input[type=range]').fill('30');
-  ok(/60 of 60/.test(await page.locator('#hero .tracker').innerText()), `${name}: hero day tracker`);
+  // explorer: one card at a time
+  const ex = page.locator('#explore'); const title = async () => (await ex.locator('.ex-title').innerText()).replace(/\s+/g, ' ');
+  ok(/1\/6 WHAT IS IT/i.test(await title()), `${name}: explorer starts on the first card`);
+  const nxt = () => page.locator('.ex-nav .btn-primary').click();
+  await nxt(); ok(/2\/6 CHOOSE YOUR PATH/i.test(await title()), `${name}: Next moves to the path card`);
+  await ex.locator('.ex-paths button').nth(0).click();
+  ok(/Nothing developer-related is taught/i.test(await ex.locator('.ex-note').innerText()), `${name}: choosing computer skills says nothing developer-related is taught`);
+  await ex.locator('.ex-levels button').nth(0).click();
+  ok(/LCS · Low Computer Skills/i.test(await ex.locator('.ex-result').innerText()), `${name}: level shows the group (LCS · Low Computer Skills)`);
+  ok((await ex.getByRole('link', { name: /APPLY WITH THESE CHOICES/ }).getAttribute('href')) === '/apply?goal=skills&level=none', `${name}: apply link carries the choices`);
+  await ex.locator('.ex-paths button').nth(1).click(); ok(/Starting from zero is fine/i.test(await ex.locator('.ex-note').innerText()), `${name}: software development says starting from zero is fine`);
+  await nxt(); ok(/3\/6 HOW IT WORKS/i.test(await title()), `${name}: card 3`);
+  await ex.locator('.ex-method button').nth(3).click(); ok(/apply it to your own project/i.test(await ex.locator('#how .ex-say').innerText()), `${name}: method step explains itself`);
+  await page.locator('.days button').nth(9).click(); ok(/20/.test(await ex.locator('#commitment [aria-live]').first().innerText()), `${name}: commitment counter shows 20 hours after day 10`);
+  await nxt(); ok(/4\/6 YOUR PROJECT/i.test(await title()), `${name}: card 4`);
+  await page.getByRole('tab', { name: /Solution/ }).click(); ok(/Decide how it would work/.test(await ex.locator('#project').innerText()), `${name}: project builder step`);
+  await nxt(); ok(/5\/6 STRAIGHT ANSWERS/i.test(await title()), `${name}: card 5`);
+  const q2 = ex.getByRole('button', { name: /Can I choose my class time/ }); await q2.click();
+  ok((await q2.getAttribute('aria-expanded')) === 'true' && /assigned by SHARIF/.test(await ex.locator('#faq').innerText()), `${name}: FAQ accordion`);
+  await nxt(); ok(/6\/6 JOIN/i.test(await title()) && await ex.locator('#int-name').isVisible(), `${name}: last card has Apply and the interest form`);
+  await page.keyboard.press('ArrowLeft'); ok(/5\/6/.test(await title()), `${name}: keyboard arrow goes back`);
+  await page.goto(BASE + '/#faq', { waitUntil: 'networkidle' }); ok(/5\/6 STRAIGHT ANSWERS/i.test(await title()), `${name}: a deep link (/#faq) opens that card`);
   if (opts.isMobile) {
-    await page.evaluate(() => window.scrollTo({ top: 1400, behavior: 'instant' })); await page.waitForTimeout(800);
-    ok(await page.locator('.sticky.show').count() === 1, `${name}: sticky mobile CTA appears after hero`);
     await page.locator('.burger').click(); await page.waitForTimeout(300);
     ok(await page.locator('.drawer.open a.btn').isVisible(), `${name}: mobile nav drawer opens with Apply`);
     const dtxt = await page.locator('.drawer.open').innerText(); ok(['Student dashboard', 'My project', 'FAQ', 'Final Project', 'Privacy notice'].every((t) => dtxt.includes(t)), `${name}: hamburger holds all links incl. Student dashboard`);

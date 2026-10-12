@@ -4,11 +4,10 @@ import Logo from './Logo';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-const LINKS = [['/#program', 'The Program', 'program'], ['/#journey', '30 Days', 'journey'], ['/#project', 'Final Project', 'project'], ['/#faq', 'FAQ', 'faq']] as const;
+const LINKS = [['/#what', 'How it works', 'what'], ['/#path', 'Choose your path', 'path'], ['/#project', 'Final Project', 'project'], ['/#faq', 'FAQ', 'faq']] as const;
 
 export default function Header({ open }: { open: boolean }) {
   const [menu, setMenu] = useState(false);
-  const [active, setActive] = useState('');
 
   useEffect(() => {
     document.body.style.overflow = menu ? 'hidden' : '';
@@ -17,14 +16,6 @@ export default function Header({ open }: { open: boolean }) {
     return () => { window.removeEventListener('keydown', esc); document.body.style.overflow = ''; };
   }, [menu]);
 
-  useEffect(() => {
-    const ids = LINKS.map((l) => l[2]);
-    const els = ids.map((i) => document.getElementById(i)).filter(Boolean) as HTMLElement[];
-    if (!els.length) return;
-    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)), { rootMargin: '-40% 0px -55% 0px' });
-    els.forEach((e) => io.observe(e));
-    return () => io.disconnect();
-  }, []);
 
   return (
     <>
@@ -36,7 +27,7 @@ export default function Header({ open }: { open: boolean }) {
             <span style={{ display: 'flex', flexDirection: 'column' }}><b style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Chevron width={24} />FORGE30</b><small>SHARIF TECHNOLOGIES</small></span>
           </Link>
           <nav className="nav" aria-label="Main">
-            {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} aria-current={active === id}>{t}</a>)}
+            {LINKS.map(([h, t, id]) => <a key={id} className="l" href={h} >{t}</a>)}
             <Link className="l" href="/status">Dashboard</Link>
             <Link className="btn btn-amber" href="/apply">{open ? 'APPLY' : 'DASHBOARD'}</Link>
           </nav>
