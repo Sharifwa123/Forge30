@@ -9,6 +9,7 @@ await db.query('DELETE FROM rate_limits');
 const h = await (await fetch(BASE + '/')).text();
 ok(h.includes('Pick your path') && h.includes('Skills Forge') && h.includes('computer skills'), 'landing welcomes computer-skills learners and names both paths');
 ok(!/Developer Forge|developer program/i.test(h), 'landing no longer calls FORGE30 a developer-only program');
+ok(h.includes('nothing developer-related is taught') && h.includes('choose Beginner'), 'landing says computer-skills learners get nothing developer-related, and how a no-skills future developer should apply');
 ok(h.includes('LCS, ICS or ACS'), 'landing explains the LCS / ICS / ACS groups');
 ok(h.includes('Do I have to become a developer?'), 'FAQ answers "do I have to become a developer?"');
 

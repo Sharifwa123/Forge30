@@ -27,7 +27,9 @@ await page.fill('#about-fullName', 'Kwame Asante'); await page.fill('#about-pref
 await page.fill('#about-phone', '12'); await page.fill('#about-email', 'bad'); await page.locator('#about-email').blur();
 ok(await page.getByText('Enter a valid email address').count() === 1, 'step 1: invalid email message on blur');
 await page.fill('#about-phone', '024' + id); await page.fill('#about-email', `kwame${id}@example.com`);
-await page.fill('#about-location', 'Tamale, Northern'); await page.selectOption('#about-ageBracket', '18-24'); await opt('Both'); await opt('Beginner: I have never');
+await page.fill('#about-location', 'Tamale, Northern'); await page.selectOption('#about-ageBracket', '18-24'); await opt('Computer skills:'); ok(await page.getByText('Nothing developer-related is taught on this path').count() === 1, 'step 1: choosing computer skills says nothing developer-related is taught');
+await opt('Software development:'); ok(await page.getByText('Want to be a developer but have no computer skills?').count() === 1, 'step 1: future developers with no skills are told to choose Software development + Beginner');
+await opt('Both'); await opt('Beginner: I have never');
 ok(await page.getByText('Starting from zero is fine').count() === 1, 'step 1: zero-experience reassurance shown (conditional)');
 await cont();
 
