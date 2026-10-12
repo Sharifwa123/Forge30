@@ -11,7 +11,11 @@ import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 const W = 1012, H = 638; // CR80 (3.375 x 2.125 in) at 300 dpi
-const NAVY = '#071230', BRAND = '#1e5ecf', AMBER = '#f6b93b';
+// Two looks: the standard (developer) card, and a teal one for computer-skills learners.
+const THEMES = {
+  dev: { NAVY: '#071230', BRAND: '#1e5ecf', AMBER: '#f6b93b', G2: '#0a1a3f', G3: '#143f93', G3D: '#0b2257', GLOW: 'rgba(30,94,207,0.35)', GLOW3: 'rgba(30,94,207,0.28)', TINT: '#eef3fc', BADGE: 'STUDENT ID CARD', BADGE_INK: '#2a1c00' },
+  skills: { NAVY: '#032622', BRAND: '#0d8a7c', AMBER: '#5eead4', G2: '#06403a', G3: '#0f766e', G3D: '#07423c', GLOW: 'rgba(45,212,191,0.30)', GLOW3: 'rgba(45,212,191,0.24)', TINT: '#ecf8f6', BADGE: 'COMPUTER SKILLS', BADGE_INK: '#022c27' },
+};
 
 const asset = (p: string) => readFile(join(process.cwd(), p));
 const dataUri = (b: Buffer, t: string) => `data:${t};base64,${b.toString('base64')}`;
@@ -28,6 +32,8 @@ export async function GET(req: Request) {
   const [ph] = await q<{ photo: Buffer | null }>('SELECT photo FROM applications WHERE ref=$1', [ref]);
   if (!ph?.photo) return NextResponse.json({ error: 'Upload your passport photo first.' }, { status: 409 });
 
+  const T = THEMES[c.data?.about?.goal === 'skills' ? 'skills' : 'dev']; // only computer-skills applicants get the teal card
+  const { NAVY, BRAND, AMBER } = T;
   const sideParam = u.searchParams.get('side');
   const side = sideParam === 'back' ? 'back' : sideParam === '3d' ? '3d' : 'front';
   const h = req.headers;
@@ -52,8 +58,8 @@ export async function GET(req: Request) {
   const chips = [c.seat && ['SEAT', c.seat], c.group_label && ['GROUP', c.group_label], c.class_code && ['CLASS', c.class_code], ['DATE & TIME', (c.session_time || 'COMING SOON').toUpperCase()]].filter(Boolean) as string[][];
 
   const front = (
-    <div style={{ width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden', color: '#fff', fontFamily: 'Sans', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, #0a1a3f 55%, #143f93 135%)` }}>
-      <div style={{ position: 'absolute', display: 'flex', right: -220, top: -280, width: 640, height: 640, borderRadius: 320, background: 'rgba(30,94,207,0.35)' }} />
+    <div style={{ width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden', color: '#fff', fontFamily: 'Sans', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, ${T.G2} 55%, ${T.G3} 135%)` }}>
+      <div style={{ position: 'absolute', display: 'flex', right: -220, top: -280, width: 640, height: 640, borderRadius: 320, background: T.GLOW }} />
       <div style={{ position: 'absolute', display: 'flex', right: -60, top: -120, width: 360, height: 360, borderRadius: 180, border: '2px solid rgba(255,255,255,0.12)' }} />
       <div style={{ position: 'absolute', display: 'flex', left: 0, top: 0, bottom: 0, width: 14, background: AMBER }} />
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '26px 44px 0 58px' }}>
@@ -66,7 +72,7 @@ export async function GET(req: Request) {
               <div style={{ display: 'flex', fontSize: 13, letterSpacing: 3.5, color: '#9db5e8', fontWeight: 700, marginTop: 6 }}>SHARIF TECHNOLOGIES SKILLS FORGE</div>
             </div>
           </div>
-          <div style={{ display: 'flex', background: AMBER, color: '#2a1c00', fontWeight: 700, fontSize: 16, letterSpacing: 3, padding: '9px 18px', borderRadius: 999 }}>STUDENT ID CARD</div>
+          <div style={{ display: 'flex', background: AMBER, color: T.BADGE_INK, fontWeight: 700, fontSize: 16, letterSpacing: 3, padding: '9px 18px', borderRadius: 999 }}>{T.BADGE}</div>
         </div>
         <div style={{ display: 'flex', marginTop: 22 }}>
           <div style={{ display: 'flex', width: 236, height: 296, padding: 6, borderRadius: 18, background: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.45)' }}>
@@ -102,7 +108,7 @@ export async function GET(req: Request) {
 
   const terms = ['This card identifies the holder as a confirmed participant of FORGE30.', 'It is issued and owned by SHARIF TECHNOLOGIES and is not transferable.', 'Carry it to every in-person session where requested.', 'It does not itself certify completion of the program.', `If found, please return it to SHARIF TECHNOLOGIES${[s.organizer.website && s.organizer.website.replace(/^https?:\/\//, ''), s.organizer.phone, s.organizer.email].filter(Boolean).join(' · ') ? ' — ' + [s.organizer.website && s.organizer.website.replace(/^https?:\/\//, ''), s.organizer.phone, s.organizer.email].filter(Boolean).join(' · ') : ''}.`];
   const back = (
-    <div style={{ width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden', fontFamily: 'Sans', background: '#eef3fc', color: NAVY }}>
+    <div style={{ width: W, height: H, display: 'flex', position: 'relative', overflow: 'hidden', fontFamily: 'Sans', background: T.TINT, color: NAVY }}>
       <div style={{ position: 'absolute', display: 'flex', left: 0, top: 0, right: 0, height: 92, background: NAVY }} />
       <div style={{ position: 'absolute', display: 'flex', left: 0, top: 92, right: 0, height: 6, background: AMBER }} />
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', padding: '0 52px' }}>
@@ -154,8 +160,8 @@ export async function GET(req: Request) {
     const fu = dataUri(f, 'image/png'), bu = dataUri(b, 'image/png');
     const tilt = 'skew(-10deg, 3deg)';
     res = new ImageResponse((
-      <div style={{ width: 1600, height: 1000, display: 'flex', position: 'relative', overflow: 'hidden', fontFamily: 'Sans', color: '#fff', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, #0b2257 60%, #1e5ecf 150%)` }}>
-        <div style={{ position: 'absolute', display: 'flex', left: -200, bottom: -300, width: 900, height: 900, borderRadius: 450, background: 'rgba(30,94,207,0.28)' }} />
+      <div style={{ width: 1600, height: 1000, display: 'flex', position: 'relative', overflow: 'hidden', fontFamily: 'Sans', color: '#fff', backgroundImage: `linear-gradient(135deg, ${NAVY} 0%, ${T.G3D} 60%, ${BRAND} 150%)` }}>
+        <div style={{ position: 'absolute', display: 'flex', left: -200, bottom: -300, width: 900, height: 900, borderRadius: 450, background: T.GLOW3 }} />
         <div style={{ position: 'absolute', display: 'flex', right: -150, top: -250, width: 700, height: 700, borderRadius: 350, border: '2px solid rgba(255,255,255,0.1)' }} />
         <div style={{ position: 'absolute', display: 'flex', left: 520, top: 300, width: 900, transform: `rotate(7deg) ${tilt}`, opacity: 0.92, boxShadow: '0 40px 80px rgba(0,0,0,0.55)', borderRadius: 26 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

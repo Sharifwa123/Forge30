@@ -27,7 +27,7 @@ const tbd = (v: string) => !v || /^to be determined/i.test(v);
 
 type ProjectSummary = { ready: number; started: number; total: number; nextTitle: string | null; title: string; feedback: number; journal: number };
 
-export function Dashboard({ me, settings: s, cardToken, project, rev }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null; rev: string }) {
+export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null; rev: string; budget: { title: string; lines: string[] } | null }) {
   const router = useRouter();
   const idx = STAGES.indexOf(me.status);
   const first = me.name.split(' ')[0];
@@ -60,6 +60,14 @@ export function Dashboard({ me, settings: s, cardToken, project, rev }: { me: Me
       {me.message && <NoticeStack label="Personal message" items={[{ id: 'msg', kind: 'Notice', title: 'A message for you', text: me.message, style: 'important', ctaLabel: '', ctaUrl: '', popup: false }]} />}
       <NoticeStack items={s.items} label="Updates" />
       <NoticePopup items={s.items} />
+
+      {budget && (
+        <section className="panel" aria-label="Project budget" style={{ borderLeft: '6px solid var(--amber)' }}>
+          <div className="eyebrow">For confirmed students</div>
+          <h2 style={{ fontSize: '1.3rem' }}>{budget.title}</h2>
+          {budget.lines.map((l) => <p key={l} style={{ margin: '0 0 8px' }}>{l}</p>)}
+        </section>
+      )}
 
       {project && (
         <section className="panel" aria-label="My project" style={{ borderLeft: '6px solid var(--brand)' }}>

@@ -5,7 +5,7 @@ import { audit, isAdmin, sameOrigin } from '@/lib/security';
 import { STATUSES, aboutSchema, normalizePhone } from '@/lib/schema';
 import { issueCredentials } from '@/lib/card';
 
-const Edit = aboutSchema.pick({ fullName: true, phone: true, email: true, location: true });
+const Edit = aboutSchema.pick({ fullName: true, phone: true, email: true, location: true }).extend({ goal: aboutSchema.shape.goal.optional() });
 const Body = z.object({
   status: z.enum(STATUSES).optional(), adminNotes: z.string().max(5000).optional(), cohortNote: z.string().max(500).optional(),
   seat: z.string().max(20).optional(), cohortLabel: z.string().max(40).optional(), classCode: z.string().max(20).optional(), groupLabel: z.string().max(40).optional(), sessionTime: z.string().max(60).optional(),
@@ -30,7 +30,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (edit) {
       await q(`UPDATE applications SET name=$2, email=$3, phone=$4, location=$5, data=jsonb_set(data,'{about}', COALESCE(data->'about','{}'::jsonb) || $6::jsonb), updated_at=now() WHERE id=$1`,
-        [id, edit.fullName, edit.email, normalizePhone(edit.phone), edit.location, JSON.stringify({ fullName: edit.fullName, email: edit.email, phone: edit.phone, location: edit.location })]);
+        [id, edit.fullName, edit.email, normalizePhone(edit.phone), edit.location, JSON.stringify({ fullName: edit.fullName, email: edit.email, phone: edit.phone, location: edit.location, ...(edit.goal ? { goal: edit.goal } : {}) })]);
     }
   } catch (e: any) {
     if (e?.code === '23505') return NextResponse.json({ error: 'Another applicant already uses that email address or phone number.' }, { status: 409 });

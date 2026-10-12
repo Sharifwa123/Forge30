@@ -10,7 +10,7 @@ const app = { about: { fullName: 'Efua Mensah', phone: '055' + uniq, email: `efu
   availability: { periods: ['evening'], format: 'remote' }, device: { phone: 'android', computer: 'win_laptop', internet: 'reliable', electricity: 'reliable', workspace: 'yes' },
   finish: { certificate: 'yes', budget: 'yes', privacy: true } };
 let r = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify(app) }); const { ref } = await r.json(); ok(!!ref, 'application accepted without any project section: ' + ref);
-r = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify({ ...app, about: { ...app.about, email: `x${uniq}@example.com`, phone: '056' + uniq }, finish: { certificate: 'yes', privacy: true } }) }); ok(r.status === 422, 'GH₵500 budget answer is still required (now on the final step)');
+r = await fetch(BASE + '/api/apply', { method: 'POST', headers: J, body: JSON.stringify({ ...app, about: { ...app.about, email: `x${uniq}@example.com`, phone: '056' + uniq }, finish: { certificate: 'yes', privacy: true } }) }); ok(r.status === 200, 'the budget is no longer asked at application time (applications work without it)');
 const P = (b, h = {}) => fetch(BASE + '/api/student/project', { method: 'POST', headers: { ...J, ...h }, body: JSON.stringify(b) });
 ok((await P({ kind: 'title', title: 'X' })).status === 401, 'project API requires student session');
 r = await fetch(BASE + '/api/status', { method: 'POST', headers: J, body: JSON.stringify({ ref, email: app.about.email }) }); const S = { Cookie: cookieOf(r) };
