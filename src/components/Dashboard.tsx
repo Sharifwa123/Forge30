@@ -1,4 +1,5 @@
 'use client';
+import { GROUP_NAME } from '@/lib/levels';
 import { waLink } from '@/lib/whatsapp';
 import Logo from './Logo';
 import { NoticeStack, type NoticeItem } from './Notices';
@@ -10,7 +11,7 @@ import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
 
-const GROUP_NAME: Record<string, string> = { LCS: 'Low Computer Skills', ICS: 'Intermediate Computer Skills', ACS: 'Advanced Computer Skills' };
+
 type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; cohort: string; classCode: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
 

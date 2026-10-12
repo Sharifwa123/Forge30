@@ -1,15 +1,11 @@
 import { pool } from './db';
+import { groupFor } from './levels';
+export { groupFor };
 
 export const CLASS_SIZE = 15;
 export const GROUPS = { LCS: 'LCS', ICS: 'ICS', ACS: 'ACS' } as const;
 export const COHORTS = { inPerson: 'Wenchi CIC', online: 'Online' } as const;
 
-/** Never used / low skills -> LCS, some practice -> ICS, experienced -> ACS. (Form answer "basic" = comfortable user, not yet a programmer: LCS.) */
-export function groupFor(experience: string | undefined): string {
-  if (experience === 'prior') return GROUPS.ACS;
-  if (experience === 'some') return GROUPS.ICS;
-  return GROUPS.LCS;
-}
 /** In person -> Wenchi CIC; remote -> Online. "Either" is placed Online (no venue seat or travel needed); an admin can move anyone. */
 export function cohortFor(format: string | undefined): string {
   return format === 'in_person' ? COHORTS.inPerson : COHORTS.online;

@@ -13,7 +13,7 @@ const STEPS: { key: StepKey; title: string; short: string }[] = [
   { key: 'commitment', title: 'Your commitment', short: 'Commitment' },
   { key: 'availability', title: 'Availability & format', short: 'Schedule' },
   { key: 'device', title: 'Device & access', short: 'Devices' },
-  { key: 'finish', title: 'Budget, certificate & consent', short: 'Finish' },
+  { key: 'finish', title: 'Certificate & consent', short: 'Finish' },
 ];
 const KEY = 'forge30-draft-v2';
 
@@ -36,6 +36,12 @@ export default function ApplyFlow({ open }: { open: boolean }) {
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (s?.d) { setD({ ...EMPTY, ...s.d }); setStep(s.step ?? 0); if (s.phase === 'form' || s.phase === 'review') setPhase(s.phase); started.current = true; }
+    } catch {}
+    // Choices made in the landing-page explorer (/apply?goal=skills&level=none) fill in the first two questions.
+    try {
+      const q = new URLSearchParams(location.search), goal = q.get('goal') || '', level = q.get('level') || '';
+      const okGoal = ['skills', 'dev', 'both', 'unsure'].includes(goal), okLevel = ['none', 'basic', 'some', 'prior'].includes(level);
+      if (okGoal || okLevel) setD((x: any) => ({ ...x, about: { ...x.about, ...(okGoal && !x.about?.goal ? { goal } : {}), ...(okLevel && !x.about?.experience ? { experience: level } : {}) } }));
     } catch {}
     setHydrated(true);
   }, []);

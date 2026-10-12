@@ -16,7 +16,7 @@ const org = { name: 'SHARIF TECHNOLOGIES', title: 'Founder', bio: 'x', website: 
 // landing copy
 await settings({ organizer: { ...org, whatsapp: '' }, whatsappGroupUrl: '' });
 let h = await (await fetch(BASE + '/')).text();
-ok(h.includes('FORGE30 in 30 seconds') && h.includes('What does it cost?') && h.includes('Leave your WhatsApp number'), 'landing shows the plain-language intro and the interest form');
+ok(h.includes('A live program that teaches you real skills in 30 days') && h.includes('Choose your path') && h.includes('Leave your WhatsApp number'), 'landing shows the plain-language intro and the interest form');
 ok(!h.includes('CHAT WITH US ON WHATSAPP'), 'no WhatsApp chat button until a number is set');
 await settings({ organizer: { ...org, whatsapp: '0241234567' } });
 h = await (await fetch(BASE + '/')).text();
@@ -37,7 +37,7 @@ ok((await db.query('SELECT count(*) n FROM interests')).rows[0].n === '1', 'the 
 const d = '/opt/pw-browsers'; const exe = `${d}/${readdirSync(d).find((x) => x.startsWith('chromium-'))}/chrome-linux/chrome`;
 const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
 const ctx = await browser.newContext({ viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true }); const p = await ctx.newPage();
-await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+await p.goto(BASE + '/#join', { waitUntil: 'networkidle' }); // the form lives on the last explorer card
 await p.locator('#int-name').fill('Kofi Boateng'); await p.locator('#int-wa').fill('0551112223'); await p.getByRole('button', { name: /KEEP ME UPDATED/ }).tap();
 await p.getByText('Thank you, Kofi').waitFor({ timeout: 8000 });
 ok(await p.getByRole('link', { name: 'JOIN THE WHATSAPP GROUP' }).count() === 1, 'sign-up confirmation shows the WhatsApp group link');
