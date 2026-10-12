@@ -3,8 +3,8 @@ import { z } from 'zod';
 export const OPTIONS = {
   ageBracket: [['under18', 'Under 18'], ['18-24', '18–24'], ['25-34', '25–34'], ['35-44', '35–44'], ['45+', '45 or older']],
   goal: [
-    ['skills', 'Computer skills: I want to get confident using computers'],
-    ['dev', 'Software development: I want to learn to build software'],
+    ['skills', 'Computer skills: I want to get confident using computers (nothing developer-related is taught)'],
+    ['dev', 'Software development: I want to learn to build software (you can start from zero)'],
     ['both', 'Both'],
     ['unsure', 'Not sure yet'],
   ],

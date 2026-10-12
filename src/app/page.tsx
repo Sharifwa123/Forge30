@@ -52,7 +52,7 @@ export default async function Home() {
             <div className="hdgs" data-anim="fold" style={{ marginBottom: 14 }}><div className="eyebrow">FORGE30 in 30 seconds</div><h2 style={{ marginBottom: 0 }}>Get real computer skills, or learn to build software, in 30 days.</h2></div>
             <div className="plain" data-anim="rise">
               {[['👤', 'Who is it for?', 'Anyone who wants to get confident with computers or learn to build software. Complete beginners welcome. No experience needed, just commitment.'],
-                ['🧭', 'Pick your path', 'Computer skills or software development. Not sure? Choose “Not sure yet” when you apply. You are placed by level: LCS, ICS or ACS (Low, Intermediate or Advanced Computer Skills).'],
+                ['🧭', 'Pick your path', 'Computer skills (nothing developer-related is taught) or software development (you can start from zero: choose Beginner as your level). Not sure? Choose “Not sure yet”. You are placed by level: LCS, ICS or ACS (Low, Intermediate or Advanced Computer Skills).'],
                 ['📅', 'What do you do?', 'A live two-hour class every day for 30 days: learn, practise, solve, build.'],
                 ['🛠', 'What do you leave with?', 'A real project you made and presented on Day 30, plus practical skills and confidence.'],
                 ['💰', 'What does it cost?', 'No joining fee. Anything you need for your project is explained once your place is confirmed. In person may add travel costs.']].map(([i, h, t]) => (
