@@ -1,4 +1,5 @@
 'use client';
+import { waLink } from '@/lib/whatsapp';
 import Logo from './Logo';
 import { NoticeStack, type NoticeItem } from './Notices';
 import NoticePopup from './NoticePopup';
@@ -213,7 +214,7 @@ function ContactForm({ me }: { me: Me }) {
 
 /* ---------- Organizer ---------- */
 export function OrganizerCard({ o, dark }: { o: Organizer; dark?: boolean }) {
-  const links = [o.website && ['Website', o.website.replace(/^https?:\/\//, ''), o.website], o.email && ['Email', o.email, `mailto:${o.email}`], o.phone && ['Phone', o.phone, `tel:${o.phone.replace(/\s/g, '')}`], o.whatsapp && ['WhatsApp', o.whatsapp, `https://wa.me/${o.whatsapp.replace(/[^\d]/g, '')}`]].filter(Boolean) as string[][];
+  const links = [o.website && ['Website', o.website.replace(/^https?:\/\//, ''), o.website], o.email && ['Email', o.email, `mailto:${o.email}`], o.phone && ['Phone', o.phone, `tel:${o.phone.replace(/\s/g, '')}`], o.whatsapp && ['WhatsApp', o.whatsapp, `${waLink(o.whatsapp)}`]].filter(Boolean) as string[][];
   return (
     <section className="panel" aria-label="Contact the organizer" style={dark ? { background: 'var(--navy-800)', borderColor: 'var(--line-dark)', color: '#fff' } : undefined}>
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { q } from '@/lib/db';
 import { rateLimit, sameOrigin } from '@/lib/security';
 
-const NAMES = new Set(['landing_viewed', 'details_viewed', 'gate_passed', 'application_started', 'step_completed', 'application_abandoned', 'application_submitted']);
+const NAMES = new Set(['landing_viewed', 'details_viewed', 'gate_passed', 'application_started', 'step_completed', 'application_abandoned', 'application_submitted', 'interest_submitted', 'whatsapp_clicked']);
 const STEPS = new Set(['about', 'commitment', 'availability', 'device', 'project', 'finish', 'review']);
 
 // No personal data: only an event name and an optional step name.

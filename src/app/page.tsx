@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Chevron from '@/components/Chevron';
+import InterestForm, { WhatsAppChat } from '@/components/Interest';
 import Logo from '@/components/Logo';
 import Header from '@/components/Header';
 import Enhance from '@/components/Enhance';
@@ -26,7 +27,7 @@ export default async function Home() {
         <NoticeStack items={items} />
         <NoticePopup items={items} />
 
-        <section id="hero" className="hero">
+        <section id="hero" className="hero" style={{ paddingBottom: 56 }}>
           <div className="wrap">
             <div>
               <Logo size={168} className="hero-logo" priority />
@@ -37,20 +38,29 @@ export default async function Home() {
               <div className="cta-row">
                 <Link href={open ? '/apply' : '/status'} className="btn btn-primary">{CTA} <span className="arrow">→</span></Link>
                 <a href="#program" className="btn btn-ghost">SEE HOW IT WORKS</a>
+                <WhatsAppChat number={s.organizer.whatsapp} />
               </div>
+              <p className="note hero-int"><a href="#interest">Not ready to apply yet? Leave your WhatsApp number →</a></p>
               {!open && <p className="note" style={{ marginTop: 18 }}>Applications are closed for now. Submitted an application? Open your student dashboard for updates.</p>}
             </div>
             <DayTracker />
           </div>
         </section>
 
-        <div className="stats"><div className="wrap">
-          <div className="strip" role="list" data-anim="zoom">
-            {[['30', 'Days'], ['60', 'Hours'], ['2', 'Hours / day'], ['Live', '& practical'], ['1', 'Final project']].map(([n, t]) => (
-              <div className="s" role="listitem" key={t}><div className="n">{n}</div><div className="t">{t}</div></div>
-            ))}
+        <section id="simple" className="paper" style={{ paddingBlock: 32 }}>
+          <div className="wrap">
+            <div className="hdgs" data-anim="fold" style={{ marginBottom: 14 }}><div className="eyebrow">FORGE30 in 30 seconds</div><h2 style={{ marginBottom: 0 }}>Learn to build real software in 30 days.</h2></div>
+            <div className="plain" data-anim="rise">
+              {[['👤', 'Who is it for?', 'Anyone who wants to build software, even complete beginners. No experience needed, just commitment.'],
+                ['📅', 'What do you do?', 'A live two-hour class every day for 30 days: learn, practise, solve, build.'],
+                ['🛠', 'What do you leave with?', 'A real project you built and presented on Day 30, plus practical skills and confidence.'],
+                ['💰', 'What does it cost?', 'No joining fee. Plan for about GH₵500 for your project. In person may add travel costs.']].map(([i, h, t]) => (
+                <div className="pl" key={h}><span aria-hidden>{i}</span><div><h3>{h}</h3><p>{t}</p></div></div>
+              ))}
+            </div>
+            <p className="note" style={{ marginTop: 14, marginBottom: 0 }}>Classes have a maximum of 15 people. Applications are reviewed first, and selection is not guaranteed.</p>
           </div>
-        </div></div>
+        </section>
 
         <section id="program" className="tint">
           <div className="wrap grid g2" style={{ alignItems: 'center', gap: 36 }}>
@@ -132,6 +142,15 @@ export default async function Home() {
 
         <section id="faq" className="paper">
           <div className="wrap"><div className="hdgs" data-anim="fold"><div className="eyebrow">Questions</div><h2>Straight answers.</h2></div><div data-anim="rise"><Faq /></div></div>
+        </section>
+
+        <section id="interest" className="tint" style={{ paddingBlock: 32 }}>
+          <div className="wrap" style={{ maxWidth: 720 }}>
+            <h2 style={{ marginBottom: 6, fontSize: 'clamp(1.5rem,5vw,2rem)' }}>Not sure yet? Leave your WhatsApp number.</h2>
+            <p style={{ marginTop: 0 }}>It takes 20 seconds. No application, no commitment. We will explain everything.</p>
+            <InterestForm open={open} />
+            {s.organizer.whatsapp && <p style={{ margin: '12px 0 0' }}>Prefer to talk now? <WhatsAppChat number={s.organizer.whatsapp} className="btn btn-line sm" label="CHAT ON WHATSAPP" /></p>}
+          </div>
         </section>
 
         <section id="final-cta" className="hero" style={{ paddingBottom: 70 }}>

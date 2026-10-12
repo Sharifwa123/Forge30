@@ -13,6 +13,7 @@ const NoticeFields = z.object({ title: text(120), text: text(1500), style, ctaLa
 
 const Body = z.object({
   applicationsOpen: z.boolean().optional(),
+  whatsappGroupUrl: z.string().max(300).transform((s) => s.trim()).refine((v) => v === '' || /^https:\/\/(chat\.whatsapp\.com|wa\.me|whatsapp\.com)\//i.test(v), 'Use a WhatsApp link that starts with https://chat.whatsapp.com/').optional(),
   maxApplications: z.number().int().min(0).max(100000).optional(),
   notice: text(1500).optional(),
   noticeTitle: text(120).optional(), noticeStyle: style.optional(), noticeCtaLabel: text(40).optional(), noticeCtaUrl: url.optional(), noticePopup: z.boolean().optional(),
