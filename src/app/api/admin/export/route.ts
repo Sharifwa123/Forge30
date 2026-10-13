@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const sp = new URL(req.url).searchParams;
   const f: Filters = {};
-  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'sort'] as const) { const v = sp.get(k); if (v) f[k] = v; }
+  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'sort', 'photo'] as const) { const v = sp.get(k); if (v) f[k] = v; }
   const ids = (sp.get('ids') || '').split(',').filter((x) => /^\d+$/.test(x)).map(Number);
   const all = await listApplications(f, 5000);
   const rows = ids.length ? all.filter((r: any) => ids.includes(Number(r.id))) : all;

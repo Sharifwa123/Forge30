@@ -21,7 +21,7 @@ export function nextSeat(used: Iterable<string>): string | null {
 type PRow = { id: string; status: string; exp: string | null; fmt: string | null; pinned: boolean; cohort_label: string; group_label: string; class_code: string; seat: string; student_id: string | null; confirmed_at: Date | null };
 const INACTIVE = new Set(['withdrawn', 'not_selected']);
 
-/** Pure layout: given everyone in application order, work out each person's cohort, group, class and seat. Rows an admin placed by hand ("pinned") are left alone and their seats stay reserved. */
+/** Pure layout: given everyone in queue order (application order; anyone who comes back after being withdrawn joins the end of the queue), work out each person's cohort, group, class and seat. Rows an admin placed by hand ("pinned") are left alone and their seats stay reserved. */
 export function layout(rows: Pick<PRow, 'id' | 'status' | 'exp' | 'fmt' | 'pinned' | 'class_code' | 'seat'>[]) {
   const reserved = new Map<string, Set<string>>();
   for (const r of rows) if (r.pinned && !INACTIVE.has(r.status) && r.class_code && r.seat) { if (!reserved.has(r.class_code)) reserved.set(r.class_code, new Set()); reserved.get(r.class_code)!.add(r.seat); }
@@ -58,7 +58,7 @@ export async function repack(): Promise<number> {
   try {
     await c.query('BEGIN');
     await c.query('SELECT pg_advisory_xact_lock(3030)');
-    const { rows } = await c.query<PRow>(`SELECT id, status, data->'about'->>'experience' AS exp, data->'availability'->>'format' AS fmt, placement_pinned AS pinned, cohort_label, group_label, class_code, seat, student_id, confirmed_at FROM applications ORDER BY created_at, id`);
+    const { rows } = await c.query<PRow>(`SELECT id, status, data->'about'->>'experience' AS exp, data->'availability'->>'format' AS fmt, placement_pinned AS pinned, cohort_label, group_label, class_code, seat, student_id, confirmed_at FROM applications ORDER BY queue_at, created_at, id`);
     const place = layout(rows); const ids = numbering(rows, String(new Date().getFullYear()).slice(2));
     const changes: { r: PRow; cohort: string; group: string; code: string; seat: string; sid: string | null; note: string }[] = [];
     for (const r of rows) {

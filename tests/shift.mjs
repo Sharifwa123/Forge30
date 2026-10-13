@@ -35,28 +35,28 @@ ok((await row(d)).note === '', 'someone whose place did not move gets no note');
 const dash = await (await fetch(BASE + '/dashboard', { headers: { Cookie: b.cookie } })).text();
 ok(dash.includes('Your place has moved') && dash.includes('F30-001'), 'the student sees the change on their dashboard');
 
-// bring the first back: they take their original place and the others shift down again
+// bring the first back: they do NOT take their old place back, they join the end of the queue (next free seat)
 await patch(a, { status: 'submitted' });
-ok(await seats(a, b, c) === 'F30-001/B-01 F30-001/B-02 F30-001/B-03', 're-instating the first applicant puts everyone back in application order');
+ok(await seats(b, c, a) === 'F30-001/B-01 F30-001/B-02 F30-001/B-03', 're-instating the first applicant puts them at the end: nobody else is pushed down');
 
-// delete the first: shifts up again
-await fetch(`${BASE}/api/admin/applicants/${a.id}`, { method: 'DELETE', headers: { ...J, ...A } });
-ok(await seats(b, c) === 'F30-001/B-01 F30-001/B-02', 'deleting an applicant moves the others up');
+// delete the one at the front: the others move up
+await fetch(`${BASE}/api/admin/applicants/${b.id}`, { method: 'DELETE', headers: { ...J, ...A } });
+ok(await seats(c, a) === 'F30-001/B-01 F30-001/B-02', 'deleting an applicant moves the others up');
 
 // student IDs: gapless, in confirmation order, and they close up too
-await patch(c, { status: 'confirmed' }); await patch(b, { status: 'confirmed' }); await patch(d, { status: 'confirmed' });
+await patch(c, { status: 'confirmed' }); await patch(a, { status: 'confirmed' }); await patch(d, { status: 'confirmed' });
 const ids = async (...xs) => (await Promise.all(xs.map(async (x) => (await row(x)).sid.slice(-4)))).join(' ');
-ok(await ids(c, b, d) === '0001 0002 0003', 'student IDs run 0001, 0002, 0003 in confirmation order with no gaps');
+ok(await ids(c, a, d) === '0001 0002 0003', 'student IDs run 0001, 0002, 0003 in confirmation order with no gaps');
 await patch(c, { status: 'withdrawn' });
-ok(await ids(b, d) === '0001 0002', 'withdrawing a confirmed student closes the gap in student IDs');
+ok(await ids(a, d) === '0001 0002', 'withdrawing a confirmed student closes the gap in student IDs');
 ok(/student ID changed/i.test((await row(d)).note || ''), 'students whose ID changed are told');
 
 // a hand-placed (pinned) applicant is left alone by re-sorting
 const e = await apply(); await patch(e, { classCode: 'F30-009', seat: 'B-07' });
-await patch(b, { adminNotes: 'x' });
+await patch(a, { adminNotes: 'x' });
 ok(await seats(e) === 'F30-009/B-07', 'an applicant placed by hand keeps their class and seat when others change');
 await patch(e, { unpin: true });
-ok((await row(e)).k === 'F30-001', 'an admin can put them back on automatic placement');
+{ const [re, ra] = [await row(e), await row(a)]; ok(re.k === ra.k && re.s !== ra.s && re.k !== 'F30-009', 'an admin can put them back on automatic placement (they join their group’s class at the next free seat)'); }
 
 // two people applying at the same moment never share a seat
 const burst = await Promise.all([apply(), apply(), apply(), apply(), apply()]);
@@ -68,4 +68,14 @@ const fd = new FormData(); fd.append('photo', new File([jpeg], 'p.jpg', { type: 
 const up = await fetch(BASE + '/api/student/photo', { method: 'POST', headers: { Origin: BASE, Cookie: burst[0].cookie }, body: fd });
 ok(up.status === 200 && (await db.query('SELECT photo IS NOT NULL p FROM applications WHERE id=$1', [burst[0].id])).rows[0].p, 'the photo sent with the application is stored for the card');
 const noSession = await fetch(BASE + '/api/student/photo', { method: 'POST', headers: { Origin: BASE }, body: fd }); ok(noSession.status === 401, 'the photo endpoint needs the applicant’s session');
+
+// applicants who applied before the photo step (waiting for confirmation) are asked for it, and admin can see who is missing
+const w = await apply(); await db.query('UPDATE applications SET photo=NULL, photo_at=NULL WHERE id=$1', [w.id]);
+const wd = await (await fetch(BASE + '/dashboard', { headers: { Cookie: w.cookie } })).text();
+ok(wd.includes('Add your passport photo') && wd.includes('One thing left'), 'a waiting applicant without a photo is asked for it on their dashboard');
+const fd2 = new FormData(); fd2.append('photo', new File([jpeg], 'p.jpg', { type: 'image/jpeg' }));
+await fetch(BASE + '/api/student/photo', { method: 'POST', headers: { Origin: BASE, Cookie: w.cookie }, body: fd2 });
+const wd2 = await (await fetch(BASE + '/dashboard', { headers: { Cookie: w.cookie } })).text(); ok(!wd2.includes('One thing left'), 'once they add it, the request disappears');
+await db.query('UPDATE applications SET photo=NULL, photo_at=NULL WHERE id=$1', [w.id]);
+const miss = await (await fetch(BASE + '/admin?photo=missing', { headers: A })).text(); ok(miss.includes(`/admin/applicants/${w.id}`), 'admin can filter applicants who have no photo yet');
 await db.end(); console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED'); process.exit(fails ? 1 : 0);

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   if (p.data.autoPlace) { const n = await repack(); await audit('application.auto_place', undefined, { placed: n }); return NextResponse.json({ ok: true, updated: n }); }
   let n = 0;
   if (status) {
-    n = (await q('UPDATE applications SET status=$2, updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, status])).length;
+    n = (await q('UPDATE applications SET queue_at = CASE WHEN status IN (\'withdrawn\',\'not_selected\') AND $2::text NOT IN (\'withdrawn\',\'not_selected\') THEN now() ELSE queue_at END, status=$2, updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, status])).length;
     if (status === 'confirmed') await issueCredentials(ids);
   }
   if (assign) {

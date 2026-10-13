@@ -32,6 +32,8 @@ type ProjectSummary = { ready: number; started: number; total: number; nextTitle
 export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null; rev: string; budget: { title: string; lines: string[] } | null }) {
   const router = useRouter();
   const pl: NoticeItem[] = me.placementNote ? [{ id: 'placement-' + me.placementAt, kind: 'Notice', title: 'Your place has moved', text: me.placementNote, style: 'important', ctaLabel: '', ctaUrl: '', popup: true }] : [];
+  const needsPhoto = !me.hasPhoto && !['confirmed', 'withdrawn', 'not_selected'].includes(me.status);
+  const photoAsk: NoticeItem[] = needsPhoto ? [{ id: 'photo-ask', kind: 'Notice', title: 'Please add your passport photo', text: 'Your student card is prepared automatically as soon as your place is confirmed, and it needs your photo. You can add it now, from the panel on this page, so you do not have to wait.', style: 'important', ctaLabel: '', ctaUrl: '', popup: true }] : [];
   const idx = STAGES.indexOf(me.status);
   const first = me.name.split(' ')[0];
   return (
@@ -63,9 +65,9 @@ export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: 
       {me.message && <NoticeStack label="Personal message" items={[{ id: 'msg', kind: 'Notice', title: 'A message for you', text: me.message, style: 'important', ctaLabel: '', ctaUrl: '', popup: false }]} />}
       {pl.length > 0 && <NoticeStack label="Placement update" items={pl} />}
       <NoticeStack items={s.items} label="Updates" />
-      <NoticePopup items={[...pl, ...s.items]} />
+      <NoticePopup items={[...pl, ...photoAsk, ...s.items]} />
 
-      {!me.hasPhoto && !['confirmed', 'withdrawn', 'not_selected'].includes(me.status) && <EarlyPhoto />}
+      {needsPhoto && <EarlyPhoto />}
 
       {budget && (
         <section className="panel" aria-label="Project budget" style={{ borderLeft: '6px solid var(--amber)' }}>

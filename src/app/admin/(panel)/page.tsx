@@ -7,7 +7,7 @@ import ApplicantTable from '@/components/admin/ApplicantTable';
 export default async function Admin({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
   const f: Filters = {};
-  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'goal', 'cohort', 'group', 'cls', 'sort'] as const) if (sp[k]) f[k] = sp[k]!.slice(0, 100);
+  for (const k of ['search', 'status', 'location', 'device', 'format', 'period', 'certificate', 'contrib', 'photo', 'goal', 'cohort', 'group', 'cls', 'sort'] as const) if (sp[k]) f[k] = sp[k]!.slice(0, 100);
   const [rows, counts] = await Promise.all([listApplications(f), q<{ status: string; n: string }>('SELECT status, count(*) n FROM applications GROUP BY status')]);
   const total = counts.reduce((a, c) => a + Number(c.n), 0);
   const qs = new URLSearchParams(Object.entries(f).filter(([, v]) => v) as [string, string][]).toString();
@@ -27,6 +27,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<Re
         <select name="period" defaultValue={f.period ?? ''} aria-label="Availability"><option value="">Any availability</option>{OPTIONS.period.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         <select name="contrib" defaultValue={f.contrib ?? ''} aria-label="Contribution preference"><option value="">Any contribution pref.</option>{OPTIONS.contribPref.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         <select name="certificate" defaultValue={f.certificate ?? ''} aria-label="Certificate"><option value="">Any certificate pref.</option>{OPTIONS.certificate.map(([v, l]) => <option key={v} value={v}>Certificate: {l}</option>)}</select>
+        <select name="photo" defaultValue={f.photo ?? ''} aria-label="Photo"><option value="">Any photo status</option><option value="missing">No photo yet</option></select>
         <select name="goal" defaultValue={f.goal ?? ''} aria-label="Goal"><option value="">Any goal</option>{OPTIONS.goal.map(([v, l]) => <option key={v} value={v}>{l.split(':')[0]}</option>)}</select>
         <select name="cohort" defaultValue={f.cohort ?? ''} aria-label="Cohort"><option value="">Any cohort</option><option>Wenchi CIC</option><option>Online</option></select>
         <select name="group" defaultValue={f.group ?? ''} aria-label="Group"><option value="">Any group</option><option>LCS</option><option>ICS</option><option>ACS</option></select>
@@ -36,7 +37,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<Re
         <Link className="btn btn-line sm" href="/admin">Clear</Link>
         <a className="btn btn-line sm" href={`/api/admin/export?${qs}`}>Export CSV ({rows.length})</a>
       </form>
-      <ApplicantTable rows={rows.map((r) => ({ id: Number(r.id), ref: r.ref, name: r.name, email: r.email, phone: r.phone, location: r.location, status: r.status, created: new Date(r.created_at).toLocaleDateString('en-GB'), format: label('format', r.data.availability.format), computer: label('computer', r.data.device.computer), periods: r.data.availability.periods.join(', '), contrib: r.data.availability.contribRange ? label('contribRange', r.data.availability.contribRange) : '—', commit: r.data.commitment.seriousness, place: [r.cohort_label, r.group_label, r.class_code, r.seat].filter(Boolean).join(' · ') || 'Not placed' }))} />
+      <ApplicantTable rows={rows.map((r) => ({ id: Number(r.id), ref: r.ref, name: r.name, email: r.email, phone: r.phone, location: r.location, status: r.status, created: new Date(r.created_at).toLocaleDateString('en-GB'), format: label('format', r.data.availability.format), computer: label('computer', r.data.device.computer), periods: r.data.availability.periods.join(', '), contrib: r.data.availability.contribRange ? label('contribRange', r.data.availability.contribRange) : '—', commit: r.data.commitment.seriousness, photo: !!r.has_photo, place: [r.cohort_label, r.group_label, r.class_code, r.seat].filter(Boolean).join(' · ') || 'Not placed' }))} />
     </>
   );
 }
