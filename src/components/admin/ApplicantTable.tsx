@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useDialog } from '../Dialog';
 import { STATUSES, STATUS_LABEL } from '@/lib/schema';
 
-type Row = { id: number; ref: string; name: string; email: string; phone: string; location: string; status: string; created: string; format: string; computer: string; periods: string; contrib: string; commit: string; place: string };
+type Row = { id: number; ref: string; name: string; email: string; phone: string; location: string; status: string; created: string; format: string; computer: string; periods: string; contrib: string; commit: string; place: string; photo: boolean };
 
 export default function ApplicantTable({ rows }: { rows: Row[] }) {
   const [sel, setSel] = useState<Set<number>>(new Set());
@@ -47,15 +47,15 @@ export default function ApplicantTable({ rows }: { rows: Row[] }) {
       {msg && <div className="info blue" role="status">{msg}</div>}
       <div className="tbl-wrap">
         <table>
-          <thead><tr><th><input type="checkbox" checked={all} aria-label="Select all" onChange={() => setSel(all ? new Set() : new Set(rows.map((x) => x.id)))} /></th><th>Applicant</th><th>Location</th><th>Status</th><th>Placement</th><th>Format</th><th>Computer</th><th>Availability</th><th>Contribution</th><th>Seriousness</th><th>Date</th></tr></thead>
+          <thead><tr><th><input type="checkbox" checked={all} aria-label="Select all" onChange={() => setSel(all ? new Set() : new Set(rows.map((x) => x.id)))} /></th><th>Applicant</th><th>Location</th><th>Status</th><th>Photo</th><th>Placement</th><th>Format</th><th>Computer</th><th>Availability</th><th>Contribution</th><th>Seriousness</th><th>Date</th></tr></thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan={11} style={{ padding: 28, textAlign: 'center' }}>No applicants match.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={12} style={{ padding: 28, textAlign: 'center' }}>No applicants match.</td></tr>}
             {rows.map((x) => (
               <tr key={x.id}>
                 <td><input type="checkbox" checked={sel.has(x.id)} onChange={() => toggle(x.id)} aria-label={`Select ${x.name}`} /></td>
                 <td><Link href={`/admin/applicants/${x.id}`}><b>{x.name}</b></Link><div style={{ color: 'var(--muted)', fontSize: 13 }}>{x.ref} · {x.phone}</div></td>
                 <td>{x.location}</td><td><span className={'pill ' + x.status}>{STATUS_LABEL[x.status as keyof typeof STATUS_LABEL]}</span></td>
-                <td style={{ fontSize: 13 }}>{x.place}</td><td>{x.format}</td><td>{x.computer}</td><td>{x.periods}</td><td>{x.contrib}</td><td style={{ fontSize: 13 }}>{x.commit}</td><td>{x.created}</td>
+                <td>{x.photo ? '✓' : <span title="No photo yet" style={{ color: 'var(--err)', fontWeight: 700 }}>—</span>}</td><td style={{ fontSize: 13 }}>{x.place}</td><td>{x.format}</td><td>{x.computer}</td><td>{x.periods}</td><td>{x.contrib}</td><td style={{ fontSize: 13 }}>{x.commit}</td><td>{x.created}</td>
               </tr>
             ))}
           </tbody>
