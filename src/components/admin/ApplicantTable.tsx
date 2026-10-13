@@ -43,7 +43,7 @@ export default function ApplicantTable({ rows }: { rows: Row[] }) {
           </div>
         </div>
       )}
-      <div style={{ marginBottom: 12 }}><button className="btn btn-line sm" onClick={async () => { const res = await fetch('/api/admin/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [1], autoPlace: true }) }); const j = await res.json().catch(() => ({})); setMsg(res.ok ? `Placed ${j.updated} unplaced applicant(s)` : 'Failed'); if (res.ok) r.refresh(); }}>Auto-place unplaced applicants</button></div>
+      <div style={{ marginBottom: 12 }}><button className="btn btn-line sm" onClick={async () => { const res = await fetch('/api/admin/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: [1], autoPlace: true }) }); const j = await res.json().catch(() => ({})); setMsg(res.ok ? `Placements recalculated: ${j.updated} change${j.updated === 1 ? '' : 's'}` : 'Failed'); if (res.ok) r.refresh(); }}>Recalculate placements</button></div>
       {msg && <div className="info blue" role="status">{msg}</div>}
       <div className="tbl-wrap">
         <table>

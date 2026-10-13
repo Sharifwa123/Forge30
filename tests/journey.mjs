@@ -1,4 +1,5 @@
 // Applicant + admin journeys in a real (mobile) browser. BASE=... ADMIN_PASSWORD=... node tests/journey.mjs
+import sharp from 'sharp';
 import { chromium } from 'playwright-core';
 import { readdirSync } from 'node:fs';
 const BASE = process.env.BASE || 'http://localhost:3000', PW = process.env.ADMIN_PASSWORD, OUT = process.env.OUT || '/tmp/shots';
@@ -75,8 +76,12 @@ await page.locator('fieldset[data-field="device-workspace"] label.opt').first().
 await cont();
 
 // Step 5 (finish): certificate, consent (the GH₵500 budget is no longer asked or shown before admission)
-await cont(); ok(await page.locator('.error').count() === 2, 'finish: certificate and consent required');
+await cont(); ok(await page.locator('.error').count() === 3, 'finish: photo, certificate and consent all required');
 ok((await page.locator('body').innerText()).includes('GH₵500') === false, 'finish: no GH₵500 budget shown before admission');
+// the passport photo is taken as part of the application (so the card is ready as soon as the place is confirmed)
+await page.locator('#photo-field-file').setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: await sharp({ create: { width: 600, height: 800, channels: 3, background: '#8aa9e6' } }).jpeg().toBuffer() });
+{ const prep = page.locator('dialog.prep'); await prep.waitFor({ timeout: 15000 }); await prep.getByRole('button', { name: 'Use this photo' }).tap(); await prep.waitFor({ state: 'detached' }); }
+ok(await page.getByAltText('Your passport photo preview').count() === 1, 'finish: the photo preview shows after preparing it');
 await page.locator('fieldset[data-field="finish-certificate"] label.opt', { hasText: 'Yes' }).tap();
 await cont(); ok(await page.getByText('You must agree to the privacy notice').count() === 1, 'finish: privacy consent required');
 await page.locator('#finish-privacy').evaluate((el) => el.closest('label').click());
@@ -99,6 +104,7 @@ ok(await page.getByText('could not reach the server').count() === 1, 'offline su
 await ctx.setOffline(false);
 await page.getByRole('button', { name: 'SUBMIT APPLICATION' }).tap();
 await page.getByRole('heading', { name: 'APPLICATION RECEIVED' }).waitFor({ timeout: 10000 });
+ok(await page.getByText('Your passport photo was received').count() === 1, 'done: the photo was uploaded with the application');
 const done = await page.locator('.form-card').innerText();
 ok(/F30-[0-9A-F]{8}/.test(done) && done.includes('does not guarantee selection') && !/enrolled\./i.test(done.replace('not enrolled', '')), 'confirmation: ref code, no guarantee, not "enrolled"');
 ok(await page.evaluate(() => localStorage.getItem('forge30-draft-v1')) === null, 'draft cleared after submission');

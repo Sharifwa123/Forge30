@@ -10,9 +10,10 @@ import { CONTACT_METHODS, CONTACT_TIMES, STATUS_LABEL, type Status } from '@/lib
 import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
+import PhotoField from './PhotoField';
 
 
-type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; cohort: string; classCode: string; session: string; message: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
+type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; cohort: string; classCode: string; session: string; message: string; placementNote: string; placementAt: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
 type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
@@ -30,6 +31,7 @@ type ProjectSummary = { ready: number; started: number; total: number; nextTitle
 
 export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: { me: Me; settings: S; cardToken: string | null; project: ProjectSummary | null; rev: string; budget: { title: string; lines: string[] } | null }) {
   const router = useRouter();
+  const pl: NoticeItem[] = me.placementNote ? [{ id: 'placement-' + me.placementAt, kind: 'Notice', title: 'Your place has moved', text: me.placementNote, style: 'important', ctaLabel: '', ctaUrl: '', popup: true }] : [];
   const idx = STAGES.indexOf(me.status);
   const first = me.name.split(' ')[0];
   return (
@@ -59,8 +61,11 @@ export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: 
       </section>
 
       {me.message && <NoticeStack label="Personal message" items={[{ id: 'msg', kind: 'Notice', title: 'A message for you', text: me.message, style: 'important', ctaLabel: '', ctaUrl: '', popup: false }]} />}
+      {pl.length > 0 && <NoticeStack label="Placement update" items={pl} />}
       <NoticeStack items={s.items} label="Updates" />
-      <NoticePopup items={s.items} />
+      <NoticePopup items={[...pl, ...s.items]} />
+
+      {!me.hasPhoto && !['confirmed', 'withdrawn', 'not_selected'].includes(me.status) && <EarlyPhoto />}
 
       {budget && (
         <section className="panel" aria-label="Project budget" style={{ borderLeft: '6px solid var(--amber)' }}>
@@ -108,6 +113,25 @@ export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: 
 }
 
 const Fact = ({ k, v, dim }: { k: string; v: string; dim?: boolean }) => <div><div style={{ fontSize: '.75rem', fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>{k}</div><div style={{ fontWeight: 600, color: dim || tbd(v) ? 'var(--muted)' : 'var(--ink)' }}>{v}</div></div>;
+
+/** For applicants whose photo did not upload with the application: add it now so the card is ready the moment they are confirmed. */
+function EarlyPhoto() {
+  const [b, setB] = useState<Blob | null>(null); const [busy, setBusy] = useState(false); const [err, setErr] = useState(''); const r = useRouter();
+  async function save() {
+    if (!b) return; setBusy(true); setErr('');
+    try { const fd = new FormData(); fd.append('photo', b, 'photo.jpg'); const res = await fetch('/api/student/photo', { method: 'POST', body: fd }); const j = await res.json().catch(() => ({})); if (!res.ok) setErr(j.error || 'Upload failed. Please try again.'); else r.refresh(); } catch { setErr('No connection. Please try again.'); }
+    setBusy(false);
+  }
+  return (
+    <section className="panel" aria-label="Add your photo" style={{ borderLeft: '6px solid var(--amber)' }}>
+      <div className="eyebrow">One thing left</div>
+      <h2 style={{ fontSize: '1.3rem' }}>Add your passport photo</h2>
+      <p style={{ marginTop: 0 }}>Your student card is prepared automatically once your place is confirmed, and it needs your photo.</p>
+      <PhotoField blob={b} onBlob={setB} error={err} />
+      {b && <button className="btn btn-primary" onClick={save} disabled={busy}>{busy ? 'SAVING…' : 'SAVE MY PHOTO'}</button>}
+    </section>
+  );
+}
 
 /* ---------- Student card: passport photo upload, preview, download ---------- */
 function Flip3D({ front, back, alt }: { front: string; back: string; alt: string }) {

@@ -71,7 +71,7 @@ await sp.evaluate(() => { window.__marker = 'not-reloaded'; });
 ok(await sp.getByText('card unlocks here once your place is', { exact: false }).count() === 1 || await sp.getByText('unlocks here once your place is').count() === 1, 'student starts with the card locked (not confirmed yet)');
 // admin confirms -> the card panel appears on its own
 await patch({ status: 'confirmed', seat: 'B-7', groupLabel: 'Group A', sessionTime: '6:00-8:00 PM' });
-await sp.getByText('Add your passport photo').waitFor({ timeout: 15000 });
+await sp.getByText('Your project budget').waitFor({ timeout: 15000 }); // shown only once confirmed
 ok(await sp.evaluate(() => window.__marker) === 'not-reloaded', 'confirming an applicant unlocks their card on the open page without a reload');
 ok(await sp.getByText('B-7').count() >= 1 && await sp.getByText('Group A').count() >= 1 && await sp.getByText('6:00-8:00 PM').count() >= 1, 'assigned seat, group and class time appear automatically');
 // give them a photo, then change things and watch the card images re-fetch

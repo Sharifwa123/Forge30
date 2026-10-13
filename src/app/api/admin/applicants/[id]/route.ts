@@ -4,12 +4,13 @@ import { q } from '@/lib/db';
 import { audit, isAdmin, sameOrigin } from '@/lib/security';
 import { STATUSES, aboutSchema, normalizePhone } from '@/lib/schema';
 import { issueCredentials } from '@/lib/card';
+import { repack } from '@/lib/placement';
 
 const Edit = aboutSchema.pick({ fullName: true, phone: true, email: true, location: true }).extend({ goal: aboutSchema.shape.goal.optional() });
 const Body = z.object({
   status: z.enum(STATUSES).optional(), adminNotes: z.string().max(5000).optional(), cohortNote: z.string().max(500).optional(),
   seat: z.string().max(20).optional(), cohortLabel: z.string().max(40).optional(), classCode: z.string().max(20).optional(), groupLabel: z.string().max(40).optional(), sessionTime: z.string().max(60).optional(),
-  studentMessage: z.string().max(1000).optional(), removePhoto: z.boolean().optional(), edit: Edit.optional(),
+  studentMessage: z.string().max(1000).optional(), removePhoto: z.boolean().optional(), unpin: z.boolean().optional(), edit: Edit.optional(),
 });
 
 async function guard(ctx: { params: Promise<{ id: string }> }) {
@@ -24,9 +25,12 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const g = await guard(ctx); if (g.err) return g.err; const id = g.id!;
   const p = Body.safeParse(await req.json().catch(() => null));
   if (!p.success) return NextResponse.json({ error: p.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
-  const { status, adminNotes, cohortNote, cohortLabel, classCode, seat, groupLabel, sessionTime, studentMessage, removePhoto, edit } = p.data;
+  const { status, adminNotes, cohortNote, cohortLabel, classCode, seat, groupLabel, sessionTime, studentMessage, removePhoto, unpin, edit } = p.data;
+  // Changing someone's cohort, class, seat or group by hand "pins" them: automatic re-sorting leaves them where the admin put them.
+  const [cur] = await q<any>('SELECT cohort_label, class_code, seat, group_label FROM applications WHERE id=$1', [id]);
+  const pin = !!cur && ((cohortLabel !== undefined && cohortLabel.trim() !== cur.cohort_label) || (classCode !== undefined && classCode.trim() !== cur.class_code) || (seat !== undefined && seat.trim() !== cur.seat) || (groupLabel !== undefined && groupLabel.trim() !== cur.group_label));
   try {
-    const rows = await q(`UPDATE applications SET status=COALESCE($2,status), admin_notes=COALESCE($3,admin_notes), cohort_note=COALESCE($4,cohort_note), seat=COALESCE($5,seat), group_label=COALESCE($6,group_label), session_time=COALESCE($7,session_time), student_message=COALESCE($8,student_message), cohort_label=COALESCE($9,cohort_label), class_code=COALESCE($10,class_code), updated_at=now() WHERE id=$1 RETURNING id`, [id, status ?? null, adminNotes ?? null, cohortNote ?? null, seat?.trim() ?? null, groupLabel?.trim() ?? null, sessionTime?.trim() ?? null, studentMessage?.trim() ?? null, cohortLabel?.trim() ?? null, classCode?.trim() ?? null]);
+    const rows = await q(`UPDATE applications SET status=COALESCE($2,status), admin_notes=COALESCE($3,admin_notes), cohort_note=COALESCE($4,cohort_note), seat=COALESCE($5,seat), group_label=COALESCE($6,group_label), session_time=COALESCE($7,session_time), student_message=COALESCE($8,student_message), cohort_label=COALESCE($9,cohort_label), class_code=COALESCE($10,class_code), placement_pinned = (placement_pinned OR $11) AND NOT $12, updated_at=now() WHERE id=$1 RETURNING id`, [id, status ?? null, adminNotes ?? null, cohortNote ?? null, seat?.trim() ?? null, groupLabel?.trim() ?? null, sessionTime?.trim() ?? null, studentMessage?.trim() ?? null, cohortLabel?.trim() ?? null, classCode?.trim() ?? null, pin, !!unpin]);
     if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (edit) {
       await q(`UPDATE applications SET name=$2, email=$3, phone=$4, location=$5, data=jsonb_set(data,'{about}', COALESCE(data->'about','{}'::jsonb) || $6::jsonb), updated_at=now() WHERE id=$1`,
@@ -38,6 +42,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   }
   if (removePhoto) await q('UPDATE applications SET photo=NULL, photo_at=NULL, photo_changes=0, photo_allow=0, updated_at=now() WHERE id=$1', [id]);
   if (status === 'confirmed') await issueCredentials([Number(id)]);
+  await repack(); // withdrawing, re-instating, unpinning or moving someone shifts everyone else
   await audit(status ? 'application.status' : 'application.update', id, { status, notesChanged: adminNotes !== undefined, edited: !!edit, photoRemoved: !!removePhoto, messageChanged: studentMessage !== undefined });
   return NextResponse.json({ ok: true });
 }
@@ -46,6 +51,7 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }
   const g = await guard(ctx); if (g.err) return g.err; const id = g.id!;
   const rows = await q<{ ref: string; name: string }>('DELETE FROM applications WHERE id=$1 RETURNING ref, name', [id]);
   if (!rows[0]) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  await repack(); // everyone after the deleted applicant moves up
   await audit('application.delete', id, { ref: rows[0].ref });
   return NextResponse.json({ ok: true });
 }

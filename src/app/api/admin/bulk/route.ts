@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { q } from '@/lib/db';
 import { audit, isAdmin, sameOrigin } from '@/lib/security';
 import { STATUSES } from '@/lib/schema';
-import { placeUnassigned } from '@/lib/placement';
+import { repack } from '@/lib/placement';
 import { issueCredentials } from '@/lib/card';
 
 const Body = z.object({
@@ -23,25 +23,27 @@ export async function POST(req: Request) {
   const { ids, status, assign, message } = p.data;
   if (p.data.delete) {
     const rows = await q('DELETE FROM applications WHERE id = ANY($1::bigint[]) RETURNING ref', [ids]);
+    await repack();
     await audit('application.bulk_delete', undefined, { count: rows.length, refs: rows.map((r: any) => r.ref) });
     return NextResponse.json({ ok: true, updated: rows.length });
   }
-  if (p.data.autoPlace) { const n = await placeUnassigned(); await audit('application.auto_place', undefined, { placed: n }); return NextResponse.json({ ok: true, updated: n }); }
+  if (p.data.autoPlace) { const n = await repack(); await audit('application.auto_place', undefined, { placed: n }); return NextResponse.json({ ok: true, updated: n }); }
   let n = 0;
   if (status) {
     n = (await q('UPDATE applications SET status=$2, updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, status])).length;
     if (status === 'confirmed') await issueCredentials(ids);
   }
   if (assign) {
-    if (assign.group !== undefined || assign.session !== undefined) n = (await q('UPDATE applications SET group_label=COALESCE($2,group_label), session_time=COALESCE($3,session_time), updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, assign.group?.trim() ?? null, assign.session?.trim() ?? null])).length;
+    if (assign.group !== undefined || assign.session !== undefined) n = (await q('UPDATE applications SET group_label=COALESCE($2,group_label), placement_pinned = placement_pinned OR $2::text IS NOT NULL, session_time=COALESCE($3,session_time), updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, assign.group?.trim() ?? null, assign.session?.trim() ?? null])).length;
     if (assign.seatStart !== undefined) {
       const ordered = await q<{ id: number }>('SELECT id FROM applications WHERE id = ANY($1::bigint[]) ORDER BY created_at, id', [ids]);
       let k = assign.seatStart;
-      for (const r of ordered) await q('UPDATE applications SET seat=$2, updated_at=now() WHERE id=$1', [r.id, `${assign.seatPrefix ?? ''}${k++}`]);
+      for (const r of ordered) await q('UPDATE applications SET seat=$2, placement_pinned=true, updated_at=now() WHERE id=$1', [r.id, `${assign.seatPrefix ?? ''}${k++}`]);
       n = ordered.length;
     }
   }
   if (message !== undefined) n = (await q('UPDATE applications SET student_message=$2, updated_at=now() WHERE id = ANY($1::bigint[]) RETURNING id', [ids, message.trim()])).length;
+  await repack();
   await audit('application.bulk_update', undefined, { count: n, status, assign, messageSet: message !== undefined });
   return NextResponse.json({ ok: true, updated: n });
 }

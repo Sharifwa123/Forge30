@@ -1,5 +1,6 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { q } from './db';
+import { repack } from './placement';
 import { safeEqual } from './security';
 
 const secret = () => process.env.SESSION_SECRET!;
@@ -23,13 +24,14 @@ export function readCardToken(t: string | null | undefined): string | null {
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
 const newSerial = () => { const b = randomBytes(12); const c = [...b].map((x) => ALPHABET[x % 32]).join(''); return `${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8)}`; };
 
-/** Issue student ID + serial (once) to applicants who are confirmed. Safe to call repeatedly. */
+/** Issue student ID + serial to applicants who are confirmed. The ID is a placeholder here: repack() then numbers every student in confirmation order, with no gaps. Safe to call repeatedly. */
 export async function issueCredentials(ids: number[]) {
   if (!ids.length) return;
   const rows = await q<{ id: string }>(`SELECT id FROM applications WHERE id = ANY($1::bigint[]) AND status='confirmed' AND student_id IS NULL ORDER BY id`, [ids]);
   for (const r of rows) {
-    await q(`UPDATE applications SET student_id = 'F30-' || to_char(now(),'YY') || '-' || lpad(nextval('student_seq')::text, 4, '0'), serial=$2, confirmed_at=now() WHERE id=$1 AND student_id IS NULL`, [r.id, newSerial()]);
+    await q(`UPDATE applications SET student_id = 'F30-' || to_char(now(),'YY') || '-T' || id, serial=COALESCE(serial,$2), confirmed_at=now() WHERE id=$1 AND student_id IS NULL`, [r.id, newSerial()]);
   }
+  if (rows.length) await repack();
 }
 
 export type CardRow = { ref: string; name: string; student_id: string | null; serial: string | null; seat: string; group_label: string; cohort_label: string; class_code: string; session_time: string; status: string; has_photo: boolean; confirmed_at: string | null; data: any };
