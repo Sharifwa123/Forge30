@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { OPTIONS, STEP_SCHEMAS, label, type StepKey } from '@/lib/schema';
 import { track } from '@/lib/track';
 import { Area, Check, Checks, Radios, Select, Text } from './fields';
+import PhotoField from './PhotoField';
 
 type Draft = Record<StepKey, Record<string, any>>;
 const EMPTY: Draft = { about: {}, commitment: {}, availability: { periods: [] }, device: {}, finish: {} };
@@ -13,7 +14,7 @@ const STEPS: { key: StepKey; title: string; short: string }[] = [
   { key: 'commitment', title: 'Your commitment', short: 'Commitment' },
   { key: 'availability', title: 'Availability & format', short: 'Schedule' },
   { key: 'device', title: 'Device & access', short: 'Devices' },
-  { key: 'finish', title: 'Certificate & consent', short: 'Finish' },
+  { key: 'finish', title: 'Photo, certificate & consent', short: 'Finish' },
 ];
 const KEY = 'forge30-draft-v2';
 
@@ -27,6 +28,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
   const [banner, setBanner] = useState('');
   const [ref, setRef] = useState('');
   const [hydrated, setHydrated] = useState(false);
+  const [photo, setPhoto] = useState<Blob | null>(null); const [photoErr, setPhotoErr] = useState(''); const [photoFailed, setPhotoFailed] = useState(false); const [retrying, setRetrying] = useState(false);
   const started = useRef(false);
   const submitted = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -88,6 +90,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
   function next() {
     const e = validate(cur.key);
     setErrs((p) => { const n = { ...p }; for (const k of Object.keys(n)) if (k.startsWith(cur.key + '.')) delete n[k]; return { ...n, ...e }; });
+    if (cur.key === 'finish' && !photo) { setPhotoErr('Add your passport photo before continuing. It is used to prepare your student card.'); if (!Object.keys(e).length) { requestAnimationFrame(() => document.querySelector('[data-field="finish-photo"]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })); return; } }
     if (Object.keys(e).length) { focusFirst(Object.keys(e)); return; }
     track('step_completed', cur.key);
     if (step === STEPS.length - 1) { setPhase('review'); track('step_completed', 'review'); } else setStep(step + 1);
@@ -95,14 +98,19 @@ export default function ApplyFlow({ open }: { open: boolean }) {
   const back = () => { if (phase === 'review') { setPhase('form'); setStep(STEPS.length - 1); } else if (step > 0) setStep(step - 1); else setPhase('gate'); };
   const edit = (i: number) => { setPhase('form'); setStep(i); };
 
+  // The photo goes up right after the application is saved (the applicant is signed in by then), so the card can be prepared as soon as they are confirmed.
+  async function sendPhoto(b: Blob): Promise<boolean> {
+    try { const fd = new FormData(); fd.append('photo', b, 'photo.jpg'); return (await fetch('/api/student/photo', { method: 'POST', body: fd })).ok; } catch { return false; }
+  }
   async function submit() {
     setBusy(true); setBanner('');
     // re-validate everything client-side
     for (let i = 0; i < STEPS.length; i++) { const e = validate(STEPS[i].key); if (Object.keys(e).length) { setErrs(e); setStep(i); setPhase('form'); setBusy(false); setBanner('Some answers need attention before you can submit.'); return; } }
+    if (!photo) { setStep(STEPS.length - 1); setPhase('form'); setPhotoErr('Add your passport photo before submitting.'); setBusy(false); return; }
     try {
       const r = await fetch('/api/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) { submitted.current = true; track('application_submitted'); try { localStorage.removeItem(KEY); } catch {} setRef(j.ref); setPhase('done'); }
+      if (r.ok) { submitted.current = true; track('application_submitted'); try { localStorage.removeItem(KEY); } catch {} setRef(j.ref); setPhotoFailed(!(await sendPhoto(photo))); setPhase('done'); }
       else if (r.status === 422 && j.fields) {
         setErrs(j.fields); const secs = Object.keys(j.fields).map((k) => k.split('.')[0]);
         const i = STEPS.findIndex((s) => secs.includes(s.key)); if (i >= 0) { setStep(i); setPhase('form'); }
@@ -159,6 +167,8 @@ export default function ApplyFlow({ open }: { open: boolean }) {
         <p className="lead">Your application has been successfully submitted.</p>
         <p>Your reference code. <b>Save it</b> (screenshot it or write it down). You will need it with your email to check your status:</p>
         <p><span className="ref">{ref}</span></p>
+        {photoFailed && photo && <div className="info amber" role="alert"><b>Your photo did not upload</b><p>Your application is saved. Please try the photo again{retrying ? '…' : ':'}</p><button className="btn btn-primary sm" disabled={retrying} onClick={async () => { setRetrying(true); setPhotoFailed(!(await sendPhoto(photo))); setRetrying(false); }}>UPLOAD PHOTO AGAIN</button></div>}
+        {!photoFailed && photo && <p className="note">✓ Your passport photo was received. Your student card is prepared automatically once your place is confirmed.</p>}
         <h3 style={{ marginTop: 28 }}>What happens next</h3>
         <ol className="steps-next">
           <li>Applications remain open until SHARIF TECHNOLOGIES determines that sufficient applications have been received for the selection process.</li>
@@ -194,7 +204,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
           {banner && <div className="info red" role="alert"><b>{banner}</b></div>}
           {Object.keys(errs).length > 0 && phase === 'form' && <div className="info red" role="alert" style={{ padding: '10px 16px' }}>Please fix {Object.keys(errs).length === 1 ? 'the highlighted answer' : 'the highlighted answers'} below.</div>}
 
-          {phase === 'review' ? <Review d={d} edit={edit} heading={heading} /> : (
+          {phase === 'review' ? <Review d={d} edit={edit} heading={heading} hasPhoto={!!photo} /> : (
             <>
               <h2 ref={heading} tabIndex={-1} style={{ outline: 'none' }}>{cur.title}</h2>
 
@@ -256,6 +266,8 @@ export default function ApplyFlow({ open }: { open: boolean }) {
               </>)}
 
               {cur.key === 'finish' && (<>
+                <h3 style={{ margin: '0 0 8px' }}>Your passport photo <span style={{ color: 'var(--err)' }}>*</span></h3>
+                <PhotoField blob={photo} onBlob={(b) => { setPhoto(b); setPhotoErr(''); }} error={photoErr} />
                 <p className="lead">Your final project is built after you apply. It can be a software project, or a practical digital project if you are on the computer-skills path. Inside your student dashboard you will develop your idea, problem, users, solution and proposal step by step, all the way to Day 30. Start thinking about something you genuinely care about.</p>
                 <Radios id="finish-certificate" label="Would you like to receive a certificate of completion if you successfully complete the program?" required two options={OPTIONS.certificate} value={F.certificate} error={e('finish', 'certificate')} onChange={(v) => set('finish', 'certificate', v)} />
                 <div className="hint" style={{ marginTop: -10, marginBottom: 24 }}>Certificates are associated with successful completion of the program requirements and are not automatically issued simply because someone registered.</div>
@@ -287,7 +299,7 @@ function Top() {
   );
 }
 
-function Review({ d, edit, heading }: { d: Draft; edit: (i: number) => void; heading: React.RefObject<HTMLHeadingElement | null> }) {
+function Review({ d, edit, heading, hasPhoto }: { d: Draft; edit: (i: number) => void; heading: React.RefObject<HTMLHeadingElement | null>; hasPhoto: boolean }) {
   const A = d.about, C = d.commitment, V = d.availability, D = d.device, F = d.finish;
   const Sec = ({ t, i, rows }: { t: string; i: number; rows: [string, any][] }) => (
     <section><header><b>{t}</b><button onClick={() => edit(i)} aria-label={`Edit ${t}`}>Edit</button></header>
@@ -302,7 +314,7 @@ function Review({ d, edit, heading }: { d: Draft; edit: (i: number) => void; hea
       <Sec t="Your availability" i={2} rows={[['General availability', (V.periods || []).map((p: string) => label('period', p)).join(', ') + (V.periodOther ? ` (${V.periodOther})` : '')], ['Note', 'Not a reservation. Class time is assigned by SHARIF TECHNOLOGIES.']]} />
       <Sec t="Your learning-format preference" i={2} rows={[['Preference', label('format', V.format)], ['In-person contribution preference', V.format !== 'remote' ? label('contribPref', V.contribPref) : undefined], ['Comfortable contribution range', V.format !== 'remote' ? label('contribRange', V.contribRange) : undefined]]} />
       <Sec t="Your device" i={3} rows={[['Phone', label('phone', D.phone)], ['Computer', label('computer', D.computer)], ['Shared computer access', D.computer === 'none' ? label('sharedComputer', D.sharedComputer) : undefined], ['Internet', label('internet', D.internet)], ['Electricity', label('electricity', D.electricity)], ['Workspace', label('workspace', D.workspace)]]} />
-      <Sec t="Certificate & consent" i={4} rows={[['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
+      <Sec t="Photo, certificate & consent" i={4} rows={[['Passport photo', hasPhoto ? 'Added' : 'Missing'], ['Certificate', label('certificate', F.certificate)], ['Privacy notice', 'Agreed']]} />
     </div>
   </>);
 }

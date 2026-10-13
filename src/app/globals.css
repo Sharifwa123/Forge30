@@ -429,3 +429,4 @@ main, section { overflow-x: clip; }
 .hero-s .hero-int { margin: 12px 0 0; padding: 0; border: 0; } .hero-s .hero-int a { font-size: .92rem; }
 .hero-s .tag { margin: 10px 0 4px; } .hero-s .lead { margin: 0 0 14px; } .hero-s { padding-bottom: 70px; }
 .hero-s .note.hero-int { border-left: 0; padding-left: 0; background: transparent; }
+.pf { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; } .pf-box { flex: none; width: 112px; aspect-ratio: 35 / 45; border: 2px dashed var(--line); border-radius: 10px; overflow: hidden; display: grid; place-items: center; background: var(--paper); font-size: 2rem; } .pf-box img { width: 100%; height: 100%; object-fit: cover; } .pf-side { flex: 1 1 220px; min-width: 0; }

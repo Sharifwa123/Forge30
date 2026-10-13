@@ -37,6 +37,9 @@ ALTER TABLE applications ADD COLUMN IF NOT EXISTS serial TEXT;
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS student_message TEXT NOT NULL DEFAULT '';
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS cohort_label TEXT NOT NULL DEFAULT '';
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS class_code TEXT NOT NULL DEFAULT '';
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS placement_pinned BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS placement_note TEXT NOT NULL DEFAULT '';
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS placement_note_at TIMESTAMPTZ;
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS seat TEXT NOT NULL DEFAULT '';
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS group_label TEXT NOT NULL DEFAULT '';
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS session_time TEXT NOT NULL DEFAULT '';
@@ -55,7 +58,8 @@ CREATE TABLE IF NOT EXISTS events (id BIGSERIAL PRIMARY KEY, at TIMESTAMPTZ NOT 
 `;
 
 export function ready(): Promise<void> {
-  return (globalThis.__migrated ??= pool().query(DDL).then(() => undefined).catch((e) => { globalThis.__migrated = undefined; throw e; }));
+  return (globalThis.__migrated ??= pool().query(DDL).then(async () => { try { await (await import('./placement')).repack(); } catch (e) { console.error('startup repack failed', e); } }) // heals old gaps and duplicates once per cold start
+    .catch((e) => { globalThis.__migrated = undefined; throw e; }));
 }
 
 export async function q<T = any>(text: string, params: unknown[] = []): Promise<T[]> {
