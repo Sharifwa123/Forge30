@@ -11,10 +11,11 @@ import type { Organizer } from '@/lib/settings';
 import { Radios, Text } from './fields';
 import PhotoPrep from './PhotoPrep';
 import PhotoField from './PhotoField';
+import GroupJoin from './GroupJoin';
 
 
 type Me = { ref: string; name: string; email: string; phone: string; status: Status; studentId: string | null; photoChangesLeft: number; seat: string; group: string; cohort: string; classCode: string; session: string; message: string; placementNote: string; placementAt: string; hasPhoto: boolean; submitted: string; contact: Record<string, string> };
-type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer };
+type S = { cohortName: string; cohortDates: string; delivery: string; classArrangement: string; items: NoticeItem[]; organizer: Organizer; groupUrl: string; groupLabel: string };
 
 const STAGES: Status[] = ['submitted', 'under_review', 'selected', 'confirmed'];
 const MSG: Record<Status, string> = {
@@ -67,6 +68,7 @@ export function Dashboard({ me, settings: s, cardToken, project, rev, budget }: 
       <NoticeStack items={s.items} label="Updates" />
       <NoticePopup items={[...pl, ...photoAsk, ...s.items]} />
 
+      {s.groupUrl && !['withdrawn', 'not_selected'].includes(me.status) && <section className="panel" aria-label="WhatsApp group" style={{ borderLeft: '6px solid #128c4a' }}><h2 style={{ fontSize: '1.3rem' }}>Our WhatsApp group</h2><p style={{ marginTop: 0 }}>Class dates, updates and questions are shared in the group.</p><GroupJoin url={s.groupUrl} label={s.groupLabel} /></section>}
       {needsPhoto && <EarlyPhoto />}
 
       {budget && (

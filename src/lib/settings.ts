@@ -18,6 +18,9 @@ export type Settings = {
   organizer: Organizer;
   /** WhatsApp group invite link, shown to people who leave their number. Empty = not shown. */
   whatsappGroupUrl: string;
+  /** Show a permanent "Join the WhatsApp group" button across the public site (needs a link). Controlled from Admin. */
+  groupButton: boolean;
+  groupButtonLabel: string;
 };
 export type Organizer = { name: string; title: string; bio: string; website: string; location: string; email: string; phone: string; whatsapp: string };
 
@@ -32,6 +35,8 @@ export const DEFAULTS: Settings = {
   classArrangement: 'To be determined by SHARIF TECHNOLOGIES',
   announcements: [],
   whatsappGroupUrl: '',
+  groupButton: false,
+  groupButtonLabel: 'Join the WhatsApp group',
   // Prefilled only from the public SHARIF TECHNOLOGIES GitHub profile. Edit in Admin → Cohort & settings.
   organizer: {
     name: 'SHARIF TECHNOLOGIES',
@@ -63,3 +68,6 @@ export async function acceptingApplications(s: Settings): Promise<{ open: boolea
 export async function setSetting<K extends keyof Settings>(key: K, value: Settings[K]) {
   await q(`INSERT INTO settings(key, value) VALUES ($1, $2::jsonb) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`, [key, JSON.stringify(value)]);
 }
+
+/** What the public site shows: the join button only appears when it is switched on AND a link is set. */
+export const publicGroup = (s: Settings) => ({ url: s.groupButton && s.whatsappGroupUrl ? s.whatsappGroupUrl : '', label: s.groupButtonLabel.trim() || 'Join the WhatsApp group' });

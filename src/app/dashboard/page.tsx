@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Dashboard } from '@/components/Dashboard';
 import { q } from '@/lib/db';
-import { getSettings } from '@/lib/settings';
+import { getSettings, publicGroup } from '@/lib/settings';
 import { getStudentRef } from '@/lib/student';
 import { cardToken, photoChangesLeft } from '@/lib/card';
 import { summarize } from '@/lib/project';
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
         <div className="wrap" style={{ maxWidth: 980 }}>
           <Dashboard
             me={{ ref: r.ref, name: r.name, email: r.email, phone: r.phone, status: r.status, studentId: r.student_id, seat: r.seat, group: r.group_label, cohort: r.cohort_label, classCode: r.class_code, session: r.session_time, message: r.student_message || '', placementNote: r.placement_note && r.placement_note_at && Date.now() - new Date(r.placement_note_at).getTime() < 14 * 864e5 ? r.placement_note : '', placementAt: r.placement_note_at ? new Date(r.placement_note_at).toISOString() : '', hasPhoto: r.has_photo, photoChangesLeft: photoChangesLeft(r), submitted: new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), contact: r.contact }}
-            settings={{ cohortName: s.cohortName, cohortDates: s.cohortDates, delivery: s.deliveryArrangement, classArrangement: s.classArrangement, items: toItems(s), organizer: s.organizer }}
+            settings={{ cohortName: s.cohortName, cohortDates: s.cohortDates, delivery: s.deliveryArrangement, classArrangement: s.classArrangement, items: toItems(s), groupUrl: publicGroup(s).url, groupLabel: publicGroup(s).label, organizer: s.organizer }}
             rev={rev}
             budget={confirmed ? BUDGET_NOTE : null}
             cardToken={confirmed ? cardToken(ref, 6 * 3600) : null}

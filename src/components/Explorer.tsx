@@ -5,6 +5,7 @@ import { track } from '@/lib/track';
 import { GROUP_NAME, LEVELS, groupFor } from '@/lib/levels';
 import { CommitCounter, Faq, ProjectBuilder } from './Interactive';
 import InterestForm, { WhatsAppChat } from './Interest';
+import GroupJoin from './GroupJoin';
 
 const CARDS = [
   ['what', 'What is it?'],
@@ -37,7 +38,7 @@ const PATHS: Record<Goal, { icon: string; name: string; sub: string; learn: stri
   unsure: { icon: '🤔', name: 'Not sure yet', sub: 'That is fine', learn: 'Choose “Not sure yet” in the application and we will help you decide.', finish: 'A real project, presented on Day 30.' },
 };
 
-export default function Explorer({ open, whatsapp, organizerName, organizerTitle }: { open: boolean; whatsapp: string; organizerName: string; organizerTitle: string }) {
+export default function Explorer({ open, whatsapp, organizerName, organizerTitle, groupUrl = '', groupLabel = '' }: { groupUrl?: string; groupLabel?: string; open: boolean; whatsapp: string; organizerName: string; organizerTitle: string }) {
   const [i, setI] = useState(0);
   const [stat, setStat] = useState<number | null>(null);
   const [method, setMethod] = useState(0);
@@ -137,6 +138,7 @@ export default function Explorer({ open, whatsapp, organizerName, organizerTitle
         <div className="ex-panel" id="join" role="tabpanel" hidden={i !== 5} data-card="join">
           <h2>{open ? 'Ready to join?' : 'Applications are closed for now'}</h2>
           {open ? <Link className="btn btn-amber ex-big" href={applyHref}>APPLY FOR FORGE30 <span className="arrow">→</span></Link> : <Link className="btn btn-line ex-big" href="/status">STUDENT DASHBOARD</Link>}
+          {groupUrl && <p style={{ margin: '12px 0 0' }}><GroupJoin url={groupUrl} label={groupLabel} className="ex-big" /></p>}
           <p className="note">Takes a few minutes. Your answers save as you go. There is no joining fee.</p>
           <h3 id="interest">Not sure yet? Leave your WhatsApp number.</h3>
           <p style={{ marginTop: 0 }}>No application, no commitment. We will explain everything.</p>
