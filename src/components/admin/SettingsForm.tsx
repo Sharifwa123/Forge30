@@ -10,7 +10,7 @@ import { toItems } from '../Notices';
 export default function SettingsForm({ s }: { s: Settings }) {
   const { confirm, confirmWith } = useDialog();
   const [v, setV] = useState({ cohortName: s.cohortName, cohortDates: s.cohortDates, deliveryArrangement: s.deliveryArrangement, classArrangement: s.classArrangement });
-  const [o, setO] = useState(s.organizer); const [wag, setWag] = useState(s.whatsappGroupUrl); const [ann, setAnn] = useState<Draft>(EMPTY); const [editId, setEditId] = useState<string | null>(null); const [edit, setEdit] = useState<Draft>(EMPTY); const [max, setMax] = useState(String(s.maxApplications || ''));
+  const [o, setO] = useState(s.organizer); const [wag, setWag] = useState(s.whatsappGroupUrl); const [gOn, setGOn] = useState(s.groupButton); const [gLabel, setGLabel] = useState(s.groupButtonLabel); const [ann, setAnn] = useState<Draft>(EMPTY); const [editId, setEditId] = useState<string | null>(null); const [edit, setEdit] = useState<Draft>(EMPTY); const [max, setMax] = useState(String(s.maxApplications || ''));
   const nd = (): Draft => ({ title: s.noticeTitle, text: s.notice, style: s.noticeStyle, ctaLabel: s.noticeCtaLabel, ctaUrl: s.noticeCtaUrl, popup: s.noticePopup }); const [nt, setNt] = useState<Draft>(nd()); const [msg, setMsg] = useState(''); const r = useRouter();
   useEffect(() => { setNt(nd()); }, [s.notice, s.noticeTitle, s.noticeStyle, s.noticeCtaLabel, s.noticeCtaUrl, s.noticePopup]); // eslint-disable-line react-hooks/exhaustive-deps
   const noticeBody = (d: Draft) => ({ notice: d.text.trim(), noticeTitle: d.title.trim(), noticeStyle: d.style, noticeCtaLabel: d.ctaLabel.trim(), noticeCtaUrl: d.ctaUrl.trim(), noticePopup: d.popup }); // keep the box in step with what is actually saved
@@ -69,8 +69,15 @@ export default function SettingsForm({ s }: { s: Settings }) {
         {([['name', 'Name'], ['title', 'Title'], ['location', 'Location'], ['website', 'Website (https://…)'], ['email', 'Email'], ['phone', 'Phone'], ['whatsapp', 'WhatsApp']] as const).map(([k, l]) => <div className="field" key={k}><label htmlFor={'o-' + k}>{l}</label><input id={'o-' + k} type="text" value={o[k]} onChange={(e) => setO({ ...o, [k]: e.target.value })} /></div>)}
         <div className="field"><label htmlFor="o-bio">Short bio</label><textarea id="o-bio" maxLength={800} value={o.bio} onChange={(e) => setO({ ...o, bio: e.target.value })} /></div>
         <button className="btn btn-primary sm" onClick={() => post({ organizer: o })}>Save organizer profile</button>
-        <div className="field" style={{ marginTop: 20 }}><label htmlFor="wag">WhatsApp group invite link <span className="optnote">(shown only to people who leave their number on the landing page)</span></label>
-          <div style={{ display: 'flex', gap: 8 }}><input id="wag" type="text" placeholder="https://chat.whatsapp.com/…" value={wag} onChange={(e) => setWag(e.target.value)} /><button className="btn btn-line sm" onClick={() => post({ whatsappGroupUrl: wag }, 'WhatsApp link saved')}>Save</button></div></div>
+      </div>
+      <div className="panel">
+        <h3>WhatsApp group button</h3>
+        <p className="note">A permanent “Join the WhatsApp group” button on the landing page, the application confirmation and every student dashboard. Switch it on or off here at any time.</p>
+        <label className="chk" style={{ display: 'flex', gap: 10, alignItems: 'center', margin: '8px 0 14px', fontWeight: 700 }}><input type="checkbox" id="gb-on" checked={gOn} onChange={(e) => setGOn(e.target.checked)} />Show the join button on the site</label>
+        <div className="field"><label htmlFor="wag">Group invite link</label><input id="wag" type="text" placeholder="https://chat.whatsapp.com/…" value={wag} onChange={(e) => setWag(e.target.value)} /></div>
+        <div className="field"><label htmlFor="gb-label">Button wording</label><input id="gb-label" type="text" maxLength={40} value={gLabel} onChange={(e) => setGLabel(e.target.value)} /></div>
+        <button className="btn btn-primary sm" onClick={() => post({ whatsappGroupUrl: wag, groupButton: gOn, groupButtonLabel: gLabel }, gOn && wag ? 'Join button is live' : 'Saved')}>Save</button>
+        <p className="note" style={{ marginTop: 10 }}>{s.groupButton && s.whatsappGroupUrl ? '✅ The button is showing on the site right now.' : s.groupButton ? '⚠ Switched on, but no valid link is saved, so nothing shows.' : 'The button is hidden right now.'}</p>
       </div>
       <div className="panel" style={{ gridColumn: '1 / -1' }}>
         <h3>Announcements</h3>

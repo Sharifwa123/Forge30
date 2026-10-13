@@ -6,7 +6,8 @@ import Logo from '@/components/Logo';
 import Header from '@/components/Header';
 import Enhance from '@/components/Enhance';
 import Footer from '@/components/Footer';
-import { getSettings, DEFAULTS, acceptingApplications } from '@/lib/settings';
+import { getSettings, DEFAULTS, acceptingApplications, publicGroup } from '@/lib/settings';
+import GroupJoin from '@/components/GroupJoin';
 import { NoticeStack, toItems } from '@/components/Notices';
 import NoticePopup from '@/components/NoticePopup';
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const s = await getSettings().catch(() => DEFAULTS);
   const open = (await acceptingApplications(s).catch(() => ({ open: s.applicationsOpen }))).open;
-  const items = toItems(s);
+  const items = toItems(s); const grp = publicGroup(s);
   const CTA = open ? 'APPLY NOW' : 'STUDENT DASHBOARD';
 
   return (
@@ -42,12 +43,13 @@ export default async function Home() {
               <a href="#what" className="btn btn-ghost">HOW IT WORKS</a>
               <WhatsAppChat number={s.organizer.whatsapp} />
             </div>
+            {grp.url && <div className="grp"><GroupJoin url={grp.url} label={grp.label} /></div>}
             {!open && <p className="note" style={{ marginTop: 14 }}>Applications are closed for now. Submitted an application? Open your student dashboard for updates.</p>}
             <p className="note hero-int"><a href="#join">Not ready to apply yet? Leave your WhatsApp number →</a></p>
           </div>
         </section>
 
-        <Explorer open={open} whatsapp={s.organizer.whatsapp} organizerName={s.organizer.name} organizerTitle={s.organizer.title} />
+        <Explorer groupUrl={grp.url} groupLabel={grp.label} open={open} whatsapp={s.organizer.whatsapp} organizerName={s.organizer.name} organizerTitle={s.organizer.title} />
       </main>
       <Footer />
       <Enhance open={open} />

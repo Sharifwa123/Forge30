@@ -6,6 +6,7 @@ import { OPTIONS, STEP_SCHEMAS, label, type StepKey } from '@/lib/schema';
 import { track } from '@/lib/track';
 import { Area, Check, Checks, Radios, Select, Text } from './fields';
 import PhotoField from './PhotoField';
+import GroupJoin from './GroupJoin';
 
 type Draft = Record<StepKey, Record<string, any>>;
 const EMPTY: Draft = { about: {}, commitment: {}, availability: { periods: [] }, device: {}, finish: {} };
@@ -18,7 +19,7 @@ const STEPS: { key: StepKey; title: string; short: string }[] = [
 ];
 const KEY = 'forge30-draft-v2';
 
-export default function ApplyFlow({ open }: { open: boolean }) {
+export default function ApplyFlow({ open, groupUrl = '', groupLabel = '' }: { open: boolean; groupUrl?: string; groupLabel?: string }) {
   const [phase, setPhase] = useState<'gate' | 'form' | 'review' | 'done'>('gate');
   const [step, setStep] = useState(0);
   const [d, setD] = useState<Draft>(EMPTY);
@@ -169,6 +170,7 @@ export default function ApplyFlow({ open }: { open: boolean }) {
         <p><span className="ref">{ref}</span></p>
         {photoFailed && photo && <div className="info amber" role="alert"><b>Your photo did not upload</b><p>Your application is saved. Please try the photo again{retrying ? '…' : ':'}</p><button className="btn btn-primary sm" disabled={retrying} onClick={async () => { setRetrying(true); setPhotoFailed(!(await sendPhoto(photo))); setRetrying(false); }}>UPLOAD PHOTO AGAIN</button></div>}
         {!photoFailed && photo && <p className="note">✓ Your passport photo was received. Your student card is prepared automatically once your place is confirmed.</p>}
+        {groupUrl && <div className="info blue"><b>Join our WhatsApp group</b><p style={{ margin: '0 0 8px' }}>Updates, class dates and questions are shared there.</p><GroupJoin url={groupUrl} label={groupLabel} /></div>}
         <h3 style={{ marginTop: 28 }}>What happens next</h3>
         <ol className="steps-next">
           <li>Applications remain open until SHARIF TECHNOLOGIES determines that sufficient applications have been received for the selection process.</li>
